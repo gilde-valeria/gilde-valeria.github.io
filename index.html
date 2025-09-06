@@ -15,6 +15,7 @@
       --accent-green: #DAEDC2; /* emerald green */
       --accent-pink: #E6C2ED;  /* pink */
       --accent-blue: #C2E3ED;
+      --purplue: #906298;
       --text: #35606E;
       --muted: #6b7280;
       --card-bg: #FFF7EF;
@@ -29,7 +30,7 @@
     }
     header{
       background:var(--bg);
-      color:var(--accent-green);
+      color:var(--card-bg);
       padding:3rem 1rem;
       text-align:center;
     }
@@ -41,22 +42,22 @@
       display:flex;
       flex-wrap:wrap;
       gap:1.25rem;
-      justify-content:center;
+      justify-content:space-around;
       padding:.75rem 1rem;
     }
     nav a{
-      color:#FFF7EF;
+      color: var(--bg);
       text-decoration:none;
-      font-weight:600;
+      font-weight:bold;
     }
-    nav a:hover{color:var(--accent-pink)}
+    nav a:hover{color:var(--purplue)}
     main{max-width:900px;margin:auto;padding:2rem 1rem}
     section{margin:0 0 2rem}
     h2{
       border-bottom:3px solid var(--accent-pink);
       padding-bottom:.35rem;
       margin-top:0;
-      color:var(--accent-green);
+      color:var(--bg);
     }
     ul{padding-left:1.25rem}
     .pub li{margin:.5rem 0}
@@ -68,46 +69,46 @@
       box-shadow:0 2px 6px rgba(0,0,0,.05);
     }
     footer{
-      background:var(--bg);
+      background:var(--purplue);
       color:#f1f5f9;
       text-align:center;
       padding:1rem;
     }
     .muted{color:var(--muted)}
-    a{color:var(--accent-pink)}
+    a{color:var(--purplue)}
     .grid{display:grid;gap:1rem}
     @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
 
     .about-container {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    }
 
-.about-photo img {
-  width: 200px;       /* adjust size as you like */
-  height: auto;
-  border-radius: 8px; /* small rounded corners, not circular */
-  display: block;
-}
+    .about-photo img {
+    width: 200px;       /* adjust size as you like */
+    height: auto;
+    border-radius: 8px; /* small rounded corners, not circular */
+    display: block;
+    }
 
-.about-text {
-  flex: 1; /* takes remaining space */
-  min-width: 250px;
-}
+    .about-text {
+    flex: 1; /* takes remaining space */
+    min-width: 250px;
+    }
 
-/* On small screens, stack vertically */
-@media (max-width: 768px) {
-  .about-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .about-photo img {
-    width: 100%;
-    max-width: 280px;
-  }
-}
+    /* On small screens, stack vertically */
+    @media (max-width: 768px) {
+    .about-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .about-photo img {
+        width: 100%;
+        max-width: 280px;
+    }
+    }
   </style>
 </head>
 <body>
@@ -131,7 +132,7 @@
   <h2>About Me</h2>
   <div class="about-container">
     <div class="about-photo">
-      <img src="images/me.jpeg" alt="Gilde Valeria Rodríguez">
+      <img src="images/me.jpg" alt="Gilde Valeria Rodríguez">
     </div>
     <div class="about-text">
       <p>
@@ -148,27 +149,44 @@
   <section id="publications" class="card">
     <h2>Publications</h2>
     <ul class="pub">
+        <li>
+        <strong>Asynchronous wait-free runtime verification and enforcement of linearizability</strong>.
+       ACM Symposium on Principles of Distributed Computing (PODC) 2023. [<a href="https://dl.acm.org/doi/abs/10.1145/3583668.3594563">PDF</a>]
+      </li>
       <li>
         <strong>Towards Efficient Runtime Verified Linearizable Implementations</strong>.
-        Runtime Verification (RV) 2024. (with A. Castañeda). [<a href="#">PDF</a>] [<a href="#">BibTeX</a>]
+        Runtime Verification (RV) 2024. (Gilde Valeria Rodriguez and Armando Castañeda). 
+        <strong> <a href="https://cmpe.bogazici.edu.tr/rv24/awards/">[Runner-up Best Paper Award]</a> </strong> [<a href="https://link.springer.com/chapter/10.1007/978-3-031-74234-7_17">PDF</a>] [<a href="#">BibTeX</a>]
       </li>
       <li>
-        <strong>Runtime Verification of Linearizability using Non-linearizable Objects in an Asynchronous and Distributed Setting</strong>.
-        (Journal submission in progress). [<a href="#">Preprint</a>]
+        <strong>Asynchronous Fault-Tolerant Language Decidability for Runtime Verification of Distributed Systems</strong>.
+       ACM Symposium on Principles of Distributed Computing (PODC) 2025. [<a href="https://dl.acm.org/doi/abs/10.1145/3732772.3733514">PDF</a>]
       </li>
+      <li>
+        <strong>Distributed Runtime Verification of Linearizability Using Non-linearizable Objects</strong>.
+        (Journal submission in progress).
+      </li>
+
+
     </ul>
   </section>
 
 
   <!-- News Section -->
-  <section id="news" class="card">
-    <h2>News</h2>
-    <ul>
-      <li><strong>July 2025:</strong> Volunteer local organizer for <em>PODC 2025</em> in Huatulco, México.</li>
-      <li><strong>October 2024:</strong> Presented my paper at <em>Runtime Verification (RV 2024)</em>, Istanbul.</li>
-      <li><strong>2023:</strong> Published first paper at <em>PODC 2023</em>.</li>
-    </ul>
-  </section>
+ <section id="news" class="card">
+  <h2>News</h2>
+  <ul>
+    <li><strong>September 2025:</strong> Began a research visit at <em>MSU</em>, Michigan, United States.</li>
+    <li><strong>July 2025:</strong> Presented our paper at <em>PODC 2025</em>, Huatulco, México.</li>
+    <li><strong>July 2025:</strong> Served as a volunteer local organizer for <em>PODC 2025</em>, Huatulco, México.</li>
+    <li><strong>May 2025:</strong> Advanced to PhD candidacy.</li>
+    <li><strong>April 2025:</strong> Our paper was accepted at <em>PODC 2025</em>.</li>
+    <li><strong>October 2024:</strong> Presented our paper at <em>Runtime Verification (RV 2024)</em>, Istanbul.</li>
+    <li><strong>August 2024:</strong> Our paper was accepted at <em>RV 2024</em>.</li>
+    <li><strong>May 2023:</strong> My first paper was accepted at <em>PODC 2023</em>.</li>
+  </ul>
+</section>
+
 
   <!-- Interests -->
   <section id="interests" class="card">
@@ -181,8 +199,8 @@
       </ul>
       <ul>
         <li>Teaching Concurrent Computing</li>
-        <li>Design & Visual Communication</li>
-        <li>Art, nature, and woodworking</li>
+        <li>Crochet, cooking and woodworking</li>
+        <li>Art, nature, and crossfit</li>
       </ul>
     </div>
   </section>
@@ -193,7 +211,7 @@
     <p>Email: <a href="mailto:gildevroji@gmail.com">gildevroji@gmail.com</a></p>
     <p>GitHub: <a href="https://github.com/gilde-valeria">github.com/gilde-valeria</a></p>
     <p>ORCID: <a href="https://orcid.org/0009-0009-1463-7786">0009-0009-1463-7786</a></p>
-    <p class="muted">East Lansing · México City</p>
+    <p class="muted">Mexico City</p>
   </section>
 </main>
 
