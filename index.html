@@ -12,11 +12,11 @@
   <style>
     :root {
       --bg: #0f172a;
-      --accent-green: #10b981; /* emerald green */
-      --accent-pink: #ec4899;  /* pink */
-      --text: #111827;
+      --accent-green: #DAEDC2; /* emerald green */
+      --accent-pink: #E6C2ED;  /* pink */
+      --text: #35606E;
       --muted: #6b7280;
-      --card-bg: #ffffff;
+      --card-bg: #FFF7EF;
     }
     *{box-sizing:border-box}
     body{
@@ -24,11 +24,11 @@
       font-family:'General Sans', system-ui, sans-serif;
       line-height:1.6;
       color:var(--text);
-      background:#fafafa;
+      background:#FFF7EF;
     }
     header{
       background:var(--bg);
-      color:#fff;
+      color:#FFF7EF;
       padding:3rem 1rem;
       text-align:center;
     }
@@ -43,7 +43,7 @@
       padding:.75rem 1rem;
     }
     nav a{
-      color:#fff;
+      color:#FFF7EF;
       text-decoration:none;
       font-weight:600;
     }
@@ -75,6 +75,37 @@
     a{color:var(--accent-pink)}
     .grid{display:grid;gap:1rem}
     @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+
+    .about-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.about-photo img {
+  width: 200px;       /* adjust size as you like */
+  height: auto;
+  border-radius: 8px; /* small rounded corners, not circular */
+  display: block;
+}
+
+.about-text {
+  flex: 1; /* takes remaining space */
+  min-width: 250px;
+}
+
+/* On small screens, stack vertically */
+@media (max-width: 768px) {
+  .about-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .about-photo img {
+    width: 100%;
+    max-width: 280px;
+  }
+}
   </style>
 </head>
 <body>
@@ -93,18 +124,22 @@
 </nav>
 
 <main>
-  <!-- About Me with photo -->
-  <section id="about" class="card">
-    <h2>About Me</h2>
-    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-      <img src="images/me.jpeg" alt="Gilde Valeria Rodríguez" style="width:120px; border-radius:50%; border:2px solid var(--accent-green);">
+  
+    <section id="about" class="card">
+  <h2>About Me</h2>
+  <div class="about-container">
+    <div class="about-photo">
+      <img src="images/me.jpg" alt="Gilde Valeria Rodríguez">
+    </div>
+    <div class="about-text">
       <p>
         I am a PhD student at UNAM (México) working on concurrent and distributed computing.
-        My research focuses on runtime verification of <em>linearizability</em>, verification interfaces,
+        My research focuses on distributed runtime verification of <em>linearizability</em>, verification interfaces,
         and asynchronous distributed algorithms.
       </p>
     </div>
-  </section>
+  </div>
+</section>
 
 
   <!-- Publications -->
