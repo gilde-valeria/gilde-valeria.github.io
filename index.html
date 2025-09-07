@@ -11,14 +11,14 @@
 
   <style>
     :root {
-      --bg: #35606E;
-      --accent-green: #DAEDC2; /* emerald green */
-      --accent-pink: #E6C2ED;  /* pink */
-      --accent-blue: #C2E3ED;
-      --purplue: #906298;
-      --text: #35606E;
-      --muted: #6b7280;
-      --card-bg: #FFF7EF;
+      --bg: #1A1A1A;
+      --accent-green: #6EB598;
+      --accent-pink: #E3B1F6;
+      --accent-yellow: #F1C95F;
+      --purplue: #AB57F0;
+      --text: #1A1A1A;
+      --muted: #5C48EB;
+      --card-bg: #FEFEFE;
     }
     *{box-sizing:border-box}
     body{
@@ -26,15 +26,15 @@
       font-family:'General Sans', system-ui, sans-serif;
       line-height:1.6;
       color:var(--text);
-      background:#FFF7EF;
+      background:#FEFEFE;
     }
     header{
-      background:var(--bg);
+      background:var(--muted);
       color:var(--card-bg);
       padding:3rem 1rem;
       text-align:center;
     }
-    header h1{margin:0;font-size:2.2rem}
+    header h1{margin:0;font-size:2.3rem;font-weight: 300;}
     header p{opacity:.9;margin:.25rem 0 0}
     nav{
       background:var(--accent-green);
@@ -42,7 +42,7 @@
       display:flex;
       flex-wrap:wrap;
       gap:1.25rem;
-      justify-content:space-around;
+      justify-content: space-evenly;
       padding:.75rem 1rem;
     }
     nav a{
@@ -50,16 +50,35 @@
       text-decoration:none;
       font-weight:bold;
     }
-    nav a:hover{color:var(--purplue)}
-    main{max-width:900px;margin:auto;padding:2rem 1rem}
-    section{margin:0 0 2rem}
+    nav a:hover{color:var(--accent-pink)}
+    main{max-width:1100px;margin:auto;padding:2rem 1rem}
+
+    /*--- GRID LAYOUT: about a la izquierda (angosto), resto a la derecha ---*/
+    .layout{
+      display:grid;
+      grid-template-columns: minmax(260px, 320px) 1fr; /* About angosto */
+      gap:1.25rem;
+      align-items:start;
+    }
+    .col-left{order:1}
+    .col-right{order:2; display:grid; gap:1.25rem}
+    /* En móviles: una sola columna y About al final */
+    @media (max-width: 768px){
+      .layout{
+        grid-template-columns: 1fr;
+      }
+      .col-left{order:2}   /* About abajo */
+      .col-right{order:1}  /* Resto arriba */
+    }
+
+    section{margin:0}
     h2{
       border-bottom:3px solid var(--accent-pink);
       padding-bottom:.35rem;
       margin-top:0;
       color:var(--bg);
     }
-    ul{padding-left:1.25rem}
+    ul{padding-left:1.25rem;margin:0}
     .pub li{margin:.5rem 0}
     .card{
       background:var(--card-bg);
@@ -73,41 +92,36 @@
       color:#f1f5f9;
       text-align:center;
       padding:1rem;
+      margin-top:2rem;
     }
     .muted{color:var(--muted)}
     a{color:var(--purplue)}
     .grid{display:grid;gap:1rem}
     @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
 
-    .about-container {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    /* --- ABOUT --- */
+    .about-container{
+      display:flex;
+      align-items:center;
+      gap:1rem;
+      flex-wrap:wrap;
     }
-
-    .about-photo img {
-    width: 200px;       /* adjust size as you like */
-    height: auto;
-    border-radius: 8px; /* small rounded corners, not circular */
-    display: block;
+    .about-photo img{
+      width: 160px;     /* más pequeño para no ocupar tanto */
+      height: auto;
+      border-radius: 0; /* rectangular, sin bordes */
+      display:block;
     }
-
-    .about-text {
-    flex: 1; /* takes remaining space */
-    min-width: 250px;
-    }
-
-    /* On small screens, stack vertically */
-    @media (max-width: 768px) {
-    .about-container {
+    .about-text{flex:1; min-width: 240px;}
+    @media (max-width: 768px){
+      .about-container{
         flex-direction: column;
         align-items: flex-start;
-    }
-    .about-photo img {
+      }
+      .about-photo img{
         width: 100%;
-        max-width: 280px;
-    }
+        max-width: 320px;
+      }
     }
   </style>
 </head>
@@ -127,92 +141,98 @@
 </nav>
 
 <main>
-  
-    <section id="about" class="card">
-  <h2>About Me</h2>
-  <div class="about-container">
-    <div class="about-photo">
-      <img src="images/me.jpg" alt="Gilde Valeria Rodríguez">
+  <div class="layout">
+    <!-- Columna izquierda: ABOUT (angosta) -->
+    <div class="col-left">
+      <section id="about" class="card">
+        <h2>About Me</h2>
+        <div class="about-container">
+          <div class="about-photo">
+            <img src="images/me.jpg" alt="Gilde Valeria Rodríguez">
+          </div>
+          <div class="about-text">
+            <p>
+              I am a PhD student at UNAM (México) working on concurrent and distributed computing.
+              My research focuses on distributed runtime verification of <em>linearizability</em>, verification interfaces,
+              and asynchronous distributed algorithms.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
-    <div class="about-text">
-      <p>
-        I am a PhD student at UNAM (México) working on concurrent and distributed computing.
-        My research focuses on distributed runtime verification of <em>linearizability</em>, verification interfaces,
-        and asynchronous distributed algorithms.
-      </p>
+
+    <!-- Columna derecha: resto de cards apiladas y “arriba” -->
+    <div class="col-right">
+      <!-- Publications -->
+      <section id="publications" class="card">
+        <h2>Publications</h2>
+        <ul class="pub">
+          <li>
+            <strong>Asynchronous wait-free runtime verification and enforcement of linearizability</strong>.
+            ACM Symposium on Principles of Distributed Computing (PODC) 2023.
+            [<a href="https://dl.acm.org/doi/abs/10.1145/3583668.3594563">PDF</a>]
+          </li>
+          <li>
+            <strong>Towards Efficient Runtime Verified Linearizable Implementations</strong>.
+            Runtime Verification (RV) 2024. (Gilde Valeria Rodriguez and Armando Castañeda).
+            <strong><a href="https://cmpe.bogazici.edu.tr/rv24/awards/">[Runner-up Best Paper Award]</a></strong>
+            [<a href="https://link.springer.com/chapter/10.1007/978-3-031-74234-7_17">PDF</a>]
+            [<a href="#">BibTeX</a>]
+          </li>
+          <li>
+            <strong>Asynchronous Fault-Tolerant Language Decidability for Runtime Verification of Distributed Systems</strong>.
+            ACM Symposium on Principles of Distributed Computing (PODC) 2025.
+            [<a href="https://dl.acm.org/doi/abs/10.1145/3732772.3733514">PDF</a>]
+          </li>
+          <li>
+            <strong>Distributed Runtime Verification of Linearizability Using Non-linearizable Objects</strong>.
+            (Journal submission in progress).
+          </li>
+        </ul>
+      </section>
+
+      <!-- News -->
+      <section id="news" class="card">
+        <h2>News</h2>
+        <ul>
+          <li><strong>September 2025:</strong> Began a research visit at <em>MSU</em>, Michigan, United States.</li>
+          <li><strong>July 2025:</strong> Presented our paper at <em>PODC 2025</em>, Huatulco, México.</li>
+          <li><strong>July 2025:</strong> Served as a volunteer local organizer for <em>PODC 2025</em>, Huatulco, México.</li>
+          <li><strong>May 2025:</strong> Advanced to PhD candidacy.</li>
+          <li><strong>April 2025:</strong> Our paper was accepted at <em>PODC 2025</em>.</li>
+          <li><strong>October 2024:</strong> Presented our paper at <em>Runtime Verification (RV 2024)</em>, Istanbul.</li>
+          <li><strong>August 2024:</strong> Our paper was accepted at <em>RV 2024</em>.</li>
+          <li><strong>May 2023:</strong> My first paper was accepted at <em>PODC 2023</em>.</li>
+        </ul>
+      </section>
+
+      <!-- Interests -->
+      <section id="interests" class="card">
+        <h2>Interests</h2>
+        <div class="grid">
+          <ul>
+            <li>Distributed Algorithms</li>
+            <li>Runtime Verification</li>
+            <li>Linearizability & Consistency</li>
+          </ul>
+          <ul>
+            <li>Teaching Concurrent Computing</li>
+            <li>Crochet, cooking and woodworking</li>
+            <li>Art, nature, and crossfit</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" class="card">
+        <h2>Contact</h2>
+        <p>Email: <a href="mailto:gildevroji@gmail.com">gildevroji@gmail.com</a></p>
+        <p>GitHub: <a href="https://github.com/gilde-valeria">github.com/gilde-valeria</a></p>
+        <p>ORCID: <a href="https://orcid.org/0009-0009-1463-7786">0009-0009-1463-7786</a></p>
+        <p class="muted">Mexico City</p>
+      </section>
     </div>
   </div>
-</section>
-
-
-  <!-- Publications -->
-  <section id="publications" class="card">
-    <h2>Publications</h2>
-    <ul class="pub">
-        <li>
-        <strong>Asynchronous wait-free runtime verification and enforcement of linearizability</strong>.
-       ACM Symposium on Principles of Distributed Computing (PODC) 2023. [<a href="https://dl.acm.org/doi/abs/10.1145/3583668.3594563">PDF</a>]
-      </li>
-      <li>
-        <strong>Towards Efficient Runtime Verified Linearizable Implementations</strong>.
-        Runtime Verification (RV) 2024. (Gilde Valeria Rodriguez and Armando Castañeda). 
-        <strong> <a href="https://cmpe.bogazici.edu.tr/rv24/awards/">[Runner-up Best Paper Award]</a> </strong> [<a href="https://link.springer.com/chapter/10.1007/978-3-031-74234-7_17">PDF</a>] [<a href="#">BibTeX</a>]
-      </li>
-      <li>
-        <strong>Asynchronous Fault-Tolerant Language Decidability for Runtime Verification of Distributed Systems</strong>.
-       ACM Symposium on Principles of Distributed Computing (PODC) 2025. [<a href="https://dl.acm.org/doi/abs/10.1145/3732772.3733514">PDF</a>]
-      </li>
-      <li>
-        <strong>Distributed Runtime Verification of Linearizability Using Non-linearizable Objects</strong>.
-        (Journal submission in progress).
-      </li>
-
-
-    </ul>
-  </section>
-
-
-  <!-- News Section -->
- <section id="news" class="card">
-  <h2>News</h2>
-  <ul>
-    <li><strong>September 2025:</strong> Began a research visit at <em>MSU</em>, Michigan, United States.</li>
-    <li><strong>July 2025:</strong> Presented our paper at <em>PODC 2025</em>, Huatulco, México.</li>
-    <li><strong>July 2025:</strong> Served as a volunteer local organizer for <em>PODC 2025</em>, Huatulco, México.</li>
-    <li><strong>May 2025:</strong> Advanced to PhD candidacy.</li>
-    <li><strong>April 2025:</strong> Our paper was accepted at <em>PODC 2025</em>.</li>
-    <li><strong>October 2024:</strong> Presented our paper at <em>Runtime Verification (RV 2024)</em>, Istanbul.</li>
-    <li><strong>August 2024:</strong> Our paper was accepted at <em>RV 2024</em>.</li>
-    <li><strong>May 2023:</strong> My first paper was accepted at <em>PODC 2023</em>.</li>
-  </ul>
-</section>
-
-
-  <!-- Interests -->
-  <section id="interests" class="card">
-    <h2>Interests</h2>
-    <div class="grid">
-      <ul>
-        <li>Distributed Algorithms</li>
-        <li>Runtime Verification</li>
-        <li>Linearizability & Consistency</li>
-      </ul>
-      <ul>
-        <li>Teaching Concurrent Computing</li>
-        <li>Crochet, cooking and woodworking</li>
-        <li>Art, nature, and crossfit</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section id="contact" class="card">
-    <h2>Contact</h2>
-    <p>Email: <a href="mailto:gildevroji@gmail.com">gildevroji@gmail.com</a></p>
-    <p>GitHub: <a href="https://github.com/gilde-valeria">github.com/gilde-valeria</a></p>
-    <p>ORCID: <a href="https://orcid.org/0009-0009-1463-7786">0009-0009-1463-7786</a></p>
-    <p class="muted">Mexico City</p>
-  </section>
 </main>
 
 <footer>
