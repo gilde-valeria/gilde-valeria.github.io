@@ -1,0 +1,269 @@
+:root {
+  --bg: #1A1A1A;
+  --accent-green: #6EB598;
+  --accent-pink: #E3B1F6;
+  --accent-yellow: #F1C95F;
+  --purplue: #AB57F0;
+  --text: #1A1A1A;
+  --muted: #5C48EB;
+  --card-bg: #FEFEFE;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'General Sans', system-ui, sans-serif;
+  line-height:1.6;
+  color:var(--text);
+  background:#FEFEFE;
+}
+
+/* NUEVO: bloquear scroll cuando menú móvil está abierto */
+body.menu-open{
+  overflow: hidden;
+}
+
+header{
+  background:var(--muted);
+  color:var(--card-bg);
+  padding:3rem 1rem;
+  text-align:center;
+}
+header h1{margin:0;font-size:2.3rem;font-weight:300;}
+header p{opacity:.9;margin:.25rem 0 0}
+
+.header-teaching {
+  background: var(--bg);
+  display: flex;
+  align-items: center;        /* centra el bloque respecto a la imagen */
+  justify-content: flex-start;
+  gap: 2rem;
+  padding: 2rem 1.5rem;
+}
+
+.header-image {
+  margin-left: 10%;
+  max-width: 320px;
+  width: 15%;
+  height: auto;
+}
+
+.title-teaching {
+  margin-top: 5%;
+  margin-right: 5%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;     /* h1 arriba, p abajo */
+  justify-content: flex-start;/* 👈 CLAVE: no centrar verticalmente */
+  align-items: center;        /* centra horizontalmente */
+  text-align: center;
+}
+
+/* --- NAVBAR --- */
+.navbar{
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--accent-green);
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+
+/* El contenedor debe repartir espacio entre logo y menú/botón */
+.nav-container {
+  width: 1000px;
+  max-width: 1800px;   /* mismo ancho que main */
+  margin: auto;
+  padding: 0.5rem 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center; /* DESKTOP centrado */
+  gap: 1.25rem;
+
+  position: relative; /* para menú overlay móvil */
+}
+
+
+/* Siempre mantener el toggle por encima */
+.nav-toggle{
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 3000;           /* <- por encima del logo y del navbar */
+  position: relative;      /* <- para que z-index aplique */
+}
+
+/* Logo oculto por defecto */
+.nav-logo{display:none;}
+.navbar.scrolled .nav-logo{display:block;}
+.nav-logo img{height:36px;width:auto;}
+
+.nav-menu{
+  display:flex;
+  gap:1.25rem;
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
+.nav-menu li a{
+  color:var(--bg);
+  text-decoration:none;
+  font-weight:600;
+}
+.nav-menu li a:hover{
+  color:var(--accent-pink);
+}
+
+.nav-toggle {
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  display: none;
+  z-index: 3000;
+}
+.nav-toggle img {
+  width: 32px;     /* <- AJUSTA AQUÍ */
+  height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  display: block;
+}
+
+/* --- RESPONSIVE: MENÚ PANTALLA COMPLETA --- */
+
+/* En móvil sí se ve */
+@media (max-width: 768px){
+  /* El contenedor debe repartir espacio entre logo y menú/botón */
+.nav-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* <- CLAVE */
+}
+  .nav-toggle{
+    display: block;
+    
+  }
+
+  /* Evita que el logo empuje/tape */
+  .nav-logo{
+    display: block;        /* <- opcional: si quieres logo siempre */
+  }
+
+  /* Si quieres que el logo solo salga al hacer scroll, OK,
+     pero entonces evita que crezca demasiado */
+  .nav-logo img{
+    height: 28px;          /* <- más chico en móvil */
+    width: auto;
+  }
+
+
+  /* CAMBIO CLAVE: menú full screen */
+  .nav-menu{
+    position: fixed;
+    inset: 0; /* top:0 right:0 bottom:0 left:0 */
+    background: var(--accent-green);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    z-index: 2000;
+  }
+
+  .nav-menu.show{
+    display:flex;
+  }
+
+  .nav-menu li a{
+    font-size:1.8rem;
+    font-weight:600;
+    color:var(--bg);
+  }
+}
+
+main{max-width:1100px;margin:auto;padding:2rem 1rem}
+
+/*--- GRID LAYOUT ---*/
+.layout{
+  display:grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap:1.25rem;
+  align-items:start;
+}
+.col-left{order:1}
+.col-right{order:2; display:grid; gap:1.25rem}
+
+@media (max-width: 768px){
+  .layout{grid-template-columns:1fr;}
+  .col-left{order:2}
+  .col-right{order:1}
+}
+
+section{margin:0}
+h2{
+  border-bottom:3px solid var(--accent-pink);
+  padding-bottom:.35rem;
+  margin-top:0;
+  color:var(--bg);
+}
+ul{padding-left:1.25rem;margin:0}
+.pub li{margin:.5rem 0}
+
+.card{
+  background:var(--card-bg);
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:1.25rem;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+footer{
+  background:var(--purplue);
+  color:#f1f5f9;
+  text-align:center;
+  padding:1rem;
+  margin-top:2rem;
+}
+footer img{
+  padding-top:1em;
+  height:60px;
+}
+.logo-footer{height:100px}
+
+.muted{color:var(--muted)}
+a{color:var(--purplue)}
+
+.grid{display:grid;gap:1rem}
+@media(min-width:700px){
+  .grid{grid-template-columns:1fr 1fr}
+}
+
+/* --- ABOUT --- */
+.about-container{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.about-photo img{
+  width:160px;
+  height:auto;
+  border-radius:0;
+  display:block;
+}
+.about-text{flex:1; min-width:240px}
+
+@media (max-width:768px){
+  .about-container{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .about-photo img{
+    width:100%;
+    max-width:320px;
+  }
+}

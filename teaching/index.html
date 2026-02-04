@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cómputo Concurrente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Material de apoyo para estudiantes de Cómputo Concurrente: prácticas, ejemplos teóricos y notas en español." />
+
+  <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+<header class="header-teaching">
+  <img
+    src="../images/granularity_network.jpg"
+    alt="Ilustración de cómputo concurrente"
+    class="header-image"
+  >
+  <div class="title-teaching">
+    <h1>Cómputo Concurrente</h1>
+  <p>Material para computólogas y computólogos</p>
+  </div>
+  
+
+  
+</header>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-logo">
+      <img src="../images/nombre.svg" alt="Gilde Valeria Rodríguez">
+    </a>
+
+    <button class="nav-toggle" aria-label="toggle menu">
+      <img src="../images/circle.svg" alt="toggle">
+    </button>
+
+    <ul class="nav-menu">
+      <li><a href="./teaching/index.html">Home</a></li>
+      <li><a href="/teaching/notas/">Roadmap</a></li>
+      <li><a href="/teaching/practicas/">Prácticas</a></li>
+      <li><a href="/teaching/soluciones/">Teoría</a></li>
+      <li><a href="../index.html">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main style="max-width:900px; margin:auto; padding:2rem 1rem;">
+  <section class="card">
+    <p>
+      Encontrarás mapas (roadmaps) con resúmenes, 
+      ejemplos prácticos y teóricos.
+    </p>
+    <p class="muted"></p>
+  </section>
+
+  <section class="card">
+    <h2>Índices</h2>
+    <ul>
+      <li>
+        <strong><a href="/teaching/notas/">Roadmap y resúmenes</a></strong><br>
+        Conceptos, intuiciones, notas y “ruta” para estudiar.
+      </li>
+      <li>
+        <strong><a href="/teaching/practicas/">Prácticas</a></strong><br>
+        Enunciados, material y páginas por práctica.
+      </li>
+      <li>
+        <strong><a href="/teaching/soluciones/">Ejemplos teóricos</a></strong><br>
+        Explicaciones, errores comunes, guías y ejemplos conceptuales.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Último material</h2>
+    <ul>
+      <li>
+        <a href="/teaching/practicas/1-intro--multihilos/">Práctica 1 — Multi-core, threads y procesos</a>
+      </li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="logo-footer">
+    <img src="../images/nombre.svg" alt="Gilde Valeria Rodríguez">
+  </div>
+  <small>© 2025 Gilde Valeria Rodríguez</small>
+</footer>
+
+<script>
+  const toggleBtn = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('.nav-menu');
+  const navbar = document.querySelector('.navbar');
+
+  toggleBtn.addEventListener('click', () => {
+    menu.classList.toggle('show');
+    document.body.classList.toggle('menu-open');
+  });
+
+  document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+      menu.classList.remove('show');
+      document.body.classList.remove('menu-open');
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  });
+</script>
+</body>
+</html>

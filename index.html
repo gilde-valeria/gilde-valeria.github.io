@@ -7,7 +7,7 @@
    <!-- SEO Meta Tags -->
   <meta name="author" content="Gilde Valeria Rodríguez">
   <meta name="description" content="Personal webpage of Gilde Valeria Rodríguez, PhD student at UNAM. Research in distributed computing, runtime verification, linearizability, and concurrent algorithms.">
-  <meta name="keywords" content="Gilde Valeria Rodríguez, UNAM, distributed computing, runtime verification, linearizability, concurrent algorithms, PhD, researcher, computer science">
+  <meta name="keywords" content="Gilde Valeria Rodríguez, Gilde Valeria Rodríguez Jiménez, UNAM, distributed computing, runtime verification, linearizability, concurrent algorithms, PhD, researcher, computer science">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph (for sharing on social media) -->
@@ -27,121 +27,7 @@
   <!-- Import General Sans font -->
   <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --bg: #1A1A1A;
-      --accent-green: #6EB598;
-      --accent-pink: #E3B1F6;
-      --accent-yellow: #F1C95F;
-      --purplue: #AB57F0;
-      --text: #1A1A1A;
-      --muted: #5C48EB;
-      --card-bg: #FEFEFE;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'General Sans', system-ui, sans-serif;
-      line-height:1.6;
-      color:var(--text);
-      background:#FEFEFE;
-    }
-    header{
-      background:var(--muted);
-      color:var(--card-bg);
-      padding:3rem 1rem;
-      text-align:center;
-    }
-    header h1{margin:0;font-size:2.3rem;font-weight: 300;}
-    header p{opacity:.9;margin:.25rem 0 0}
-    nav{
-      background:var(--accent-green);
-      color:var(--bg);
-      display:flex;
-      flex-wrap:wrap;
-      gap:1.25rem;
-      justify-content: space-evenly;
-      padding:.75rem 1rem;
-    }
-    nav a{
-      color: var(--bg);
-      text-decoration:none;
-      font-weight:bold;
-    }
-    nav a:hover{color:var(--accent-pink)}
-    main{max-width:1100px;margin:auto;padding:2rem 1rem}
-
-    /*--- GRID LAYOUT: about a la izquierda (angosto), resto a la derecha ---*/
-    .layout{
-      display:grid;
-      grid-template-columns: minmax(260px, 320px) 1fr; /* About angosto */
-      gap:1.25rem;
-      align-items:start;
-    }
-    .col-left{order:1}
-    .col-right{order:2; display:grid; gap:1.25rem}
-    /* En móviles: una sola columna y About al final */
-    @media (max-width: 768px){
-      .layout{
-        grid-template-columns: 1fr;
-      }
-      .col-left{order:2}   /* About abajo */
-      .col-right{order:1}  /* Resto arriba */
-    }
-
-    section{margin:0}
-    h2{
-      border-bottom:3px solid var(--accent-pink);
-      padding-bottom:.35rem;
-      margin-top:0;
-      color:var(--bg);
-    }
-    ul{padding-left:1.25rem;margin:0}
-    .pub li{margin:.5rem 0}
-    .card{
-      background:var(--card-bg);
-      border:1px solid #e5e7eb;
-      border-radius:14px;
-      padding:1.25rem;
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
-    }
-    footer{
-      background:var(--purplue);
-      color:#f1f5f9;
-      text-align:center;
-      padding:1rem;
-      margin-top:2rem;
-    }
-    .muted{color:var(--muted)}
-    a{color:var(--purplue)}
-    .grid{display:grid;gap:1rem}
-    @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
-
-    /* --- ABOUT --- */
-    .about-container{
-      display:flex;
-      align-items:center;
-      gap:1rem;
-      flex-wrap:wrap;
-    }
-    .about-photo img{
-      width: 160px;     /* más pequeño para no ocupar tanto */
-      height: auto;
-      border-radius: 0; /* rectangular, sin bordes */
-      display:block;
-    }
-    .about-text{flex:1; min-width: 240px;}
-    @media (max-width: 768px){
-      .about-container{
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .about-photo img{
-        width: 100%;
-        max-width: 320px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
@@ -150,12 +36,29 @@
   <p>PhD Student · Concurrent & Distributed Computing · Runtime Verification</p>
 </header>
 
-<nav>
-  <a href="#about">About</a>
-  <a href="#news">News</a>
-  <a href="#publications">Publications</a>
-  <a href="#interests">Interests</a>
-  <a href="#contact">Contact</a>
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-container">
+    <!-- Logo -->
+    <a href="#" class="nav-logo">
+      <img src="images/nombre.svg" alt="Gilde Valeria Rodríguez">
+    </a>
+
+    <!-- Toggle button (mobile) -->
+    <button class="nav-toggle" aria-label="toggle menu">
+      <img src="images/circle.svg" alt="toggle">
+    </button>
+
+    <!-- Menu links -->
+    <ul class="nav-menu">
+      <li><a href="#about">About</a></li>
+      <li><a href="#news">News</a></li>
+      <li><a href="#publications">Publications</a></li>
+      <li><a href="#interests">Interests</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="./teaching/index.html">Teaching</a></li>
+    </ul>
+  </div>
 </nav>
 
 <main>
@@ -189,6 +92,30 @@
 
     <!-- Columna derecha: resto de cards apiladas y “arriba” -->
     <div class="col-right">
+      <!-- Teaching -->
+<section id="teaching" class="card">
+  <h2>Teaching: Concurrent Computing</h2>
+  <p>
+    Notes for Computer Scientist in Spanish.
+  </p>
+
+  <ul>
+    
+    <li>
+      <strong><a href="/teaching/notas/">Roadmap and Summary</a></strong><br>
+      Explicaciones conceptuales, intuiciones y apuntes extendidos.
+    </li>
+    <li>
+      <strong><a href="/teaching/practicas/">Practical Examples</a></strong><br>
+    </li>
+    <li>
+      <strong><a href="/teaching/soluciones/">Theoretical Examples</a></strong><br>
+      Discusión de ideas clave, errores comunes y soluciones comentadas.
+    </li>
+    
+  </ul>
+</section>
+
       <!-- Publications -->
       <section id="publications" class="card">
         <h2>Publications</h2>
@@ -264,8 +191,43 @@
 </main>
 
 <footer>
+  
+  <div class="logo-footer">
+            <img src="images/nombre.svg" alt="Gilde Valeria Rodríguez">
+  </div>
+
   <small>© 2025 Gilde Valeria Rodríguez</small>
 </footer>
+<script>
+  const toggleBtn = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('.nav-menu');
+  const navbar = document.querySelector('.navbar');
+
+  function closeMenu() {
+    menu.classList.remove('show');
+    document.body.classList.remove('menu-open');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    menu.classList.toggle('show');
+    document.body.classList.toggle('menu-open');
+  });
+
+  // ✅ Cierra el menú cuando das click en cualquier opción
+  document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // (Opcional pero útil) Cierra si cambias el tamaño a desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) closeMenu();
+  });
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  });
+</script>
 
 </body>
 </html>
