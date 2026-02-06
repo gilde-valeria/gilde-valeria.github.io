@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prácticas — Cómputo Concurrente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Prácticas de Cómputo Concurrente: enunciados, objetivos y material asociado." />
+
+  <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- OJO: si este archivo vive en /teaching/practicas/index.html -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Prácticas</h1>
+  <p>Guías y enunciados · Cómputo Concurrente</p>
+</header>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-logo">
+      <img src="../../images/nombre.svg" alt="Gilde Valeria Rodríguez">
+    </a>
+
+    <button class="nav-toggle" aria-label="toggle menu">
+      <img src="../../images/circle.svg" alt="toggle">
+    </button>
+
+    <ul class="nav-menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/teaching/">Teaching</a></li>
+      <li><a href="/teaching/notas/">Roadmap</a></li>
+      <li><a href="/teaching/practicas/">Prácticas</a></li>
+      <li><a href="/teaching/soluciones/">Teoría</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main style="max-width: 1100px; margin:auto; padding:2rem 1rem;">
+
+  <!-- Intro -->
+  <section class="card">
+    <p>
+      Aquí encontrarás las <strong>prácticas del curso</strong> organizadas por tema.
+      Cada entrada incluye el objetivo del tema, lo que se espera que implementes,
+      y material de apoyo (código, lecturas o notas).
+    </p>
+    <p class="muted">
+      Consejo: revisa el <a href="/teaching/notas/">Roadmap</a> antes de empezar una práctica.
+    </p>
+  </section>
+
+  <!-- Grid de recuadros -->
+  <section class="card">
+    <h2>Índice de prácticas</h2>
+
+    <!-- Contenedor de tarjetas -->
+    <div class="practice-grid">
+
+      <!-- Tarjeta 1 -->
+      <article class="practice-card">
+        <div class="practice-meta">
+          <span class="practice-tag">Práctica 1</span>
+          <span class="practice-tag alt">Java · Multihilos</span>
+        </div>
+
+        <h3>Multi-core, threads y procesos</h3>
+        <p class="practice-desc">
+          Repaso de Java y primer contacto con programación multihilo:
+          creación de hilos, estados, <code>join()</code> y medición simple de tiempos.
+        </p>
+        <p>
+    <a href="https://github.com/gilde-valeria/gilde-valeria.github.io/blob/main/teaching/practicas/1-intro--multihilos/intro--multihilos.org"
+       target="_blank" rel="noopener">
+      Ver práctica en formato Org (GitHub)
+    </a>
+  </p>
+
+        <ul class="practice-bullets">
+          <li><strong>Aprendes:</strong> qué es un hilo en Java, estados, coordinación básica.</li>
+          <li><strong>Implementas:</strong> variantes del determinante concurrente (secuencial, 2 hilos, 6 hilos).</li>
+          <li><strong>Entregable:</strong> ZIP con código + PDF breve.</li>
+        </ul>
+
+        <div class="practice-actions">
+          <!-- Página HTML de la práctica (recomendada para alumnos) -->
+          <a class="btn" href="/teaching/practicas/1-intro--multihilos/">Ver práctica</a>
+
+          <!-- Fuente .org (opcional) -->
+          <a class="btn secondary" href="/teaching/practicas/1-intro--multihilos/intro--multihilos.org">
+            Fuente (.org)
+          </a>
+        </div>
+      </article>
+
+      <!-- Plantilla de tarjeta (duplica este bloque para nuevas prácticas) -->
+      <article class="practice-card">
+        <div class="practice-meta">
+          <span class="practice-tag">Próximamente</span>
+          <span class="practice-tag alt">Tema</span>
+        </div>
+
+        <h3>Sincronización: locks, atomicidad y condiciones de carrera</h3>
+        <p class="practice-desc">
+          (Descripción breve del nuevo tema.) Qué significa sincronizar, por qué aparecen
+          condiciones de carrera y cómo se mitigan con mecanismos básicos.
+        </p>
+
+        <ul class="practice-bullets">
+          <li><strong>Aprendes:</strong> invariantes simples, secciones críticas, atomicidad.</li>
+          <li><strong>Implementas:</strong> (por definir) contador seguro, ejemplo con interleavings.</li>
+          <li><strong>Entregable:</strong> (por definir).</li>
+        </ul>
+
+        <div class="practice-actions">
+          <a class="btn disabled" href="#" aria-disabled="true">Aún no disponible</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="logo-footer">
+    <img src="../../images/nombre.svg" alt="Gilde Valeria Rodríguez">
+  </div>
+  <small>© 2025 Gilde Valeria Rodríguez</small>
+</footer>
+
+<script>
+  const toggleBtn = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('.nav-menu');
+  const navbar = document.querySelector('.navbar');
+
+  function closeMenu(){
+    menu.classList.remove('show');
+    document.body.classList.remove('menu-open');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    menu.classList.toggle('show');
+    document.body.classList.toggle('menu-open');
+  });
+
+  document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) closeMenu();
+  });
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  });
+</script>
+
+<!-- Estilos locales solo para el grid de prácticas (no toca tu styles.css global) -->
+<style>
+  .practice-grid{
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 800px){
+    .practice-grid{
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .practice-card{
+    background: var(--card-bg);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+
+  .practice-meta{
+    display:flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-bottom: .5rem;
+  }
+
+  .practice-tag{
+    display:inline-block;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    font-size: .9rem;
+    font-weight: 600;
+    background: rgba(92,72,235,.12);
+    color: var(--muted);
+  }
+  .practice-tag.alt{
+    background: rgba(110,181,152,.18);
+    color: var(--bg);
+  }
+
+  .practice-card h3{
+    margin: .4rem 0 .35rem;
+    color: var(--bg);
+    font-size: 1.25rem;
+  }
+
+  .practice-desc{
+    margin: 0 0 .75rem;
+  }
+
+  .practice-bullets{
+    margin: 0 0 1rem;
+    padding-left: 1.2rem;
+  }
+  .practice-bullets li{
+    margin: .35rem 0;
+  }
+
+  .practice-actions{
+    display:flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn{
+    display:inline-block;
+    padding: .55rem .9rem;
+    border-radius: 12px;
+    text-decoration:none;
+    font-weight: 700;
+    background: var(--purplue);
+    color: #fff;
+  }
+  .btn.secondary{
+    background: transparent;
+    border: 2px solid var(--purplue);
+    color: var(--purplue);
+  }
+  .btn.disabled{
+    background: #cbd5e1;
+    color: #334155;
+    pointer-events: none;
+  }
+</style>
+
+</body>
+</html>
