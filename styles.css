@@ -139,6 +139,7 @@ header p{opacity:.9;margin:.25rem 0 0}
 @media (max-width: 768px){
   /* El contenedor debe repartir espacio entre logo y menú/botón */
 .nav-container{
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between; /* <- CLAVE */
