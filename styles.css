@@ -71,17 +71,17 @@ header p{opacity:.9;margin:.25rem 0 0}
 
 /* El contenedor debe repartir espacio entre logo y menú/botón */
 .nav-container {
-  width: 1000px;
-  max-width: 1800px;   /* mismo ancho que main */
-  margin: auto;
+  width: 100%;
+  max-width: 1100px;     /* o el ancho que quieras en desktop */
+  margin: 0 auto;
   padding: 0.5rem 1rem;
 
   display: flex;
   align-items: center;
-  justify-content: center; /* DESKTOP centrado */
+  justify-content: center;  /* desktop */
   gap: 1.25rem;
 
-  position: relative; /* para menú overlay móvil */
+  position: relative;
 }
 
 
