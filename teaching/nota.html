@@ -2,35 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Nota de Clase</title>
+  <title>Nota de Clase | Cómputo Concurrente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../styles.css">
+  
   <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
 </head>
 <body>
   <div id="site-navbar"></div>
 
   <main style="max-width:900px; margin:auto; padding:2rem 1rem;">
-    <section class="card">
-        <zero-md id="viewer">
-            <template>
-                <style>
-                    /* Aquí puedes poner CSS específico para que el MD 
-                       se vea igual a tu sitio */
-                    .markdown-body { font-family: 'General Sans', sans-serif; }
-                    pre { background: #f4f4f4; padding: 1rem; border-radius: 8px; }
-                </style>
-            </template>
-        </zero-md>
+    <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
+    
+    <section class="card" style="margin-top:1rem;">
+      <zero-md id="viewer">
+        <template>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
+          <style>
+            .markdown-body { 
+              padding: 1rem; 
+              font-family: 'General Sans', sans-serif; 
+            }
+            /* Estilo para bloques de código */
+            pre { background: #f6f8fa; border-radius: 8px; padding: 16px; overflow: auto; }
+          </style>
+        </template>
+      </zero-md>
     </section>
   </main>
 
+  <div id="site-footer"></div>
+
   <script>
-    // Lógica para leer el parámetro ?file= de la URL
+    // 1. Capturamos el archivo de la URL (?src=...)
     const params = new URLSearchParams(window.location.search);
     const file = params.get('src');
+    const viewer = document.getElementById('viewer');
+
     if (file) {
-      document.getElementById('viewer').setAttribute('src', file);
+      console.log("Intentando cargar nota desde:", file);
+      // Seteamos el src. Importante: zero-md v3 detecta el cambio automáticamente
+      viewer.src = file;
+    } else {
+      viewer.innerHTML = "<p>⚠️ No se proporcionó ninguna nota para mostrar.</p>";
     }
+
+    // Debug: Escuchar si hay errores de carga
+    viewer.addEventListener('zero-md-error', (e) => {
+      console.error("Error cargando el Markdown:", e.detail.status);
+      alert("No se pudo encontrar el archivo: " + file + "\nVerifica que el bot de GitHub ya lo haya creado.");
+    });
   </script>
+
+  <script type="module" src="/scripts/include-teaching.js"></script>
 </body>
 </html>
