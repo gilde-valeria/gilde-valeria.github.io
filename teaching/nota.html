@@ -28,8 +28,8 @@
 </main>
 
 <script>
-  // 1. Encapsulamos la lógica en una función asíncrona para manejar la espera
-  async function initViewer() {
+  // Usamos una función asíncrona para poder usar 'await'
+  async function loadNote() {
     const params = new URLSearchParams(window.location.search);
     let file = params.get('src');
     const viewer = document.getElementById('viewer');
@@ -39,34 +39,36 @@
       return;
     }
 
-    // Limpieza de ruta (Path normalization)
+    // Normalización de ruta: quitamos la diagonal inicial si existe
     if (file.startsWith('/')) {
       file = file.substring(1);
     }
 
-    console.log("Esperando a que zero-md esté definido...");
+    console.log("1. Esperando a que el componente zero-md se registre...");
     
-    // 2. BARRERA DE SINCRONIZACIÓN: 
-    // No avanzamos hasta que el navegador reconozca el componente zero-md
+    // BARRERA DE SINCRONIZACIÓN:
+    // No pasamos de aquí hasta que el navegador reconozca 'zero-md'
     await customElements.whenDefined('zero-md');
 
-    console.log("Componente listo. Cargando:", file);
+    console.log("2. Componente listo. Cargando archivo:", file);
 
-    // 3. Asignamos el archivo y renderizamos
-    viewer.setAttribute('src', file);
-    
-    // En zero-md v3, esto asegura que el contenido se dibuje
-    if (typeof viewer.render === 'function') {
-      viewer.render();
-    }
+    // En zero-md v3, cambiar el atributo 'src' dispara el render automáticamente.
+    // No necesitamos llamar a .render() manualmente si quitamos 'manual-render' del tag.
+    viewer.src = file;
   }
 
-  // Ejecutamos la función
-  initViewer();
+  // Ejecutamos la carga
+  loadNote();
 
-  // Listener para errores de red (404)
+  // Captura de errores de red (404)
   document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
-    console.error("Error 404: El archivo no existe en la ruta especificada.");
+    console.error("Error 404: No se encontró el archivo .md en la ruta:", e.detail.status);
+    document.getElementById('viewer').innerHTML = `
+      <div style="color:red; padding:2rem; border:1px dashed red;">
+        <h3>Error 404: Archivo no encontrado</h3>
+        <p>El navegador intentó buscar el archivo en la ruta relativa: <b>${viewer.src}</b></p>
+        <p>Verifica que el bot de GitHub haya subido el archivo .md correctamente.</p>
+      </div>`;
   });
 </script>
 
