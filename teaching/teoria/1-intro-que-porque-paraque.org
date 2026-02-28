@@ -1,0 +1,50 @@
+#+title: ¿Qué es la Concurrencia? Origen, Propósito y la Gran Unificación
+#+date: 2026-02-27
+#+filetags: :teoria:introduccion:raynal:historia:
+
+* 1. ¿Qué es la Concurrencia? 
+Coordinar agentes en presencia de adversarios.
+
+#+begin_quote
+"Un programa concurrente consiste en una colección de agentes que cooperan o compiten por recursos compartidos." 
+#+end_quote
+
+El reto del programador no es escribir el código, sino razonar sobre todas las posibles **historias de ejecución** (interleavings) que se pueden generar.
+
+* 2. Un Poco de Historia: De la Necesidad a la Disciplina
+** El Origen (1961 - Atlas Computer)
+La concurrencia nació bajo el nombre de *Multiprogramming* en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
+- **Objetivo original:** No era ir más rápido, sino **no desperdiciar el CPU**. Mientras un proceso esperaba por la lectura de una cinta magnética (I/O), el CPU saltaba a otro proceso.
+
+** La Evolución Forzada (El fin de la fiesta del silicio)
+¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
+1. **Power Wall:** No pudimos aumentar más la frecuencia de reloj sin derretir los chips.
+2. **Memory Wall:** El CPU es mucho más rápido que la RAM.
+3. **ILP Wall:** Ya no pudimos encontrar más paralelismo automático en instrucciones secuenciales.
+
+*La solución de la industria:* Pasar de procesadores rápidos a **procesadores con muchos núcleos**. La complejidad de la velocidad se trasladó del hardware al software.
+
+* 3. La Gran Unificación (Raynal & Rajsbaum)
+A menudo se enseña que Paralelo, Concurrente y Distribuido son cosas distintas. Sin embargo, **Sergio Rajsbaum y Michel Raynal** argumentan que son **dos caras de la misma moneda**.
+
+** La Diferencia de Enfoque
+- **Cómputo Paralelo:** Busca **Eficiencia**. Es un entorno "amigable" donde dividimos una tarea para terminar antes (ej. multiplicar matrices).
+- **Cómputo Distribuido:** Busca **Coordinación**. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.
+
+** El Vínculo: Los Adversarios
+Ambos modelos luchan contra **Adversarios**:
+- **Asincronía:** Un hilo/nodo puede ser infinitamente lento.
+- **Fallos:** Un agente puede morir (crash) o mentir (fallas bizantinas).
+
+* 4. Nuestro Modelo de Estudio
+En este curso, utilizaremos un **modelo teórico idealizado** para entender la base de todo:
+- **Agentes:** Múltiples *hilos* ejecutando código.
+- **Comunicación:** *Memoria Compartida*. Los hilos se comunican a través de **Objetos Compartidos** (Queues, Stacks, Registros).
+- **Adversario:** Un scheduler asíncrono que puede pausar a cualquier hilo en el peor momento posible.
+
+[[file:../images/procesador_atomic.png]]
+
+---
+# Notas Relacionadas:
+- [[file:2-historias-con-moraleja.org][Historias y el modelo de interleaving de Raynal]]
+- [[file:teaching/teoria/3-linearizabilidad-vs-sc.org][Linealizabilidad: ¿Cómo probar la corrección?]]

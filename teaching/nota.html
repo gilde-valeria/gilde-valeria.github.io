@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nota de Clase</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
+</head>
+<body>
+  <div id="site-navbar"></div>
+
+  <main style="max-width:900px; margin:auto; padding:2rem 1rem;">
+    <section class="card">
+        <zero-md id="viewer">
+            <template>
+                <style>
+                    /* Aquí puedes poner CSS específico para que el MD 
+                       se vea igual a tu sitio */
+                    .markdown-body { font-family: 'General Sans', sans-serif; }
+                    pre { background: #f4f4f4; padding: 1rem; border-radius: 8px; }
+                </style>
+            </template>
+        </zero-md>
+    </section>
+  </main>
+
+  <script>
+    // Lógica para leer el parámetro ?file= de la URL
+    const params = new URLSearchParams(window.location.search);
+    const file = params.get('src');
+    if (file) {
+      document.getElementById('viewer').setAttribute('src', file);
+    }
+  </script>
+</body>
+</html>

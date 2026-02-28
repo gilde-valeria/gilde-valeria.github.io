@@ -1,0 +1,18 @@
+name: Org to MD Converter
+on: [push]
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Pandoc
+        run: sudo apt-get install pandoc
+      - name: Run Conversion Script
+        run: python3 convert_all.py
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'valeria-bot'
+          git config --global user.email 'valeria@cs.research'
+          git add .
+          git commit -m "Auto-convert Org to MD" || echo "No changes to commit"
+          git push
