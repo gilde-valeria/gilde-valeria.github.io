@@ -45,15 +45,16 @@
       if (!file.startsWith('./')) file = './' + file;
 
       try {
-        // Barrera de sincronización: Esperamos a que la librería cargue de verdad
+        console.log("Buscando librería y archivo:", file);
+        // Esperamos a que la librería cargue correctamente
         await customElements.whenDefined('zero-md');
         
-        console.log("Librería detectada. Cargando:", file);
+        console.log("¡Librería lista! Renderizando nota...");
         viewer.src = file;
         
       } catch (e) {
         console.error("Error en el visor:", e);
-        status.innerHTML = `<b style="color:red;">Error de Liveness:</b> Falló el cargador asíncrono.`;
+        status.innerHTML = `<b style="color:red;">Error del Visor:</b> No se pudo cargar la nota.`;
       }
     })();
   </script>
