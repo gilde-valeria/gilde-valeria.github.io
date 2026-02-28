@@ -15,62 +15,70 @@
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
     <section class="card" style="margin-top:1rem; min-height: 400px;">
-      <zero-md id="viewer" manual-render>
+      <zero-md id="viewer">
         <template>
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
-            .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
-            pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; }
+            .markdown-body { 
+              padding: 2rem; 
+              font-family: 'General Sans', sans-serif; 
+              color: #333;
+            }
+            pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
+            code { font-family: 'Fira Code', monospace; }
           </style>
         </template>
+        <div style="padding: 2rem; color: gray;">Cargando nota de investigación...</div>
       </zero-md>
     </section>
-</main>
+  </main>
 
-<script>
-  // Usamos una función asíncrona para poder usar 'await'
-  async function loadNote() {
-    const params = new URLSearchParams(window.location.search);
-    let file = params.get('src');
-    const viewer = document.getElementById('viewer');
+  <div id="site-footer"></div>
 
-    if (!file) {
-      viewer.innerHTML = "<p>⚠️ No se especificó ninguna nota. Regresa al índice.</p>";
-      return;
-    }
+  <script>
+    // Usamos una función anónima autoejecutable para manejar el flujo asíncrono
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      let file = params.get('src');
+      const viewer = document.getElementById('viewer');
 
-    // Normalización de ruta: quitamos la diagonal inicial si existe
-    if (file.startsWith('/')) {
-      file = file.substring(1);
-    }
+      if (!file) {
+        viewer.innerHTML = "<p>⚠️ No se seleccionó ninguna nota.</p>";
+        return;
+      }
 
-    console.log("1. Esperando a que el componente zero-md se registre...");
-    
-    // BARRERA DE SINCRONIZACIÓN:
-    // No pasamos de aquí hasta que el navegador reconozca 'zero-md'
-    await customElements.whenDefined('zero-md');
+      // Normalización de la ruta (evitamos la diagonal inicial)
+      if (file.startsWith('/')) {
+        file = file.substring(1);
+      }
 
-    console.log("2. Componente listo. Cargando archivo:", file);
+      console.log("Iniciando carga de:", file);
 
-    // En zero-md v3, cambiar el atributo 'src' dispara el render automáticamente.
-    // No necesitamos llamar a .render() manualmente si quitamos 'manual-render' del tag.
-    viewer.src = file;
-  }
+      // BARRERA DE SINCRONIZACIÓN: 
+      // Esperamos a que el navegador registre el tag <zero-md>
+      await customElements.whenDefined('zero-md');
+      
+      // Ahora el 'viewer' ya es un componente inteligente
+      viewer.src = file;
+      
+      // Forzamos el renderizado solo por seguridad
+      if (viewer.render) {
+        await viewer.render();
+        console.log("¡Renderizado completo!");
+      }
+    })();
 
-  // Ejecutamos la carga
-  loadNote();
-
-  // Captura de errores de red (404)
-  document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
-    console.error("Error 404: No se encontró el archivo .md en la ruta:", e.detail.status);
-    document.getElementById('viewer').innerHTML = `
-      <div style="color:red; padding:2rem; border:1px dashed red;">
-        <h3>Error 404: Archivo no encontrado</h3>
-        <p>El navegador intentó buscar el archivo en la ruta relativa: <b>${viewer.src}</b></p>
-        <p>Verifica que el bot de GitHub haya subido el archivo .md correctamente.</p>
-      </div>`;
-  });
-</script>
+    // Captura de errores (como el 404)
+    document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
+      console.error("Error en Zero-MD:", e.detail.status);
+      document.getElementById('viewer').innerHTML = `
+        <div style="padding:2rem; color:#d32f2f;">
+          <h3>Error 404: No se encontró la nota</h3>
+          <p>Ruta intentada: <b>${file}</b></p>
+          <p>Verifica que el nombre en el repositorio coincida exactamente.</p>
+        </div>`;
+    });
+  </script>
 
   <script type="module" src="/scripts/include-teaching.js"></script>
 </body>
