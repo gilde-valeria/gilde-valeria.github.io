@@ -35,50 +35,55 @@
 
   <div id="site-footer"></div>
 
-  <script>
-    // Usamos una función anónima autoejecutable para manejar el flujo asíncrono
-    (async () => {
-      const params = new URLSearchParams(window.location.search);
-      let file = params.get('src');
-      const viewer = document.getElementById('viewer');
+<script>
+  // Usamos una función asíncrona para manejar la espera (barrera)
+  async function inicializarVisor() {
+    const params = new URLSearchParams(window.location.search);
+    let file = params.get('src');
+    const viewer = document.getElementById('viewer');
 
-      if (!file) {
-        viewer.innerHTML = "<p>⚠️ No se seleccionó ninguna nota.</p>";
-        return;
-      }
+    if (!file) {
+      viewer.innerHTML = "<p>⚠️ No se especificó ninguna nota. Regresa al índice.</p>";
+      return;
+    }
 
-      // Normalización de la ruta (evitamos la diagonal inicial)
-      if (file.startsWith('/')) {
-        file = file.substring(1);
-      }
+    // Normalización: Si la ruta empieza con '/', la hacemos relativa
+    if (file.startsWith('/')) {
+      file = file.substring(1);
+    }
 
-      console.log("Iniciando carga de:", file);
+    console.log("1. Esperando a que el componente sea definido...");
 
-      // BARRERA DE SINCRONIZACIÓN: 
-      // Esperamos a que el navegador registre el tag <zero-md>
-      await customElements.whenDefined('zero-md');
-      
-      // Ahora el 'viewer' ya es un componente inteligente
-      viewer.src = file;
-      
-      // Forzamos el renderizado solo por seguridad
-      if (viewer.render) {
-        await viewer.render();
-        console.log("¡Renderizado completo!");
-      }
-    })();
+    // BARRERA DE SINCRONIZACIÓN
+    // No pasamos de aquí hasta que el navegador reconozca el tag <zero-md>
+    await customElements.whenDefined('zero-md');
 
-    // Captura de errores (como el 404)
-    document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
-      console.error("Error en Zero-MD:", e.detail.status);
-      document.getElementById('viewer').innerHTML = `
-        <div style="padding:2rem; color:#d32f2f;">
-          <h3>Error 404: No se encontró la nota</h3>
-          <p>Ruta intentada: <b>${file}</b></p>
-          <p>Verifica que el nombre en el repositorio coincida exactamente.</p>
-        </div>`;
-    });
-  </script>
+    console.log("2. Componente listo. Intentando cargar:", file);
+
+    // Asignamos la ruta
+    viewer.setAttribute('src', file);
+
+    // Forzamos el renderizado por si el componente se quedó "dormido"
+    if (viewer.render) {
+      await viewer.render();
+      console.log("3. ¡Renderizado exitoso!");
+    }
+  }
+
+  // Ejecutamos la lógica
+  inicializarVisor();
+
+  // Captura de errores (como el temido 404)
+  document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
+    console.error("Error de Red (404/CORS):", e.detail.status);
+    document.getElementById('viewer').innerHTML = `
+      <div style="color:#d32f2f; padding:2rem; border: 1px dashed #d32f2f; border-radius:8px;">
+        <h3>⚠️ Error de carga</h3>
+        <p>No pudimos encontrar el archivo: <b>${file}</b></p>
+        <p>Asegúrate de que el bot de GitHub ya haya generado el archivo <b>.md</b> en la carpeta correcta.</p>
+      </div>`;
+  });
+</script>
 
   <script type="module" src="/scripts/include-teaching.js"></script>
 </body>
