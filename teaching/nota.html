@@ -5,7 +5,7 @@
   <title>Visor de Notas | Cómputo Concurrente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
 </head>
 <body>
   <div id="site-navbar"></div>
@@ -14,59 +14,60 @@
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
     <section class="card" style="margin-top:1rem; min-height: 400px;">
-      <zero-md id="viewer" src="">
+      <div id="status-debug" style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;"></div>
+      
+      <zero-md id="viewer">
         <template>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
             .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
             pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
           </style>
         </template>
-        <div id="fallback-message" style="padding:2rem; color:gray;">Iniciando sistema de archivos...</div>
       </zero-md>
     </section>
   </main>
 
-  <div id="site-footer"></div>
-
-  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
-
   <script>
+    const log = (msg) => {
+      console.log(msg);
+      document.getElementById('status-debug').innerText += " > " + msg;
+    };
+
     (async () => {
       const params = new URLSearchParams(window.location.search);
       let file = params.get('src');
       const viewer = document.getElementById('viewer');
-      const fallback = document.getElementById('fallback-message');
 
       if (!file) {
-        fallback.innerHTML = "⚠️ No se especificó ninguna nota.";
+        log("Error: No hay parámetro 'src' en la URL.");
         return;
       }
 
-      // Normalizar ruta
-      if (file.startsWith('/')) file = file.substring(1);
-
-      console.log("Intentando sincronizar con zero-md para:", file);
-
-      // 3. Mecanismo de seguridad: Timeout de 5 segundos
-      const timeout = setTimeout(() => {
-        fallback.innerHTML = "<p style='color:red;'>❌ Error de Liveness: La librería zero-md no respondió. Revisa tu conexión o el CDN.</p>";
-      }, 5000);
+      // Normalizar: Si el usuario puso "/teoria/...", lo convertimos en "teoria/..."
+      // porque nota.html ya está dentro de /teaching/
+      const cleanFile = file.startsWith('/') ? file.substring(1) : file;
+      log(`Buscando: ${cleanFile}`);
 
       try {
-        // Esperamos a que el componente esté listo
-        await customElements.whenDefined('zero-md');
-        clearTimeout(timeout); // Si llega aquí, cancelamos el error de timeout
+        // 1. Prueba de existencia (Fetch)
+        log("Verificando disponibilidad del archivo...");
+        const response = await fetch(cleanFile);
         
-        console.log("Componente registrado. Cargando datos...");
-        viewer.src = file;
-        
-        // Verificamos si el archivo existe realmente antes de renderizar
-        const response = await fetch(file);
-        if (!response.ok) throw new Error("404");
-
+        if (response.ok) {
+          log("¡Archivo encontrado! Pasando a zero-md.");
+          await customElements.whenDefined('zero-md');
+          viewer.src = cleanFile; 
+        } else {
+          throw new Error(`Servidor respondió con ${response.status}`);
+        }
       } catch (err) {
-        console.error("Fallo en el pipeline:", err);
-        fallback.innerHTML = `<p style="color:red;">⚠️ No se pudo cargar <b>${file}</b>. <br> Verifica que el bot haya creado el archivo .md</p>`;
+        log(`FALLO: ${err.message}`);
+        viewer.innerHTML = `<div style="padding:2rem; color:red;">
+          <h3>⚠️ Error de Acceso</h3>
+          <p>El archivo <b>${cleanFile}</b> no es accesible.</p>
+          <p>Prueba abrirlo directamente: <a href="${cleanFile}">${cleanFile}</a></p>
+        </div>`;
       }
     })();
   </script>
