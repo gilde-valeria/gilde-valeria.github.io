@@ -11,7 +11,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y emacs-nox
 
       - name: Publish Org to HTML
-        run: emacs --batch --load publish.el --funcall org-publish-all
+        run: emacs -Q --batch --load publish.el --funcall org-publish-all
 
       - name: Commit and Push
         run: |
