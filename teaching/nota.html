@@ -5,8 +5,8 @@
   <title>Visor de Notas | Cómputo Concurrente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
-  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
+  
+  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3/dist/zero-md.min.js"></script>
 </head>
 <body>
   <div id="site-navbar"></div>
@@ -15,60 +15,67 @@
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
     <section class="card" style="margin-top:1rem; min-height: 500px;">
-      <zero-md id="viewer" manual-render>
+      <div id="debug-console" style="font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 5px;"></div>
+      
+      <zero-md id="viewer">
         <template>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
             .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
             pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
           </style>
         </template>
-        <div id="loader" style="padding:2rem; color:#666;">⌛ Sincronizando con el servidor de notas...</div>
+        <div style="padding:2rem;">⌛ Sincronizando hilos de lectura...</div>
       </zero-md>
     </section>
   </main>
 
   <script>
+    const debug = (msg) => {
+        console.log(msg);
+        document.getElementById('debug-console').innerText += " > " + msg;
+    };
+
     (async () => {
       const params = new URLSearchParams(window.location.search);
       let file = params.get('src');
       const viewer = document.getElementById('viewer');
-      const loader = document.getElementById('loader');
 
-      if (!file) {
-        loader.innerText = "⚠️ Error: Falta el parámetro 'src'.";
-        return;
-      }
+      if (!file) return debug("Falta parámetro src.");
+      
+      // Normalización forzada para GitHub Pages
+      if (file.startsWith('/')) file = file.substring(1);
+      if (!file.startsWith('./')) file = './' + file;
 
-      // 1. Normalización basada en tu prueba exitosa
-      // Si el archivo viene como /teoria/... lo pasamos a ./teoria/...
-      let cleanPath = file;
-      if (file.startsWith('/')) {
-          cleanPath = '.' + file; 
-      } else if (!file.startsWith('./')) {
-          cleanPath = './' + file;
-      }
+      debug(`Archivo: ${file}`);
 
+      // Verificamos si el archivo existe antes de llamar al componente
       try {
-        console.log("Intentando fetch de seguridad a:", cleanPath);
-        const check = await fetch(cleanPath);
-        if (!check.ok) throw new Error(`404 - No encontrado`);
+        const res = await fetch(file);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        debug("Archivo OK en servidor.");
 
-        console.log("Archivo confirmado. Esperando componente...");
-        await customElements.whenDefined('zero-md');
-        
-        // 2. Transmisión de datos al componente
-        viewer.src = cleanPath;
-        
-        // 3. Forzamos el renderizado
-        console.log("Ejecutando render()...");
-        await viewer.render();
-        
-        // Si llegamos aquí, ocultamos el loader manual si es necesario
-        console.log("¡Hecho!");
+        // En lugar de esperar indefinidamente, intentamos setear el src
+        // Si la librería carga después, ella se encargará de renderizar.
+        viewer.setAttribute('src', file);
+        debug("Atributo 'src' inyectado.");
+
+        // Solo si el componente ya despertó, forzamos render
+        if (customElements.get('zero-md')) {
+            debug("Componente detectado, renderizando...");
+            viewer.render?.();
+        } else {
+            debug("Esperando carga asíncrona de la librería...");
+            // Si no ha cargado, este evento de zero-md v3 nos avisará
+            viewer.addEventListener('zero-md-ready', () => {
+                debug("¡Librería cargada y lista!");
+                viewer.render?.();
+            });
+        }
 
       } catch (e) {
-        console.error("Fallo catastrófico:", e);
-        loader.innerHTML = `<b style="color:red;">Error de Liveness:</b> No se pudo cargar <br> <code>${cleanPath}</code>`;
+        debug(`ERROR: ${e.message}`);
+        viewer.innerHTML = `<div style="color:red; padding:2rem;">No se pudo acceder a la nota: ${file}</div>`;
       }
     })();
   </script>
