@@ -2,11 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Nota de Clase | Cómputo Concurrente</title>
+  <title>Visor de Notas | Cómputo Concurrente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../styles.css">
-  
-  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
 </head>
 <body>
   <div id="site-navbar"></div>
@@ -15,75 +14,62 @@
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
     <section class="card" style="margin-top:1rem; min-height: 400px;">
-      <zero-md id="viewer">
+      <zero-md id="viewer" src="">
         <template>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
-            .markdown-body { 
-              padding: 2rem; 
-              font-family: 'General Sans', sans-serif; 
-              color: #333;
-            }
+            .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
             pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
-            code { font-family: 'Fira Code', monospace; }
           </style>
         </template>
-        <div style="padding: 2rem; color: gray;">Cargando nota de investigación...</div>
+        <div id="fallback-message" style="padding:2rem; color:gray;">Iniciando sistema de archivos...</div>
       </zero-md>
     </section>
   </main>
 
   <div id="site-footer"></div>
 
-<script>
-  // Usamos una función asíncrona para manejar la espera (barrera)
-  async function inicializarVisor() {
-    const params = new URLSearchParams(window.location.search);
-    let file = params.get('src');
-    const viewer = document.getElementById('viewer');
+  <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
 
-    if (!file) {
-      viewer.innerHTML = "<p>⚠️ No se especificó ninguna nota. Regresa al índice.</p>";
-      return;
-    }
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      let file = params.get('src');
+      const viewer = document.getElementById('viewer');
+      const fallback = document.getElementById('fallback-message');
 
-    // Normalización: Si la ruta empieza con '/', la hacemos relativa
-    if (file.startsWith('/')) {
-      file = file.substring(1);
-    }
+      if (!file) {
+        fallback.innerHTML = "⚠️ No se especificó ninguna nota.";
+        return;
+      }
 
-    console.log("1. Esperando a que el componente sea definido...");
+      // Normalizar ruta
+      if (file.startsWith('/')) file = file.substring(1);
 
-    // BARRERA DE SINCRONIZACIÓN
-    // No pasamos de aquí hasta que el navegador reconozca el tag <zero-md>
-    await customElements.whenDefined('zero-md');
+      console.log("Intentando sincronizar con zero-md para:", file);
 
-    console.log("2. Componente listo. Intentando cargar:", file);
+      // 3. Mecanismo de seguridad: Timeout de 5 segundos
+      const timeout = setTimeout(() => {
+        fallback.innerHTML = "<p style='color:red;'>❌ Error de Liveness: La librería zero-md no respondió. Revisa tu conexión o el CDN.</p>";
+      }, 5000);
 
-    // Asignamos la ruta
-    viewer.setAttribute('src', file);
+      try {
+        // Esperamos a que el componente esté listo
+        await customElements.whenDefined('zero-md');
+        clearTimeout(timeout); // Si llega aquí, cancelamos el error de timeout
+        
+        console.log("Componente registrado. Cargando datos...");
+        viewer.src = file;
+        
+        // Verificamos si el archivo existe realmente antes de renderizar
+        const response = await fetch(file);
+        if (!response.ok) throw new Error("404");
 
-    // Forzamos el renderizado por si el componente se quedó "dormido"
-    if (viewer.render) {
-      await viewer.render();
-      console.log("3. ¡Renderizado exitoso!");
-    }
-  }
-
-  // Ejecutamos la lógica
-  inicializarVisor();
-
-  // Captura de errores (como el temido 404)
-  document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
-    console.error("Error de Red (404/CORS):", e.detail.status);
-    document.getElementById('viewer').innerHTML = `
-      <div style="color:#d32f2f; padding:2rem; border: 1px dashed #d32f2f; border-radius:8px;">
-        <h3>⚠️ Error de carga</h3>
-        <p>No pudimos encontrar el archivo: <b>${file}</b></p>
-        <p>Asegúrate de que el bot de GitHub ya haya generado el archivo <b>.md</b> en la carpeta correcta.</p>
-      </div>`;
-  });
-</script>
+      } catch (err) {
+        console.error("Fallo en el pipeline:", err);
+        fallback.innerHTML = `<p style="color:red;">⚠️ No se pudo cargar <b>${file}</b>. <br> Verifica que el bot haya creado el archivo .md</p>`;
+      }
+    })();
+  </script>
 
   <script type="module" src="/scripts/include-teaching.js"></script>
 </body>
