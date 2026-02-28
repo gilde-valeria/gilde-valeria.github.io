@@ -1,18 +1,35 @@
 name: Org to MD Converter
 on: [push]
+
 jobs:
   convert:
     runs-on: ubuntu-latest
+    # --- PASO CRUCIAL: Permisos para que el bot pueda escribir en tu repo ---
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Trae todo el historial para evitar conflictos de push
+
       - name: Install Pandoc
-        run: sudo apt-get install pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
       - name: Run Conversion Script
         run: python3 convert_all.py
+
       - name: Commit and Push changes
         run: |
           git config --global user.name 'valeria-bot'
           git config --global user.email 'valeria@cs.research'
           git add .
-          git commit -m "Auto-convert Org to MD" || echo "No changes to commit"
-          git push
+          # Solo hace commit si hay cambios reales, para evitar que la Action falle
+          if git diff --staged --quiet; then
+            echo "No hay cambios para subir."
+          else
+            git commit -m "Auto-convert Org to MD [skip ci]"
+            git push origin main
+          fi
