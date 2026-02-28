@@ -5,6 +5,7 @@
   <title>Visor de Notas | Cómputo Concurrente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
   <script type="module" src="https://cdn.jsdelivr.net/npm/zero-md@3"></script>
 </head>
 <body>
@@ -13,61 +14,61 @@
   <main style="max-width:900px; margin:auto; padding:2rem 1rem;">
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
-    <section class="card" style="margin-top:1rem; min-height: 400px;">
-      <div id="status-debug" style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;"></div>
-      
-      <zero-md id="viewer">
+    <section class="card" style="margin-top:1rem; min-height: 500px;">
+      <zero-md id="viewer" manual-render>
         <template>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
             .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
             pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
           </style>
         </template>
+        <div id="loader" style="padding:2rem; color:#666;">⌛ Sincronizando con el servidor de notas...</div>
       </zero-md>
     </section>
   </main>
 
   <script>
-    const log = (msg) => {
-      console.log(msg);
-      document.getElementById('status-debug').innerText += " > " + msg;
-    };
-
     (async () => {
       const params = new URLSearchParams(window.location.search);
       let file = params.get('src');
       const viewer = document.getElementById('viewer');
+      const loader = document.getElementById('loader');
 
       if (!file) {
-        log("Error: No hay parámetro 'src' en la URL.");
+        loader.innerText = "⚠️ Error: Falta el parámetro 'src'.";
         return;
       }
 
-      // Normalizar: Si el usuario puso "/teoria/...", lo convertimos en "teoria/..."
-      // porque nota.html ya está dentro de /teaching/
-      const cleanFile = file.startsWith('/') ? file.substring(1) : file;
-      log(`Buscando: ${cleanFile}`);
+      // 1. Normalización basada en tu prueba exitosa
+      // Si el archivo viene como /teoria/... lo pasamos a ./teoria/...
+      let cleanPath = file;
+      if (file.startsWith('/')) {
+          cleanPath = '.' + file; 
+      } else if (!file.startsWith('./')) {
+          cleanPath = './' + file;
+      }
 
       try {
-        // 1. Prueba de existencia (Fetch)
-        log("Verificando disponibilidad del archivo...");
-        const response = await fetch(cleanFile);
+        console.log("Intentando fetch de seguridad a:", cleanPath);
+        const check = await fetch(cleanPath);
+        if (!check.ok) throw new Error(`404 - No encontrado`);
+
+        console.log("Archivo confirmado. Esperando componente...");
+        await customElements.whenDefined('zero-md');
         
-        if (response.ok) {
-          log("¡Archivo encontrado! Pasando a zero-md.");
-          await customElements.whenDefined('zero-md');
-          viewer.src = cleanFile; 
-        } else {
-          throw new Error(`Servidor respondió con ${response.status}`);
-        }
-      } catch (err) {
-        log(`FALLO: ${err.message}`);
-        viewer.innerHTML = `<div style="padding:2rem; color:red;">
-          <h3>⚠️ Error de Acceso</h3>
-          <p>El archivo <b>${cleanFile}</b> no es accesible.</p>
-          <p>Prueba abrirlo directamente: <a href="${cleanFile}">${cleanFile}</a></p>
-        </div>`;
+        // 2. Transmisión de datos al componente
+        viewer.src = cleanPath;
+        
+        // 3. Forzamos el renderizado
+        console.log("Ejecutando render()...");
+        await viewer.render();
+        
+        // Si llegamos aquí, ocultamos el loader manual si es necesario
+        console.log("¡Hecho!");
+
+      } catch (e) {
+        console.error("Fallo catastrófico:", e);
+        loader.innerHTML = `<b style="color:red;">Error de Liveness:</b> No se pudo cargar <br> <code>${cleanPath}</code>`;
       }
     })();
   </script>
