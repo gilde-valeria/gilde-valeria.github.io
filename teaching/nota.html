@@ -14,45 +14,50 @@
   <main style="max-width:900px; margin:auto; padding:2rem 1rem;">
     <a href="index.html" style="text-decoration:none; color:gray; font-size:0.9rem;">← Volver al índice</a>
     
-    <section class="card" style="margin-top:1rem;">
-      <zero-md id="viewer">
+    <section class="card" style="margin-top:1rem; min-height: 400px;">
+      <zero-md id="viewer" manual-render>
         <template>
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css">
           <style>
-            .markdown-body { 
-              padding: 1rem; 
-              font-family: 'General Sans', sans-serif; 
-            }
-            /* Estilo para bloques de código */
-            pre { background: #f6f8fa; border-radius: 8px; padding: 16px; overflow: auto; }
+            .markdown-body { padding: 2rem; font-family: 'General Sans', sans-serif; }
+            pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; }
           </style>
         </template>
       </zero-md>
     </section>
-  </main>
+</main>
 
-  <div id="site-footer"></div>
-
-  <script>
-    // 1. Capturamos el archivo de la URL (?src=...)
+<script>
     const params = new URLSearchParams(window.location.search);
-    const file = params.get('src');
+    let file = params.get('src');
     const viewer = document.getElementById('viewer');
 
     if (file) {
-      console.log("Intentando cargar nota desde:", file);
-      // Seteamos el src. Importante: zero-md v3 detecta el cambio automáticamente
+      // TRUCO: Si la ruta empieza con '/', se la quitamos para que sea relativa a nota.html
+      // Esto hace que "/teoria/nota.md" se vuelva "teoria/nota.md"
+      if (file.startsWith('/')) {
+        file = file.substring(1);
+      }
+      
+      console.log("Cargando nota desde ruta relativa:", file);
+      
+      // Seteamos el archivo y forzamos el renderizado
       viewer.src = file;
+      viewer.render(); 
     } else {
-      viewer.innerHTML = "<p>⚠️ No se proporcionó ninguna nota para mostrar.</p>";
+      viewer.innerHTML = "<p>Selecciona una nota para comenzar.</p>";
     }
 
-    // Debug: Escuchar si hay errores de carga
+    // Evento de error para saber si la ruta falló
     viewer.addEventListener('zero-md-error', (e) => {
-      console.error("Error cargando el Markdown:", e.detail.status);
-      alert("No se pudo encontrar el archivo: " + file + "\nVerifica que el bot de GitHub ya lo haya creado.");
+      console.error("Error 404: No se encontró el archivo en:", file);
+      viewer.innerHTML = `<div style="color:red; padding:2rem;">
+        <h3>⚠️ Error 404</h3>
+        <p>No se pudo encontrar el archivo: <b>${file}</b></p>
+        <p>Verifica que el nombre coincida exactamente (mayúsculas/minúsculas) en tu repositorio.</p>
+      </div>`;
     });
-  </script>
+</script>
 
   <script type="module" src="/scripts/include-teaching.js"></script>
 </body>
