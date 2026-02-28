@@ -28,30 +28,45 @@
 </main>
 
 <script>
-  // 1. Esperamos a que el navegador registre el componente 'zero-md'
-  customElements.whenDefined('zero-md').then(() => {
+  // 1. Encapsulamos la lógica en una función asíncrona para manejar la espera
+  async function initViewer() {
     const params = new URLSearchParams(window.location.search);
     let file = params.get('src');
     const viewer = document.getElementById('viewer');
 
-    if (file) {
-      // Limpieza de ruta para evitar problemas con la raíz de GitHub Pages
-      if (file.startsWith('/')) {
-        file = file.substring(1);
-      }
-
-      console.log("Cargando nota desde:", file);
-
-      // En la v3 de zero-md, cambiar el atributo 'src' dispara el render automáticamente
-      viewer.setAttribute('src', file);
-    } else {
-      viewer.innerHTML = "<p>⚠️ Por favor, selecciona una nota del índice.</p>";
+    if (!file) {
+      viewer.innerHTML = "<p>⚠️ No se especificó ninguna nota. Regresa al índice.</p>";
+      return;
     }
-  });
 
-  // Listener de errores (este puede vivir fuera)
+    // Limpieza de ruta (Path normalization)
+    if (file.startsWith('/')) {
+      file = file.substring(1);
+    }
+
+    console.log("Esperando a que zero-md esté definido...");
+    
+    // 2. BARRERA DE SINCRONIZACIÓN: 
+    // No avanzamos hasta que el navegador reconozca el componente zero-md
+    await customElements.whenDefined('zero-md');
+
+    console.log("Componente listo. Cargando:", file);
+
+    // 3. Asignamos el archivo y renderizamos
+    viewer.setAttribute('src', file);
+    
+    // En zero-md v3, esto asegura que el contenido se dibuje
+    if (typeof viewer.render === 'function') {
+      viewer.render();
+    }
+  }
+
+  // Ejecutamos la función
+  initViewer();
+
+  // Listener para errores de red (404)
   document.getElementById('viewer').addEventListener('zero-md-error', (e) => {
-    console.error("Error cargando el archivo Markdown. Revisa la ruta.");
+    console.error("Error 404: El archivo no existe en la ruta especificada.");
   });
 </script>
 
