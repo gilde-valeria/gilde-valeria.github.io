@@ -1,41 +1,26 @@
-name: Org to MD Converter
-on: 
-  push:
-    branches:
-      - main # O el nombre de tu rama principal
-
-# Esto evita que los builds se cancelen entre sí de forma brusca
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false 
+name: Emacs ox-publish
+on: [push]
 
 jobs:
-  convert:
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Install Pandoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
+      - name: Install Emacs
+        run: sudo apt-get update && sudo apt-get install -y emacs-nox
 
-      - name: Run Conversion Script
-        run: python3 convert_all.py
+      - name: Publish Org to HTML
+        run: emacs --batch --load publish.el --funcall org-publish-all
 
-      - name: Commit and Push changes
+      - name: Commit and Push
         run: |
           git config --global user.name 'valeria-bot'
           git config --global user.email 'valeria@cs.research'
           git add .
           if git diff --staged --quiet; then
-            echo "Sin cambios detectados."
+            echo "Sin cambios."
           else
-            git commit -m "docs: auto-convert org to md [skip ci]"
-            git push origin HEAD:${{ github.ref }}
+            git commit -m "docs: emacs-publish [skip ci]"
+            git push origin main
           fi
