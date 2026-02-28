@@ -1,17 +1,24 @@
 name: Org to MD Converter
-on: [push]
+on: 
+  push:
+    branches:
+      - main # O el nombre de tu rama principal
+
+# Esto evita que los builds se cancelen entre sí de forma brusca
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false 
 
 jobs:
   convert:
     runs-on: ubuntu-latest
-    # --- PASO CRUCIAL: Permisos para que el bot pueda escribir en tu repo ---
     permissions:
       contents: write
       
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Trae todo el historial para evitar conflictos de push
+          fetch-depth: 0
 
       - name: Install Pandoc
         run: |
@@ -26,10 +33,9 @@ jobs:
           git config --global user.name 'valeria-bot'
           git config --global user.email 'valeria@cs.research'
           git add .
-          # Solo hace commit si hay cambios reales, para evitar que la Action falle
           if git diff --staged --quiet; then
-            echo "No hay cambios para subir."
+            echo "Sin cambios detectados."
           else
-            git commit -m "Auto-convert Org to MD [skip ci]"
-            git push origin main
+            git commit -m "docs: auto-convert org to md [skip ci]"
+            git push origin HEAD:${{ github.ref }}
           fi
