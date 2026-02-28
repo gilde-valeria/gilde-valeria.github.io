@@ -14,13 +14,19 @@ jobs:
         run: emacs -Q --batch --load publish.el --funcall org-publish-all
 
       - name: Commit and Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name 'valeria-bot'
           git config --global user.email 'valeria@cs.research'
+          
+          # Forzamos la URL con el token para evitar el error 128
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          
           git add .
           if git diff --staged --quiet; then
-            echo "Sin cambios."
+            echo "Sin cambios detectados."
           else
-            git commit -m "docs: emacs-publish [skip ci]"
+            git commit -m "docs: emacs-publish update [skip ci]"
             git push origin main
           fi
