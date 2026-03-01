@@ -4,11 +4,20 @@ on: [push]
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # ESTO ES LO QUE FALTA: Permisos explícitos para escribir en el repo
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4 # Actualizado a v4
+        with:
+          fetch-depth: 0 # Evita errores de "shallow clone" al empujar cambios
 
       - name: Install Emacs
-        run: sudo apt-get update && sudo apt-get install -y emacs-nox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y emacs-nox
 
       - name: Publish Org to HTML
         run: emacs -Q --batch --load publish.el --funcall org-publish-all
@@ -17,16 +26,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name 'valeria-bot'
-          git config --global user.email 'valeria@cs.research'
-          
-          # Forzamos la URL con el token para evitar el error 128
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           git add .
+          
+          # Verificamos si hay cambios antes de intentar el commit
           if git diff --staged --quiet; then
             echo "Sin cambios detectados."
           else
             git commit -m "docs: emacs-publish update [skip ci]"
-            git push origin main
+            # Usamos el token de forma segura sin reconfigurar el remote manualmente
+            git push origin HEAD:main
           fi
