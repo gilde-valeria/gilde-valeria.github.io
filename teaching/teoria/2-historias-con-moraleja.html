@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-03-01 Sun 22:39 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>La Fábula de las Banderas: El ABC de la Exclusión Mutua</title>
+<meta name="generator" content="Org Mode" />
+<link rel='stylesheet' href='../../styles.css'>
+                         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
+                         <style>
+                           body { font-family: 'General Sans', sans-serif; background-color: var(--bg-color); }
+                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+                           pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
+                           .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
+                         </style>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../"> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><header id="top" class="status">
+<div id='site-navbar'></div>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">La Fábula de las Banderas: El ABC de la Exclusión Mutua</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org5493b76">1. El Problema: El Patio, el Gato y el Perro</a>
+<ul>
+<li><a href="#org57121e2">Las Reglas del Juego (Restricciones de Comunicación)</a></li>
+</ul>
+</li>
+<li><a href="#orgd9ae4d6">2. El Protocolo de Banderas</a>
+<ul>
+<li><a href="#orgea6b352">El Protocolo de Alice (El Gato)</a></li>
+<li><a href="#orgfaa8bd4">El Protocolo de Bob (El Perro)</a></li>
+</ul>
+</li>
+<li><a href="#orgbae6578">3. Análisis de Seguridad (Safety)</a>
+<ul>
+<li><a href="#org37e29ac">Teorema: Exclusión Mutua</a></li>
+</ul>
+</li>
+<li><a href="#orgf5cc364">4. Análisis de Viveza (Liveness)</a>
+<ul>
+<li><a href="#orgefe4ea5">¿Hay Deadlock? (Punto muerto)</a></li>
+<li><a href="#orgb6c7a88">¿Hay Starvation? (Inanición)</a></li>
+<li><a href="#org8a84c03">El talón de Aquiles: Tolerancia a Fallos</a></li>
+</ul>
+</li>
+<li><a href="#org07e0b7e">5. Conclusión: El Modelo SWMR</a></li>
+</ul>
+</div>
+</nav>
+
+<section id="outline-container-org5493b76" class="outline-2">
+<h2 id="org5493b76">1. El Problema: El Patio, el Gato y el Perro</h2>
+<div class="outline-text-2" id="text-org5493b76">
+<p>
+Para entender cómo se coordinan dos procesos, imaginemos a dos vecinos, <b>Alice</b> y <b>Bob</b>, que comparten un patio. El problema es sencillo pero crítico:
+</p>
+<ul class="org-ul">
+<li><b><b>Alice</b></b> tiene un gato.</li>
+<li><b><b>Bob</b></b> tiene un perro.</li>
+<li><b><b>Restricción:</b></b> El gato y el perro no se llevan bien. Si coinciden en el patio, ¡caos total!</li>
+</ul>
+</div>
+
+<div id="outline-container-org57121e2" class="outline-3">
+<h3 id="org57121e2">Las Reglas del Juego (Restricciones de Comunicación)</h3>
+<div class="outline-text-3" id="text-org57121e2">
+<p>
+Para que esto sea un problema de computación real, añadimos restricciones:
+</p>
+<ol class="org-ol">
+<li>No pueden verse (el patio es enorme).</li>
+<li>No pueden gritarse (están lejos).</li>
+<li><b><b>Solo hay banderas:</b></b> Cada uno tiene una bandera en su ventana que el otro puede ver. Esto representa <b><b>bits en memoria compartida</b></b>.</li>
+</ol>
+
+
+<figure id="org81aca00">
+<img src="../../images/pets_fable.png" alt="pets_fable.png">
+
+</figure>
+</div>
+</div>
+</section>
+
+<section id="outline-container-orgd9ae4d6" class="outline-2">
+<h2 id="orgd9ae4d6">2. El Protocolo de Banderas</h2>
+<div class="outline-text-2" id="text-orgd9ae4d6">
+<p>
+¿Cómo evitar que choquen usando solo banderas? Aquí está el primer intento de algoritmo:
+</p>
+</div>
+
+<div id="outline-container-orgea6b352" class="outline-3">
+<h3 id="orgea6b352">El Protocolo de Alice (El Gato)</h3>
+<div class="outline-text-3" id="text-orgea6b352">
+<ol class="org-ol">
+<li>Levanto mi bandera.</li>
+<li>Miro la ventana de Bob. Si su bandera está <b><b>abajo</b></b>, dejo salir al gato.</li>
+<li>Cuando el gato regrese, bajo mi bandera.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgfaa8bd4" class="outline-3">
+<h3 id="orgfaa8bd4">El Protocolo de Bob (El Perro)</h3>
+<div class="outline-text-3" id="text-orgfaa8bd4">
+<ol class="org-ol">
+<li>Levanto mi bandera.</li>
+<li>Miro la ventana de Alice. Si su bandera está <b><b>arriba</b></b>:
+<ul class="org-ul">
+<li>Bajo mi bandera (cedo el paso).</li>
+<li>Espero a que la bandera de Alice baje.</li>
+<li>Levanto mi bandera y repito el chequeo.</li>
+</ul></li>
+<li>Si su bandera está abajo, dejo salir al perro.</li>
+<li>Al volver, bajo mi bandera.</li>
+</ol>
+</div>
+</div>
+</section>
+
+<section id="outline-container-orgbae6578" class="outline-2">
+<h2 id="orgbae6578">3. Análisis de Seguridad (Safety)</h2>
+<div class="outline-text-2" id="text-orgbae6578">
+<p>
+¿Funciona? Lo primero es garantizar que <b><b>nunca estén juntos en el patio</b></b>. 
+</p>
+</div>
+
+<div id="outline-container-org37e29ac" class="outline-3">
+<h3 id="org37e29ac">Teorema: Exclusión Mutua</h3>
+<div class="outline-text-3" id="text-org37e29ac">
+<p>
+El algoritmo satisface la exclusión mutua. 
+</p>
+<ul class="org-ul">
+<li><b>Prueba por contradicción:</b> Si ambos estuvieran dentro, Alice debió ver la bandera de Bob abajo, y Bob debió ver la de Alice abajo. Pero para que Alice entre, su bandera ya debe estar arriba. Bob, al verla arriba, por protocolo <b><b>está obligado a bajar la suya y esperar</b></b>. Es imposible que ambos vean la bandera del otro abajo simultáneamente después de haber levantado la propia.</li>
+</ul>
+
+
+<figure id="org3cee6da">
+<img src="../../teaching/practicas/1-intro--multihilos/img/LINExample.jpg" alt="LINExample.jpg">
+
+</figure>
+</div>
+</div>
+</section>
+
+<section id="outline-container-orgf5cc364" class="outline-2">
+<h2 id="orgf5cc364">4. Análisis de Viveza (Liveness)</h2>
+<div class="outline-text-2" id="text-orgf5cc364">
+<p>
+Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real.
+</p>
+</div>
+
+<div id="outline-container-orgefe4ea5" class="outline-3">
+<h3 id="orgefe4ea5">¿Hay Deadlock? (Punto muerto)</h3>
+<div class="outline-text-3" id="text-orgefe4ea5">
+<p>
+<b>Pregunta para el lector:</b> Si ambos levantan la bandera al mismo tiempo, ¿se quedan trabados para siempre?
+</p>
+<ul class="org-ul">
+<li><b><b>Respuesta:</b></b> No. Bob es "educado". Si ve conflicto, baja su bandera y permite que Alice pase. El sistema siempre progresa.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb6c7a88" class="outline-3">
+<h3 id="orgb6c7a88">¿Hay Starvation? (Inanición)</h3>
+<div class="outline-text-3" id="text-orgb6c7a88">
+<p>
+<b>Pregunta para el lector:</b> Si Alice es muy egoísta y siempre quiere sacar al gato, ¿podría Bob quedarse esperando para siempre?
+</p>
+<ul class="org-ul">
+<li><b><b>Respuesta:</b></b> En teoría, una vez que Alice baja su bandera para meter al gato, hay una ventana de tiempo donde Bob puede levantar la suya y ganar el acceso. Sin embargo, si Alice es infinitamente rápida, Bob podría tener mala suerte.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org8a84c03" class="outline-3">
+<h3 id="org8a84c03">El talón de Aquiles: Tolerancia a Fallos</h3>
+<div class="outline-text-3" id="text-org8a84c03">
+<p>
+<b>Escenario de terror:</b> Alice levanta su bandera y, justo antes de salir al patio, ¡se queda dormida (su proceso falla/hace crash)!
+</p>
+<ul class="org-ul">
+<li><b><b>Resultado:</b></b> Su bandera se queda arriba para siempre.</li>
+<li><b><b>Consecuencia para Bob:</b></b> Bob verá la bandera de Alice arriba perpetuamente, bajará la suya y esperará&#x2026; <b>por toda la eternidad</b>.</li>
+</ul>
+
+<p>
+<b>Moraleja:</b> Este algoritmo <b><b>no es tolerante a fallos</b></b>. La caída de un hilo bloquea a los demás.
+</p>
+</div>
+</div>
+</section>
+
+<section id="outline-container-org07e0b7e" class="outline-2">
+<h2 id="org07e0b7e">5. Conclusión: El Modelo SWMR</h2>
+<div class="outline-text-2" id="text-org07e0b7e">
+<p>
+Este pequeño ejercicio nos muestra el poder de las variables <b><b>SWMR</b></b> (Single-Writer, Multi-Reader). 
+</p>
+<ul class="org-ul">
+<li>Solo Alice escribe su bandera.</li>
+<li>Solo Bob escribe su bandera.</li>
+<li>Ambos pueden leer la del otro.</li>
+</ul>
+
+<p>
+Este es el nivel más básico de coordinación en hardware. En las siguientes notas, veremos cómo mejorar esto para que sea <b><b>Wait-free</b></b> (que nadie tenga que esperar, incluso si otros fallan).
+</p>
+
+<p>
+&#x2014;
+</p>
+
+<ul class="org-ul">
+<li><a href="1-intro-que-porque-paraque.md">¿Qué es la computación concurrente?</a></li>
+<li><a href="2-historias-con-moraleja.md">Alice y Bob: El problema de la interferencia</a></li>
+<li><a href="3-linearizabilidad-vs-sc.md">Linearizabilidad: ¿Cómo evitar el choque de mascotas?</a></li>
+</ul>
+</div>
+</section>
+</main>
+<footer id="postamble" class="status">
+<div id='site-footer'></div>
+                              <script type='module' src='/scripts/include-teaching.js'></script>
+</footer>
+</body>
+</html>
