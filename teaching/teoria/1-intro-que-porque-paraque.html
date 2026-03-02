@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2026-03-01 Sun 22:39 -->
+<!-- 2026-03-02 Mon 20:37 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>¿Qué es la Concurrencia? Origen, Propósito y Definición</title>
@@ -9,8 +9,19 @@
 <link rel='stylesheet' href='../../styles.css'>
                          <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
                          <style>
-                           body { font-family: 'General Sans', sans-serif; background-color: var(--bg-color); }
-                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+                           body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
+                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
+                           
+                           /* FIX: Control de imágenes para que no desborden */
+                           img { 
+                             max-width: 100%; 
+                             height: auto; 
+                             display: block; 
+                             margin: 1.5rem auto; 
+                             border-radius: 8px;
+                             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                           }
+
                            pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
                            .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
                          </style>
@@ -30,26 +41,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgaa9d369">1. ¿Qué es la Concurrencia?</a></li>
-<li><a href="#orgf65acd1">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
+<li><a href="#org604a3bb">1. ¿Qué es la Concurrencia?</a></li>
+<li><a href="#org67af891">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
 <ul>
-<li><a href="#org912ba37">El Origen (1961 - Atlas Computer)</a></li>
-<li><a href="#org078d469">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
-<li><a href="#org6bb5187">¿Multicore, Multiprocesador y Multihilo?</a></li>
+<li><a href="#org134ae00">El Origen (1961 - Atlas Computer)</a></li>
+<li><a href="#orgb6b85e3">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
+<li><a href="#orgdb634f2">¿Multicore, Multiprocesador y Multihilo?</a></li>
 </ul>
 </li>
-<li><a href="#org1746513">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
+<li><a href="#orgec4a551">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
 <ul>
-<li><a href="#orgee200c7">La Diferencia de Enfoque</a></li>
+<li><a href="#orgbc7afed">La Diferencia de Enfoque</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
-<section id="outline-container-orgaa9d369" class="outline-2">
-<h2 id="orgaa9d369">1. ¿Qué es la Concurrencia?</h2>
-<div class="outline-text-2" id="text-orgaa9d369">
+<section id="outline-container-org604a3bb" class="outline-2">
+<h2 id="org604a3bb">1. ¿Qué es la Concurrencia?</h2>
+<div class="outline-text-2" id="text-org604a3bb">
 <p>
 Coordinar agentes en presencia de adversarios.
 </p>
@@ -65,13 +76,13 @@ Coordinar agentes en presencia de adversarios.
 </div>
 </section>
 
-<section id="outline-container-orgf65acd1" class="outline-2">
-<h2 id="orgf65acd1">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
-<div class="outline-text-2" id="text-orgf65acd1">
+<section id="outline-container-org67af891" class="outline-2">
+<h2 id="org67af891">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
+<div class="outline-text-2" id="text-org67af891">
 </div>
-<div id="outline-container-org912ba37" class="outline-3">
-<h3 id="org912ba37">El Origen (1961 - Atlas Computer)</h3>
-<div class="outline-text-3" id="text-org912ba37">
+<div id="outline-container-org134ae00" class="outline-3">
+<h3 id="org134ae00">El Origen (1961 - Atlas Computer)</h3>
+<div class="outline-text-3" id="text-org134ae00">
 <p>
 La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
 </p>
@@ -82,9 +93,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </div>
 
 
-<div id="outline-container-org078d469" class="outline-3">
-<h3 id="org078d469">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
-<div class="outline-text-3" id="text-org078d469">
+<div id="outline-container-orgb6b85e3" class="outline-3">
+<h3 id="orgb6b85e3">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
+<div class="outline-text-3" id="text-orgb6b85e3">
 <p>
 ¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
 </p>
@@ -96,9 +107,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </div>
 </div>
 
-<div id="outline-container-org6bb5187" class="outline-3">
-<h3 id="org6bb5187">¿Multicore, Multiprocesador y Multihilo?</h3>
-<div class="outline-text-3" id="text-org6bb5187">
+<div id="outline-container-orgdb634f2" class="outline-3">
+<h3 id="orgdb634f2">¿Multicore, Multiprocesador y Multihilo?</h3>
+<div class="outline-text-3" id="text-orgdb634f2">
 <p>
 Aunque a menudo se confunden, representan distintos niveles de integración y formas de gestionar los recursos del hardware.
 </p>
@@ -276,9 +287,9 @@ Cachés: A medida que avanzamos, la caché se vuelve más compleja. En multicore
 </div>
 </section>
 
-<section id="outline-container-org1746513" class="outline-2">
-<h2 id="org1746513">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
-<div class="outline-text-2" id="text-org1746513">
+<section id="outline-container-orgec4a551" class="outline-2">
+<h2 id="orgec4a551">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
+<div class="outline-text-2" id="text-orgec4a551">
 <blockquote>
 <p>
 A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable.
@@ -291,9 +302,9 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 </p>
 </div>
 
-<div id="outline-container-orgee200c7" class="outline-3">
-<h3 id="orgee200c7">La Diferencia de Enfoque</h3>
-<div class="outline-text-3" id="text-orgee200c7">
+<div id="outline-container-orgbc7afed" class="outline-3">
+<h3 id="orgbc7afed">La Diferencia de Enfoque</h3>
+<div class="outline-text-3" id="text-orgbc7afed">
 <ul class="org-ul">
 <li><b><b>Cómputo Paralelo:</b></b> Busca <b><b>Eficiencia</b></b>. Es un entorno "amigable" donde dividimos una tarea para terminar antes (ej. multiplicar matrices).</li>
 <li><b><b>Cómputo Distribuido:</b></b> Busca <b><b>Coordinación</b></b>. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.</li>
@@ -301,7 +312,7 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 
 
 
-<figure id="org251a841">
+<figure id="orge7ac6a4">
 <img src="../../images/procesador_atomic.png" alt="procesador_atomic.png">
 
 </figure>
