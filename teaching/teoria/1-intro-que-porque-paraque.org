@@ -8,16 +8,24 @@ Coordinar agentes en presencia de adversarios.
 - *Agente:* hilos en un procesador, nodos en una red, entre otros.
 - *Coordinar:* para resolver un problema (llegar a un acuerdo, usar un recurso compartido, comunicarse)
 - *Adversarios*:
+
 -- **Asincronía:** Un hilo/nodo puede ser infinitamente lento y otro inifinitamente rapido.
+
 -- **Fallos:** Un agente puede morir (crash) o mentir y corromper (fallas bizantinas).
 
 * 2. Un Poco de Historia: De la Necesidad a la Disciplina
 ** El Origen (1961 - Atlas Computer)
+
 La concurrencia nació bajo el nombre de *Multiprogramming* en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
+
 - **Objetivo original:** No era ir más rápido, sino **no desperdiciar el CPU**. Mientras un proceso esperaba por la lectura de una cinta magnética (I/O), el CPU saltaba a otro proceso.
+
+[[file:../../images/STvsMT_CPU.png]]
+
 
 
 ** La Evolución Forzada (El fin de la fiesta del silicio)
+
 ¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
 1. **Power Wall:** No pudimos aumentar más la frecuencia de reloj sin derretir los chips (No existen maquinas 100% eficiencientes).
 2. *Auge de las Redes de Computadoras*: Redes Celulares como 4G, 5G, redes inalambricas como BT, WiFi, tecnologias de IoT y la necesidad de distribuir la informacion.
@@ -37,6 +45,9 @@ El multihilo busca que un solo procesador físico no se quede ocioso. Para logra
 
 Ejemplo: Denelcor HEP (1982) y más tarde el Tera MTA (1990).
 
+[[file:../../images/MultithreadComparison.png]]
+
+
 - Multihilo Simultáneo (SMT - 2002): Es la evolución donde las instrucciones de varios hilos pueden estar en la ALU al mismo tiempo en un solo ciclo de reloj.
 
 ¿Por qué no se podía antes? Antes de SMT, la lógica de despacho (issue logic) del procesador estaba diseñada para seleccionar instrucciones de un solo hilo por ciclo. Aunque hubiera varios contextos de hardware, el "embudo" del pipeline solo aceptaba un flujo a la vez. SMT rediseñó esta lógica para mezclar instrucciones de distintos hilos y llenar los huecos de las unidades de ejecución.
@@ -54,6 +65,9 @@ En lugar de compartir una sola ALU entre varios hilos, el Multicore coloca vario
 - Evolución: Surgió cuando el Power Wall impidió seguir subiendo la velocidad de un solo núcleo. Era más eficiente poner dos núcleos "lentos" que uno solo "muy caliente".
 
 Ejemplo: IBM Power4 (2001), el primer procesador de doble núcleo en un solo chip de alto rendimiento.
+
+[[file:../../images/MulticoreVsMultiprocessor.png]]
+
 
 -- C. Multiprocesador: La unión externa
 
