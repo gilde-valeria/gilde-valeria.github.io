@@ -75,6 +75,8 @@ Es el nivel más alto de escala. Se refiere a tener múltiples chips físicos (s
 
 Diferencia clave: Mientras que en el Multicore la comunicación entre núcleos es rapidísima porque están en el mismo silicio, en un Multiprocesador tradicional la comunicación viaja por cables o pistas de la placa base, lo que introduce más latencia.
 
+#+CAPTION: Evolución de las Arquitecturas de Cómputo
+#+ATTR_HTML: :class responsive-table
 | Arquitectura | Fecha Aprox. | Ejemplo de Máquina | Cambio en ALU | Cambio en CPU | Gestión de Caché | Punto de Unión |
 |--------------+--------------+--------------------+---------------+---------------+------------------+----------------|
 | Coarse-Grain | 1954 / 1964 | CDC 6600 | Compartida | 1 core, 1 hilo activo | Compartida | Pipeline (Latencia larga) |
