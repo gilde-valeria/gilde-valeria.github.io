@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2026-03-02 Mon 22:00 -->
+<!-- 2026-03-03 Tue 19:24 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>¿Qué es la Concurrencia? Origen, Propósito y Definición</title>
@@ -12,14 +12,36 @@
                            body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
                            #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
                            
-                           /* FIX: Control de imágenes para que no desborden */
-                           img { 
-                             max-width: 100%; 
-                             height: auto; 
-                             display: block; 
-                             margin: 1.5rem auto; 
+                           /* IMÁGENES RESPONSIVAS */
+                           img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; }
+
+                           /* TABLAS ESTILO ACADÉMICO */
+                           table {
+                             width: 100%;
+                             border-collapse: collapse;
+                             margin: 2rem 0;
+                             font-size: 0.95rem;
                              border-radius: 8px;
-                             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                             overflow: hidden;
+                             box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+                           }
+                           th { background-color: var(--miPink, #ff4b82); color: white; text-align: left; padding: 12px 15px; }
+                           td { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; }
+                           tr:nth-of-type(even) { background-color: #f9f9f9; }
+                           tr:last-of-type { border-bottom: 2px solid var(--miPink, #ff4b82); }
+
+                           /* MODO CELULAR: Las tablas se vuelven verticales */
+                           @media screen and (max-width: 600px) {
+                             table, thead, tbody, th, td, tr { display: block; }
+                             thead tr { position: absolute; top: -9999px; left: -9999px; }
+                             tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
+                             td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 50%; text-align: right; }
+                             td:before { 
+                               position: absolute; top: 12px; left: 15px; width: 45%; 
+                               padding-right: 10px; white-space: nowrap; font-weight: bold;
+                               content: attr(data-th); /* Requiere un pequeño hack en el exportador */
+                               text-align: left;
+                             }
                            }
 
                            pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
@@ -41,26 +63,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org34ef132">1. ¿Qué es la Concurrencia?</a></li>
-<li><a href="#orgf5281d7">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
+<li><a href="#org8543076">1. ¿Qué es la Concurrencia?</a></li>
+<li><a href="#orga74db02">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
 <ul>
-<li><a href="#org67d579f">El Origen (1961 - Atlas Computer)</a></li>
-<li><a href="#org1135071">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
-<li><a href="#org667da8d">¿Multicore, Multiprocesador y Multihilo?</a></li>
+<li><a href="#orgc1cca39">El Origen (1961 - Atlas Computer)</a></li>
+<li><a href="#orgdcaf035">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
+<li><a href="#org99a3264">¿Multicore, Multiprocesador y Multihilo?</a></li>
 </ul>
 </li>
-<li><a href="#orgf5aab22">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
+<li><a href="#org0ac2a62">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
 <ul>
-<li><a href="#org249586b">La Diferencia de Enfoque</a></li>
+<li><a href="#orgb95c9e2">La Diferencia de Enfoque</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
-<section id="outline-container-org34ef132" class="outline-2">
-<h2 id="org34ef132">1. ¿Qué es la Concurrencia?</h2>
-<div class="outline-text-2" id="text-org34ef132">
+<section id="outline-container-org8543076" class="outline-2">
+<h2 id="org8543076">1. ¿Qué es la Concurrencia?</h2>
+<div class="outline-text-2" id="text-org8543076">
 <p>
 Coordinar agentes en presencia de adversarios.
 </p>
@@ -80,13 +102,13 @@ Coordinar agentes en presencia de adversarios.
 </div>
 </section>
 
-<section id="outline-container-orgf5281d7" class="outline-2">
-<h2 id="orgf5281d7">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
-<div class="outline-text-2" id="text-orgf5281d7">
+<section id="outline-container-orga74db02" class="outline-2">
+<h2 id="orga74db02">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
+<div class="outline-text-2" id="text-orga74db02">
 </div>
-<div id="outline-container-org67d579f" class="outline-3">
-<h3 id="org67d579f">El Origen (1961 - Atlas Computer)</h3>
-<div class="outline-text-3" id="text-org67d579f">
+<div id="outline-container-orgc1cca39" class="outline-3">
+<h3 id="orgc1cca39">El Origen (1961 - Atlas Computer)</h3>
+<div class="outline-text-3" id="text-orgc1cca39">
 <p>
 La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
 </p>
@@ -96,7 +118,7 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </ul>
 
 
-<figure id="orgc35ab3a">
+<figure id="org97f12b7">
 <img src="../../images/STvsMT_CPU.png" alt="STvsMT_CPU.png">
 
 </figure>
@@ -105,9 +127,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 
 
 
-<div id="outline-container-org1135071" class="outline-3">
-<h3 id="org1135071">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
-<div class="outline-text-3" id="text-org1135071">
+<div id="outline-container-orgdcaf035" class="outline-3">
+<h3 id="orgdcaf035">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
+<div class="outline-text-3" id="text-orgdcaf035">
 <p>
 ¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
 </p>
@@ -119,9 +141,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </div>
 </div>
 
-<div id="outline-container-org667da8d" class="outline-3">
-<h3 id="org667da8d">¿Multicore, Multiprocesador y Multihilo?</h3>
-<div class="outline-text-3" id="text-org667da8d">
+<div id="outline-container-org99a3264" class="outline-3">
+<h3 id="org99a3264">¿Multicore, Multiprocesador y Multihilo?</h3>
+<div class="outline-text-3" id="text-org99a3264">
 <p>
 Aunque a menudo se confunden, representan distintos niveles de integración y formas de gestionar los recursos del hardware.
 </p>
@@ -145,7 +167,7 @@ Ejemplo: Denelcor HEP (1982) y más tarde el Tera MTA (1990).
 </p>
 
 
-<figure id="org1284b57">
+<figure id="org1fb92f9">
 <img src="../../images/MultithreadComparison.png" alt="MultithreadComparison.png">
 
 </figure>
@@ -184,7 +206,7 @@ Ejemplo: IBM Power4 (2001), el primer procesador de doble núcleo en un solo chi
 </p>
 
 
-<figure id="org7465876">
+<figure id="org6c227b0">
 <img src="../../images/MulticoreVsMultiprocessor.png" alt="MulticoreVsMultiprocessor.png">
 
 </figure>
@@ -202,8 +224,8 @@ Es el nivel más alto de escala. Se refiere a tener múltiples chips físicos (s
 Diferencia clave: Mientras que en el Multicore la comunicación entre núcleos es rapidísima porque están en el mismo silicio, en un Multiprocesador tradicional la comunicación viaja por cables o pistas de la placa base, lo que introduce más latencia.
 </p>
 
-<table>
-
+<table class="responsive-table">
+<caption class="t-above"><span class="table-number">Table 1:</span> Evolución de las Arquitecturas de Cómputo</caption>
 
 <colgroup>
 <col  class="org-left">
@@ -313,9 +335,9 @@ Cachés: A medida que avanzamos, la caché se vuelve más compleja. En multicore
 </div>
 </section>
 
-<section id="outline-container-orgf5aab22" class="outline-2">
-<h2 id="orgf5aab22">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
-<div class="outline-text-2" id="text-orgf5aab22">
+<section id="outline-container-org0ac2a62" class="outline-2">
+<h2 id="org0ac2a62">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
+<div class="outline-text-2" id="text-org0ac2a62">
 <blockquote>
 <p>
 A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable.
@@ -328,9 +350,9 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 </p>
 </div>
 
-<div id="outline-container-org249586b" class="outline-3">
-<h3 id="org249586b">La Diferencia de Enfoque</h3>
-<div class="outline-text-3" id="text-org249586b">
+<div id="outline-container-orgb95c9e2" class="outline-3">
+<h3 id="orgb95c9e2">La Diferencia de Enfoque</h3>
+<div class="outline-text-3" id="text-orgb95c9e2">
 <ul class="org-ul">
 <li><b><b>Cómputo Paralelo:</b></b> Busca <b><b>Eficiencia</b></b>. Es un entorno "amigable" donde dividimos una tarea para terminar antes (ej. multiplicar matrices).</li>
 <li><b><b>Cómputo Distribuido:</b></b> Busca <b><b>Coordinación</b></b>. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.</li>
@@ -338,7 +360,7 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 
 
 
-<figure id="org8d43970">
+<figure id="org389b8a9">
 <img src="../../images/procesador_atomic.png" alt="procesador_atomic.png">
 
 </figure>
