@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2026-03-11 Wed 20:54 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Distintos sabores de corrección</title>
+<meta name="author" content="Valeria" />
+<meta name="generator" content="Org Mode" />
+<link rel='stylesheet' href='../../styles.css'>
+                         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
+                         <style>
+                           body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
+                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
+                           
+                           /* IMÁGENES RESPONSIVAS */
+                           img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; }
+
+                           /* TABLAS ESTILO ACADÉMICO */
+                           table {
+                             width: 100%;
+                             border-collapse: collapse;
+                             margin: 2rem 0;
+                             font-size: 0.95rem;
+                             border-radius: 8px;
+                             overflow: hidden;
+                             box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+                           }
+                           th { background-color: var(--miPink, #ff4b82); color: white; text-align: left; padding: 12px 15px; }
+                           td { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; }
+                           tr:nth-of-type(even) { background-color: #f9f9f9; }
+                           tr:last-of-type { border-bottom: 2px solid var(--miPink, #ff4b82); }
+
+                           /* MODO CELULAR: Las tablas se vuelven verticales */
+                           @media screen and (max-width: 600px) {
+                             table, thead, tbody, th, td, tr { display: block; }
+                             thead tr { position: absolute; top: -9999px; left: -9999px; }
+                             tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
+                             td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 50%; text-align: right; }
+                             td:before { 
+                               position: absolute; top: 12px; left: 15px; width: 45%; 
+                               padding-right: 10px; white-space: nowrap; font-weight: bold;
+                               content: attr(data-th); /* Requiere un pequeño hack en el exportador */
+                               text-align: left;
+                             }
+                           }
+
+                           pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
+                           .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
+                         </style>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../"> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><header id="top" class="status">
+<div id='site-navbar'></div>
+</header>
+<main id="content" class="content">
+<header>
+<h1 class="title">Distintos sabores de corrección</h1>
+</header><nav id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org502afc7">1. Análisis de algoritmos</a></li>
+<li><a href="#org7d27c50">2. Liveness and Safety (Viveza y Seguridad)</a></li>
+<li><a href="#org280fafc">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
+<li><a href="#orge4e5f7b">4. Distintos Sabores de Contadores</a>
+<ul>
+<li><a href="#org1fed493">A. Contador Linealizable</a></li>
+<li><a href="#org3c2227b">B. Sloppy Counter (Consistencia Eventual)</a></li>
+<li><a href="#orgad4f5eb">C. Árbol de Difracción (Consistencia Quiescente)</a></li>
+</ul>
+</li>
+<li><a href="#org938d24d">5. Conclusiones</a></li>
+</ul>
+</div>
+</nav>
+
+<section id="outline-container-org502afc7" class="outline-2">
+<h2 id="org502afc7">1. Análisis de algoritmos</h2>
+<div class="outline-text-2" id="text-org502afc7">
+<p>
+Cuando aprendemos a programar, suele ser en el mundo secuencial. 
+Analizamos el número de pasos de cómputo, ciclos y condicionales. Si profundizamos, 
+comprendemos la lógica mediante técnicas como "dividir y vencer" o algoritmos "glotones", entre otros. 
+</p>
+
+<p>
+En este paradigma, determinamos si una implementación es correcta encontrando la propiedad que se
+ mantiene en cada paso: la <b>invariante</b>. Al demostrar que esta propiedad resuelve el 
+ problema, decimos que el algoritmo cumple su cometido.
+</p>
+
+<blockquote>
+<p>
+Un algoritmo es una receta; una serie de instrucciones que solucionan un problema. 
+<b>Un algoritmo concurrente es el traslape de algoritmos secuenciales.</b>
+</p>
+</blockquote>
+</div>
+</section>
+
+<section id="outline-container-org7d27c50" class="outline-2">
+<h2 id="org7d27c50">2. Liveness and Safety (Viveza y Seguridad)</h2>
+<div class="outline-text-2" id="text-org7d27c50">
+<p>
+En 1977, Leslie Lamport definió que las propiedades de los sistemas se dividen en dos:
+</p>
+<ul class="org-ul">
+<li><b>Safety (Seguridad):</b> Nada malo pasa nunca. Las invariantes son ejemplos de esto.</li>
+<li><b>Liveness (Viveza):</b> Algo bueno sucederá eventualmente.</li>
+</ul>
+
+<p>
+Toda propiedad en algoritmos concurrentes se puede describir como la 
+unión de estas dos. En el mundo paralelo, la incertidumbre sobre "cuándo" sucederá algo bueno es el núcleo del desafío.
+</p>
+
+
+<figure id="orgcfa4ea7">
+<img src="../../images/alien_thinking.png" alt="alien_thinking.png">
+
+</figure>
+</div>
+</section>
+
+
+<section id="outline-container-org280fafc" class="outline-2">
+<h2 id="org280fafc">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
+<div class="outline-text-2" id="text-org280fafc">
+<p>
+Razonar sobre la corrección de un algoritmo concurrente es un desafío. 
+Dado que es indistinguible saber en qué microsegundo exacto se ejecutó una línea de código, 
+las nociones de corrección lidian con las <b>operaciones pendientes</b>. 
+</p>
+
+<p>
+Esta transformación sigue reglas que van de más a menos estrictas, 
+intentando encontrar una historia secuencial legal a partir de una concurrente:
+</p>
+
+
+
+<ul class="org-ul">
+<li><b>Linealizabilidad (Linearizability):</b> El modelo más fuerte. Cada operación parece</li>
+</ul>
+<p>
+ocurrir de forma instantánea en un punto del <i>tiempo real</i>. 
+Es decir, debemos mantener el orden de las operaciones que ya tienen un orden de precedecia, y podemos acomodar en el orden que nos <b>convenga</b>, las 
+operaciones que son concurrentes entre sí. 
+</p>
+
+
+<figure id="org9ff135f">
+<img src="../../images/LINSiSCSi.jpg" alt="LINSiSCSi.jpg">
+
+</figure>
+
+
+<figure id="org8add77f">
+<img src="../../images/porqueesLIN.jpg" alt="porqueesLIN.jpg">
+
+</figure>
+
+
+
+<ul class="org-ul">
+<li><b>Consistencia Secuencial (Sequential Consistency):</b> Relaja el tiempo real</li>
+</ul>
+<p>
+pero respeta el <i>orden de programa</i> de cada hilo.
+</p>
+
+
+<figure id="org139e5e0">
+<img src="../../images/linNOsiSC.jpg" alt="linNOsiSC.jpg">
+
+</figure>
+
+
+<ul class="org-ul">
+<li><b>Consistencia en la Inactividad (Quiescent Consistency):</b></li>
+</ul>
+<p>
+Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
+</p>
+
+
+<figure id="orgcdedfea">
+<img src="../../images/QCvsSC.jpg" alt="QCvsSC.jpg">
+
+</figure>
+
+
+<ul class="org-ul">
+<li><b>Consistencia Eventual:</b> Si cesan las actualizaciones, todas las réplicas convergerán <i>eventualmente</i>.</li>
+</ul>
+
+
+<figure id="org5e4af57">
+<img src="../../images/QCvsEC.jpg" alt="QCvsEC.jpg">
+
+</figure>
+</div>
+</section>
+
+
+<section id="outline-container-orge4e5f7b" class="outline-2">
+<h2 id="orge4e5f7b">4. Distintos Sabores de Contadores</h2>
+<div class="outline-text-2" id="text-orge4e5f7b">
+<p>
+A continuación, analizamos tres implementaciones de contadores, desde la más estricta hasta la más relajada.
+</p>
+</div>
+
+<div id="outline-container-org1fed493" class="outline-3">
+<h3 id="org1fed493">A. Contador Linealizable</h3>
+<div class="outline-text-3" id="text-org1fed493">
+<p>
+El enfoque clásico que utiliza el hardware subyacente.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-java">import java.util.concurrent.atomic.AtomicLong;
+
+public class LinearizableCounter {
+    private final AtomicLong count = new AtomicLong(0);
+
+    public void increment() {
+        count.incrementAndGet(); 
+    }
+
+    public long fetch() {
+        return count.get();
+    }
+}
+</pre>
+</div>
+
+<p>
+<b>¿Por qué es Linealizable?</b> Porque <code>incrementAndGet()</code> es atómica. 
+Si el Hilo A y B llaman al mismo tiempo, el hardware los ordena en tiempo real. Es el nivel más alto de corrección, pero genera alta contención.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3c2227b" class="outline-3">
+<h3 id="org3c2227b">B. Sloppy Counter (Consistencia Eventual)</h3>
+<div class="outline-text-3" id="text-org3c2227b">
+<p>
+Asigna memoria privada a cada hilo y solo sincroniza cuando supera un umbral.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-java">public class SloppyCounter {
+    private final AtomicLong globalCount = new AtomicLong(0);
+    private final int threshold = 100;
+    private final ThreadLocal&lt;Long&gt; localCount = ThreadLocal.withInitial(() -&gt; 0L);
+
+    public void increment() {
+        long current = localCount.get() + 1;
+        if (current &gt;= threshold) {
+            globalCount.addAndGet(current);
+            localCount.set(0L);
+        } else {
+            localCount.set(current);
+        }
+    }
+
+    public long fetch() {
+        return globalCount.get(); 
+    }
+}
+</pre>
+</div>
+
+<p>
+<b>¿Por qué NO es Secuencial?</b> Porque rompe el orden lógico. Un hilo A podría hacer 50 incrementos y luego avisar al hilo B mediante una bandera. Si B lee el contador, verá <b>0</b> porque A no ha llegado al umbral, aunque en "tiempo real" y en "orden de programa" los incrementos ocurrieron antes.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgad4f5eb" class="outline-3">
+<h3 id="orgad4f5eb">C. Árbol de Difracción (Consistencia Quiescente)</h3>
+<div class="outline-text-3" id="text-orgad4f5eb">
+<p>
+Inspirado en Shavit, divide el tráfico mediante balanceadores.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-java">public class ShavitTreeCounter {
+    static class Node {
+        boolean isLeaf;
+        Node left, right;
+        AtomicInteger balancer = new AtomicInteger(0);
+        AtomicLong count = new AtomicLong(0);
+
+        Node() { this.isLeaf = true; }
+        Node(Node left, Node right) {
+            this.isLeaf = false;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    private final Node root;
+
+    public void increment() {
+        Node current = root;
+        while (!current.isLeaf) {
+            int route = current.balancer.getAndIncrement();
+            current = (route % 2 == 0) ? current.left : current.right;
+        }
+        current.count.incrementAndGet();
+    }
+
+    public long fetch() {
+        return sumLeaves(root);
+    }
+
+    private long sumLeaves(Node node) {
+        if (node.isLeaf) return node.count.get();
+        return sumLeaves(node.left) + sumLeaves(node.right);
+    }
+}
+</pre>
+</div>
+
+
+
+<p>
+<b>¿Por qué es Quiescente?</b> Garantiza el valor exacto solo si el sistema entra en reposo (quietud). Si se lee mientras hay movimiento, el lector puede "ver el futuro" (hojas de la derecha actualizadas) y "perderse el pasado" (hojas de la izquierda aún no leídas), rompiendo la consistencia secuencial.
+</p>
+</div>
+</div>
+</section>
+
+<section id="outline-container-org938d24d" class="outline-2">
+<h2 id="org938d24d">5. Conclusiones</h2>
+<div class="outline-text-2" id="text-org938d24d">
+<p>
+La corrección no es binaria, sino un espectro. 
+En sistemas distribuidos masivos, la consistencia fuerte es matemáticamente 
+imposible frente a particiones (Teorema CAP). Por ello, relajar nuestras 
+exigencias de corrección es la clave para alcanzar el máximo rendimiento y escalabilidad.
+</p>
+
+<div class="org-center">
+<p>
+<b>Analizar la concurrencia es, en última instancia, el arte de encontrar orden en el caos.</b>
+</p>
+</div>
+</div>
+</section>
+</main>
+<footer id="postamble" class="status">
+<div id='site-footer'></div>
+                              <script type='module' src='/scripts/include-teaching.js'></script>
+</footer>
+</body>
+</html>
