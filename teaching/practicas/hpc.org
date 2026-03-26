@@ -1,0 +1,362 @@
+#+TITLE: Práctica 6 — Paralelismo con OpenMP: Memoria Compartida, Corrección y Escalabilidad
+#+SUBTITLE: Cómputo Concurrente 2026-2
+#+AUTHOR: Profa. Gilde Valeria Rodríguez
+#+DATE: 2026
+#+LANGUAGE: es
+#+OPTIONS: toc:2 num:t ^:nil
+#+LATEX_CLASS: article
+#+LATEX_HEADER: \usepackage[margin=2.5cm]{geometry}
+#+LATEX_HEADER: \usepackage{listings}
+#+LATEX_HEADER: \usepackage{xcolor}
+
+Fecha de entrega: ________________ de 2026
+
+-----
+
+* 1. Contexto: OpenMP vs MPI
+
+Las prácticas anteriores exploraron la concurrencia dentro de una sola JVM (Práctica 1) y las
+propiedades formales de corrección de estructuras compartidas (Práctica 5). Ahora damos un paso
+hacia el /cómputo de alto rendimiento/ (HPC) en C, donde el programador elige explícitamente el
+modelo de paralelismo. Los dos estándares dominantes son *OpenMP* y *MPI*, y su diferencia
+fundamental radica en /dónde vive la memoria/.
+
+** 1.1. Modelo de memoria compartida — OpenMP
+
+OpenMP (Open Multi-Processing) opera sobre un modelo de *memoria compartida*: todos los hilos
+pertenecen al mismo proceso y ven el mismo espacio de direcciones. El paralelismo se expresa
+añadiendo /directivas de compilador/ (pragmas) al código secuencial existente; el runtime de
+OpenMP se encarga de crear y destruir los hilos automáticamente. Esto lo hace conceptualmente
+análogo a lo que ya conocen de Java: múltiples hilos accediendo a un heap compartido.
+
+| *Java (P1 y P5)*                    | *OpenMP (esta práctica)*                  |
+|-------------------------------------+-------------------------------------------|
+| =new Thread(r).start()=             | =#pragma omp parallel=                    |
+| =synchronized= / =AtomicLong=       | =#pragma omp atomic= / =critical=         |
+| =ThreadLocal<Long>=                 | =firstprivate= / =reduction=              |
+| =thread.join()=                     | barrera implícita al salir del bloque     |
+| N hilos, 1 JVM, 1 máquina           | N hilos, 1 proceso, 1 nodo               |
+
+** 1.2. Modelo de memoria distribuida — MPI
+
+MPI (Message Passing Interface) opera sobre *memoria distribuida*: cada proceso tiene su propio
+espacio de memoria privado e independiente. Para intercambiar información, los procesos deben
+enviar y recibir mensajes explícitamente (=MPI_Send=, =MPI_Recv=, =MPI_Bcast=, etc.). Esto
+permite escalar a miles de nodos en una supercomputadora, pero el programador asume toda la
+responsabilidad de la comunicación.
+
+** 1.3. La diferencia clave: corrección en memoria compartida
+
+Dado que en OpenMP todos los hilos comparten el mismo espacio de memoria, las propiedades de
+corrección que estudiaron en la Práctica 5 aplican directamente:
+
+- *Linealizabilidad:* =#pragma omp atomic= garantiza que cada operación sea indivisible,
+  equivalente a =AtomicLong.incrementAndGet()= en Java.
+- *Consistencia Eventual:* Acumular en variables privadas (=reduction= o =firstprivate=) y
+  volcar al final, análogo al =SloppyCounter=.
+- *Race Condition (sin corrección):* Acceder a una variable compartida sin sincronización,
+  equivalente al contador sin =synchronized= de la Práctica 1.
+
+En MPI, en cambio, no existe memoria compartida: cada proceso trabaja con su propia copia de los
+datos. Por esta razón, las /race conditions/ dentro de un proceso son imposibles por diseño — el
+problema de corrección se desplaza hacia la consistencia de los mensajes entre procesos.
+
+-----
+
+* 2. Conceptos Clave de OpenMP
+
+** 2.1. Directivas fundamentales
+
+- =#pragma omp parallel= — Crea una región paralela: el bloque se ejecuta simultáneamente en
+  /N/ hilos.
+- =num_threads(N)= — Especifica cuántos hilos lanzar.
+- =#pragma omp atomic= — La siguiente operación de lectura-modificación-escritura es atómica
+  (linealizable).
+- =#pragma omp critical= — Sección crítica: solo un hilo a la vez (análogo a =synchronized=).
+- =#pragma omp parallel for= — Paraleliza un bucle =for= distribuyendo iteraciones entre hilos.
+- =reduction(op:var)= — Cada hilo tiene su copia local de =var=; al terminar se combinan con
+  el operador =op= (Sloppy automático).
+- =private(x)= / =firstprivate(x)= — =x= es privada por hilo.
+- =omp_get_thread_num()= — ID del hilo actual (0 … N-1).
+- =omp_get_wtime()= — Temporizador de alta resolución (análogo a =System.nanoTime()=).
+
+** 2.2. Modelo fork-join
+
+OpenMP utiliza el modelo *fork-join*: el hilo maestro (hilo 0) ejecuta el código secuencial y
+al encontrar un =#pragma omp parallel= crea (/fork/) un equipo de hilos. Al final del bloque,
+los hilos se sincronizan en una barrera implícita y el control regresa al hilo maestro (/join/).
+Este comportamiento es equivalente a lanzar varios =Thread.start()= y esperar con =join()= al
+final de la Práctica 1.
+
+-----
+
+* 3. Ejemplo Guía: El Contador en Tres Versiones
+
+El siguiente programa demuestra las tres versiones del contador estudiadas en la Práctica 5,
+ahora implementadas en C con OpenMP.
+
+Para compilar y ejecutar:
+
+#+BEGIN_SRC bash
+gcc -O2 -fopenmp -o contador contador_openmp.c
+./contador
+#+END_SRC
+
+** Versión 1 — Race Condition (sin sincronización, análogo P1)
+
+#+BEGIN_SRC c
+/* Race Condition: read-modify-write NO atómica */
+long contador_race(void) {
+    long total = 0;
+    #pragma omp parallel num_threads(N_HILOS)
+    {
+        for (int i = 0; i < INCREMENTOS / N_HILOS; i++)
+            total++;      /* ← resultado INCORRECTO e impredecible */
+    }
+    return total;
+}
+#+END_SRC
+
+** Versión 2 — Linealizable (=#pragma omp atomic=)
+
+#+BEGIN_SRC c
+/* Linealizable: operación atómica de hardware */
+long contador_linealizable(void) {
+    long total = 0;
+    #pragma omp parallel num_threads(N_HILOS)
+    {
+        for (int i = 0; i < INCREMENTOS / N_HILOS; i++) {
+            #pragma omp atomic
+            total++;      /* ← SIEMPRE correcto, alta contención */
+        }
+    }
+    return total;
+}
+#+END_SRC
+
+** Versión 3 — Consistencia Eventual (=reduction=, análogo SloppyCounter)
+
+#+BEGIN_SRC c
+/* Consistencia Eventual: volcado al final de la región paralela */
+long contador_eventual(void) {
+    long total = 0;
+    #pragma omp parallel reduction(+:total) num_threads(N_HILOS)
+    {
+        long local = 0;
+        for (int i = 0; i < INCREMENTOS / N_HILOS; i++)
+            local++;
+        total += local;   /* volcado al final, un único atomic implícito */
+    }
+    return total;         /* correcto DESPUÉS de la barrera */
+}
+#+END_SRC
+
+La versión con =reduction= es equivalente al =SloppyCounter= con un umbral infinito (vuelca
+todo al final). Es correcta, pero un =fetch()= durante la ejecución devolvería un valor
+desactualizado — el mismo comportamiento analizado en el Ejercicio 1 de la Práctica 5.
+
+-----
+
+* 4. Contexto Avanzado: Memoria Desagregada y CXL
+
+El modelo que hemos estudiado —OpenMP para memoria compartida dentro de un nodo, MPI para
+comunicación entre nodos— asume una frontera clara: o la memoria es local (nanosegundos) o está
+en otra máquina (microsegundos a través de red). Una tecnología emergente, *CXL (Compute Express
+Link)*, está redibujando esa frontera y tiene implicaciones directas sobre el tipo de corrección
+analizado en este curso.
+
+** 4.1. ¿Qué es la memoria desagregada?
+
+La *memoria desagregada* separa físicamente los módulos de memoria de los procesadores y los
+conecta a través de un bus de alta velocidad. En lugar de que cada nodo tenga su propio banco
+de RAM soldado a la placa madre, un pool de memoria externa puede ser accedido por múltiples
+nodos. CXL es el estándar abierto que hace esto posible: construido sobre la capa física de
+PCIe, añade protocolos de coherencia de caché (=CXL.cache=, =CXL.mem=) que permiten acceder
+a esa memoria con instrucciones normales de =load=/=store=, sin modificar el código existente
+[CXL-W].
+
+** 4.2. El costo: latencia más alta
+
+El acceso a memoria CXL no es gratuito. Mediciones en hardware real reportan que mientras un
+acceso a DRAM local tarda alrededor de 100 ns, un acceso a un dispositivo CXL moderno (ASIC)
+cae en el rango de 200–300 ns, y prototipos tempranos basados en FPGA han registrado hasta
+~400 ns [SIGARCH25; SupMario24]. Esto es considerablemente mejor que acceder a la memoria
+de otro nodo a través de red (RDMA: ~1.5–3 µs), pero introduce una asimetría importante que
+los algoritmos de memoria compartida típicamente no consideran [Rcmp24].
+
+| *Tipo de acceso*               | *Latencia típica*    | *Relevancia para el curso*          |
+|--------------------------------+----------------------+-------------------------------------|
+| DRAM local (L3 miss)           | ~100 ns              | Base de OpenMP en un nodo           |
+| Memoria CXL (ASIC moderno)     | ~200–300 ns          | Memoria compartida entre nodos      |
+| NUMA remoto (mismo servidor)   | ~140–410 ns          | Comparable a CXL en la práctica     |
+| RDMA sobre red                 | ~1,500–3,000 ns      | Base de MPI entre nodos             |
+
+Fuentes: [SIGARCH25], [Rcmp24], [SupMario24].
+
+** 4.3. Relación con OpenMP: coherencia garantizada, rendimiento asimétrico
+
+CXL mantiene coherencia de caché entre el procesador y la memoria externa mediante sus
+protocolos =CXL.cache= y =CXL.mem= [CXL-W]. Esto significa que un programa OpenMP existente
+puede usar memoria CXL con las mismas garantías de corrección que ya conocen: los
+=#pragma omp atomic= siguen funcionando correctamente, y las race conditions siguen siendo
+race conditions. Lo que cambia es el rendimiento: las operaciones atómicas sobre memoria CXL
+incurren en el overhead adicional del bus PCIe. El benchmark STREAM, implementado con hilos
+OpenMP y usado para medir ancho de banda en sistemas HPC, ha sido aplicado explícitamente
+para evaluar este impacto en sistemas con memoria CXL desagregada [Fri23].
+
+** 4.4. Relación con MPI: un territorio intermedio
+
+CXL 3.0 introduce soporte para que múltiples nodos accedan al mismo segmento de memoria CXL
+simultáneamente — /memory sharing/, no solo memory pooling [CXL-W]. Esto crea un espacio
+intermedio que antes no existía: dos máquinas físicamente separadas pueden compartir una
+dirección de memoria. El proyecto *cMPI* (SC'25) explota este mecanismo para reemplazar las
+copias de buffer en =MPI_Send=/=MPI_Recv= por accesos directos a memoria CXL compartida,
+reportando mejoras de hasta 49× sobre TCP/Ethernet en ciertos patrones de comunicación [Wan25].
+
+El problema de corrección que esto introduce es exactamente el que han estudiado: si dos
+procesos MPI pueden ahora leer y escribir en la misma dirección de memoria, regresan las race
+conditions que MPI había eliminado por diseño. La responsabilidad de sincronización recae de
+nuevo en el programador, ahora con operaciones atómicas CXL en lugar de mensajes MPI.
+
+-----
+
+* 5. Ejercicios
+
+** Instrucciones
+
+- Entrega en un PDF las respuestas de los ejercicios teóricos. Para los que requieran código,
+  añade una breve descripción del programa entregado.
+- Solo un integrante del equipo debe subir la práctica. Los demás deben marcar la tarea como
+  entregada y escribir un comentario privado con el nombre de quien entregó.
+- Todos los programas y el PDF deben ir en un archivo ZIP nombrado: =P6_ApellidoPaternoNombre=.
+- Utilizar *gcc con soporte OpenMP*. Se penalizará si no compila.
+- Tiempo estimado: ≈ 1.5 hr  —  Puntaje total: *100*
+
+-----
+
+** Ejercicio 1: Ley de Amdahl en OpenMP (20 pts)
+
+En la Práctica 1 aplicaste la Ley de Amdahl entre una versión secuencial y una con dos hilos
+en Java. Ahora realizarás el mismo análisis para OpenMP.
+
+**(a)** Implementa el programa =suma_vectores.c= que sume dos arreglos de tamaño
+=N = 100,000,000= elemento a elemento. Proporciona tres versiones:
+
+  i. Secuencial (sin OpenMP).
+  ii. Paralela con 2 hilos (=#pragma omp parallel for num_threads(2)=).
+  iii. Paralela con el número máximo de hilos disponibles en tu máquina.
+
+**(b)** Mide el tiempo de cada versión con =omp_get_wtime()= y calcula el /speedup/ de las
+versiones paralelas respecto a la secuencial.
+
+**(c)** ¿El speedup obtenido coincide con el predicho por la Ley de Amdahl? Argumenta en
+máximo 4 líneas por qué el speedup real puede ser menor al teórico.
+
+-----
+
+** Ejercicio 2: Race Condition y su Corrección (25 pts)
+
+En la Práctica 1 observaste que un contador compartido sin sincronización produce resultados
+incorrectos. Aquí formalizarás esa observación con OpenMP.
+
+**(a)** Implementa =contador_hilos.c= con las tres versiones del ejemplo guía. Ejecuta cada
+una con =N_HILOS = 4= e =INCREMENTOS = 10,000,000= y registra los valores obtenidos y los
+tiempos.
+
+**(b)** La versión con race condition de la Práctica 1 (Java) y la del ejemplo guía (OpenMP)
+comparten el mismo problema de fondo. Sin embargo, sus tiempos de ejecución pueden diferir
+notablemente. ¿A qué se debe esto? Menciona al menos dos razones relacionadas con las
+diferencias entre la JVM y la ejecución nativa de C.
+
+**(c)** Aplica los conceptos de la Práctica 5: clasifica cada versión (Race Condition, Atomic,
+Reduction) según el modelo de consistencia que garantiza (Linealizable, Secuencialmente
+Consistente, Quiescente o Eventual) y argumenta brevemente por qué.
+
+-----
+
+** Ejercicio 3: Sloppy Counter con Umbral en OpenMP (30 pts)
+
+El =SloppyCounter= de la Práctica 5 vuelca el contador local al global cada vez que supera un
+/umbral/. La versión de =reduction= del ejemplo guía equivale a un umbral infinito. Este
+ejercicio explora el impacto del umbral en la corrección y el rendimiento.
+
+**(a)** Implementa =sloppy_openmp.c= con el mismo mecanismo del =SloppyCounter= de la
+Práctica 5, pero en C con OpenMP. Cada hilo debe tener una variable local privada
+(=private=) y volcar al contador global con =#pragma omp atomic= cuando supere el umbral.
+Prueba con umbrales: 10, 100, 1000 y 10000.
+
+Esqueleto sugerido:
+
+#+BEGIN_SRC c
+long global = 0;
+#pragma omp parallel num_threads(N_HILOS) private(local)
+{
+    long local = 0;
+    for (int i = 0; i < INCREMENTOS / N_HILOS; i++) {
+        local++;
+        if (local >= UMBRAL) {
+            #pragma omp atomic
+            global += local;
+            local = 0;
+        }
+    }
+    /* flush final aquí */
+}
+#+END_SRC
+
+**(b)** Construye una tabla con los resultados (valor obtenido, tiempo) para cada umbral y
+para la versión =reduction=. ¿Qué relación observas entre el tamaño del umbral y el tiempo
+de ejecución?
+
+**(c)** Durante la ejecución paralela (no al final), si un hilo leyera el valor global, ¿qué
+modelo de consistencia observa? Conecta tu respuesta con el Ejercicio 1 de la Práctica 5
+(modificación al =fetch()=).
+
+-----
+
+** Ejercicio 4: Árbol de Difracción en OpenMP (25 pts)
+
+El =ShavitTreeCounter= de la Práctica 5 distribuye los incrementos en hojas de un árbol
+binario para reducir la contención. Ahora implementarás una versión simplificada en C con
+OpenMP.
+
+**(a)** Implementa =tree_counter_openmp.c=: crea un arreglo de $2^D$ contadores hoja (donde
+D es la profundidad del árbol). Cada hilo elige su hoja mediante
+=omp_get_thread_num() % num_hojas= e incrementa atómicamente solo esa hoja. La función
+=fetch()= suma todas las hojas.
+
+**(b)** Mide y compara el tiempo de =tree_counter_openmp.c= contra la versión =atomic= con
+N = 4, 8 y 16 hilos. ¿Cuándo el árbol supera en rendimiento al atomic global?
+
+**(c)** El =ShavitTreeCounter= garantiza Consistencia Quiescente. ¿Tu implementación en
+OpenMP hereda esta garantía? Argumenta si hay algún escenario donde =fetch()= pueda devolver
+un valor incorrecto incluso después de que todos los hilos hayan terminado de incrementar.
+
+-----
+
+* Referencias
+
+- [Cha08] Barbara Chapman, Gabriele Jost, and Ruud Van Der Pas. /Using OpenMP: Portable
+  Shared Memory Parallel Programming/. MIT Press, 2008.
+- [HS08] Maurice Herlihy and Nir Shavit. /The Art of Multiprocessor Programming/.
+  Morgan Kaufmann, 2008.
+- [Gro99] William Gropp, Ewing Lusk, and Anthony Skjellum. /Using MPI: Portable Parallel
+  Programming with the Message-Passing Interface/. MIT Press, 1999.
+- [Sha11] Nir Shavit. Data structures in the multicore age. /Commun. ACM/, 54(3):76–84, 2011.
+- [OMP] OpenMP Architecture Review Board. OpenMP API Specification v5.2, 2021.
+  https://www.openmp.org/specifications/
+- [Fri23] Yehonatan Fridman et al. CXL Memory as Persistent Memory for Disaggregated HPC:
+  A Practical Approach. /SC'23 Workshops/, pp. 983–994, 2023.
+- [Wan25] Shucheng Wang et al. cMPI: Using CXL Memory Sharing for MPI One-Sided and
+  Two-Sided Inter-Node Communications. /SC'25/, ACM, 2025.
+  https://arxiv.org/abs/2510.05476
+- [SupMario24] Dissecting CXL Memory Performance at Scale: Analysis, Modeling, and
+  Optimization. arXiv:2409.14317, 2024. https://arxiv.org/abs/2409.14317
+- [Rcmp24] Donghyun Gouk et al. Rcmp: Reconstructing RDMA-Based Memory Disaggregation
+  via CXL. /ACM Trans. Archit. Code Optim./, 2024.
+  https://dl.acm.org/doi/10.1145/3634916
+- [SIGARCH25] The Hitchhiker's Guide to Coherent Fabrics: 5 Programming Rules for CXL,
+  NVLink, and InfinityFabric. SIGARCH Blog, 2025.
+  https://www.sigarch.org/the-hitchhikers-guide-to-coherent-fabrics-5-programming-rules-for-cxl-nvlink-and-infinityfabric/
+- [CXL-W] Compute Express Link. Wikipedia.
+  https://en.wikipedia.org/wiki/Compute_Express_Link
