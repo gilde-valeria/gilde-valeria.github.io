@@ -1,0 +1,309 @@
+#+TITLE: Guía de Concurrencia: Java → Clojure
+#+AUTHOR: Profa. Gilde Valeria Rodríguez
+#+DATE: Cómputo Concurrente 2026-2
+#+OPTIONS: toc:2 num:t ^:nil
+#+LATEX_HEADER: \usepackage[margin=2.5cm]{geometry}
+
+-----
+
+* 1. ¿Por qué Clojure?
+
+Si Rust resuelve las data races obligando al compilador a verificar que solo
+un dueño modifica cada dato, Clojure toma un camino opuesto: *elimina el estado
+mutable casi por completo*. Si los datos no cambian, no puede haber conflicto
+en accederlos.
+
+Clojure corre sobre la JVM, por lo que hereda el heap, los stacks y el
+recolector de basura de Java. Lo que cambia radicalmente es la filosofía:
+en lugar de proteger el acceso a la memoria con candados, Clojure separa
+dos conceptos que en Java van siempre juntos:
+
+- *Identidad*: la referencia que persiste en el tiempo (~ref~, ~atom~).
+- *Estado*: el valor que tiene esa referencia en un momento dado (siempre inmutable).
+
+Cambiar una "cuenta bancaria" en Clojure no modifica ningún objeto existente;
+crea un nuevo valor y apunta la identidad hacia él. Esto hace segura la lectura
+concurrente: leer un valor inmutable nunca produce un resultado inconsistente.
+
+** Correspondencia rápida Java → Clojure
+
+| *Java*                          | *Clojure*                          |
+|---------------------------------+------------------------------------|
+| ~new Thread(r).start()~         | ~(future ...)~                     |
+| ~thread.join()~                 | ~@future~                          |
+| ~synchronized~ + múltiples vars | ~(dosync ...)~ con ~ref~           |
+| ~AtomicInteger~ (una variable)  | ~atom~ con ~swap!~                 |
+| ~volatile~ (visibilidad)        | ~atom~ (visibilidad inmediata)     |
+| ~wait()~ / ~notify()~           | ~core.async~ (canales)             |
+
+-----
+
+* 2. Instalación
+
+Clojure requiere Java instalado (Java 21 LTS funciona perfectamente).
+
+** Linux
+
+#+BEGIN_SRC bash
+curl -O https://download.clojure.org/install/linux-install-1.11.1.1413.sh
+chmod +x linux-install-1.11.1.1413.sh
+sudo ./linux-install-1.11.1.1413.sh
+#+END_SRC
+
+** macOS
+
+#+BEGIN_SRC bash
+brew install clojure/tools/clojure
+#+END_SRC
+
+** Windows
+
+Consultar la [[https://clojure.org/guides/install_windows][guía oficial]].
+La forma más sencilla es con el script de PowerShell que se indica ahí.
+
+** Alternativa sin instalación
+
+Para los ejercicios básicos de esta guía puede usarse el REPL en línea:
+[[https://tryclojure.org]]
+
+** Verificación y ejecución
+
+#+BEGIN_SRC bash
+clj --version          # verificar instalación
+
+clj                    # inicia el REPL interactivo
+clojure -M script.clj  # ejecuta un archivo
+#+END_SRC
+
+El REPL (Read-Eval-Print Loop) permite evaluar expresiones una por una,
+lo que es muy útil para explorar los ejemplos de esta guía de forma interactiva.
+
+-----
+
+* 3. Software Transactional Memory (STM)
+
+** ¿Qué es el STM?
+
+El STM de Clojure traslada la abstracción de las transacciones de base de datos
+al acceso a memoria en RAM. En lugar de usar candados explícitos, el programador
+declara un bloque transaccional con ~dosync~. El runtime de Clojure se encarga
+de garantizar que el bloque se ejecuta atómicamente.
+
+El mecanismo interno es MVCC (Multi-Version Concurrency Control), el mismo
+algoritmo que usan bases de datos como PostgreSQL:
+
+1. Cada hilo trabaja sobre su *propia copia local* de los valores de los ~ref~.
+2. Al final del ~dosync~, el runtime verifica si algún otro hilo modificó los
+   mismos ~ref~ durante la ejecución.
+3. Si hubo conflicto, *descarta la copia local y reintenta* desde el principio.
+4. Si no hubo conflicto, aplica todos los cambios de forma atómica.
+
+Las propiedades que garantiza son análogas a las propiedades ACID de una
+base de datos, pero en memoria:
+
+| *Propiedad* | *Significado en STM*                                   | *Equivalente en el curso*        |
+|-------------+--------------------------------------------------------+----------------------------------|
+| Atomicidad  | Todos los cambios del bloque ocurren o ninguno         | Punto de linearización único     |
+| Consistencia| El estado resultante respeta los invariantes           | Objeto correcto                  |
+| Aislamiento | Transacciones concurrentes no se ven entre sí          | Operaciones no superpuestas      |
+
+La propiedad más importante para el curso: el STM de Clojure garantiza que
+*es imposible un deadlock causado por el orden de adquisición de candados*,
+porque no existen candados explícitos.
+
+** Ejemplo: contador con STM
+
+#+BEGIN_SRC clojure
+;; 'ref' crea una identidad coordinable vía STM, inicializada en 0.
+(def contador (ref 0))
+
+(defn incrementar! []
+  ;; dosync abre la transacción STM.
+  ;; Toda mutación de un ref DEBE ocurrir dentro de dosync.
+  (dosync
+    ;; 'alter' aplica una función (aquí 'inc') al valor actual del ref.
+    ;; Si hay conflicto con otro hilo, dosync se reintenta automáticamente.
+    (alter contador inc)))
+
+;; Lanzamos 10 hilos concurrentes con 'future'
+(def tareas
+  (doall (repeatedly 10 #(future (incrementar!)))))
+
+;; @future espera que el futuro termine — análogo a thread.join() en Java
+(doseq [t tareas] @t)
+
+;; @ (deref) lee el valor actual del ref
+(println "Resultado:" @contador)
+;; Resultado esperado: 10 (siempre correcto)
+#+END_SRC
+
+** Restricción importante: funciones puras dentro de ~dosync~
+
+Las funciones pasadas a ~alter~ deben ser *puras* (sin efectos secundarios),
+porque el STM puede ejecutarlas múltiples veces si reintenta la transacción.
+Si pones un ~println~ dentro de un ~dosync~, puede imprimirse más veces de
+las esperadas — una por cada reintento. Para I/O dentro de transacciones,
+usa ~io!~, que lanza una excepción si se llama dentro de ~dosync~:
+
+#+BEGIN_SRC clojure
+;; Esto imprime más veces de lo esperado bajo contención:
+(dosync
+  (println "ejecutando...")    ; MAL: efecto secundario en transacción
+  (alter contador inc))
+
+;; Esto falla explícitamente, que es mejor que el comportamiento silencioso:
+(dosync
+  (io! (println "ejecutando..."))  ; lanza excepción si hay reintento
+  (alter contador inc))
+#+END_SRC
+
+-----
+
+* 4. ~atom~: operaciones atómicas sobre una sola variable
+
+El STM (~ref~ + ~dosync~) está diseñado para coordinar cambios en *múltiples*
+variables a la vez. Cuando solo necesitas cambiar *una* variable de forma
+atómica e independiente, el ~atom~ es más apropiado y más eficiente.
+
+El ~atom~ usa internamente operaciones CAS (Compare-And-Swap) de la JVM,
+exactamente como ~AtomicInteger~ en Java. Garantiza visibilidad inmediata
+entre hilos, de forma análoga a ~volatile~.
+
+#+BEGIN_SRC clojure
+;; Creamos un atom inicializado en 0
+(def total (atom 0))
+
+;; swap! aplica una función al valor actual usando CAS.
+;; Si el valor cambió entre la lectura y la escritura, reintenta.
+(defn incrementar-atom! []
+  (dotimes [_ 100]
+    (future (swap! total inc))))
+
+(incrementar-atom!)
+(Thread/sleep 100)
+
+(println "Resultado:" @total)
+;; Resultado esperado: 100
+#+END_SRC
+
+** ~ref~ vs ~atom~: cuándo usar cada uno
+
+| *Situación*                                          | *Usar*  |
+|------------------------------------------------------+---------|
+| Cambiar una sola variable de forma atómica           | ~atom~  |
+| Cambiar múltiples variables de forma coordinada      | ~ref~   |
+| Transferir dinero entre dos cuentas (A disminuye,    |         |
+| B aumenta, las dos deben cambiar juntas)             | ~ref~   |
+| Contador de métricas independiente de otros estados  | ~atom~  |
+
+La regla práctica: si la operación necesita leer el estado de otras variables
+para decidir cómo actualizar la suya, usa ~ref~. Si la operación es autónoma,
+usa ~atom~.
+
+-----
+
+* 5. Ejemplo aplicado: transferencias bancarias
+
+Este es el caso donde el STM brilla más claramente. En Java, transferir dinero
+entre dos cuentas requiere adquirir dos candados en el orden correcto —
+adquirirlos en orden inverso desde dos hilos distintos causa deadlock. Con STM:
+
+#+BEGIN_SRC clojure
+(def cuenta-alice (ref 1000))
+(def cuenta-bob   (ref  500))
+
+(defn transferir! [origen destino cantidad]
+  (dosync
+    (let [saldo @origen]
+      (if (>= saldo cantidad)
+        (do
+          (alter origen  - cantidad)
+          (alter destino + cantidad)
+          :ok)                          ; retorna :ok si la transferencia fue exitosa
+        :fondos-insuficientes))))       ; retorna :fondos-insuficientes si no
+
+;; 100 transferencias concurrentes de 5 pesos cada una
+(def futuros
+  (doall (repeatedly 100 #(future (transferir! cuenta-alice cuenta-bob 5)))))
+
+(doseq [f futuros] @f)
+
+(println "Alice:" @cuenta-alice)   ; Esperado: 500 (si todas pasaron)
+(println "Bob:"   @cuenta-bob)     ; Esperado: 1000
+(println "Total:" (+ @cuenta-alice @cuenta-bob))  ; Siempre 1500
+#+END_SRC
+
+El invariante ~Total = 1500~ se mantiene siempre porque ~dosync~ garantiza
+que las dos operaciones ~alter~ dentro de la transacción ocurren juntas o
+no ocurren. No es posible que Alice pierda 5 pesos sin que Bob gane 5 pesos.
+
+-----
+
+* 6. La limitación del STM: bloqueo condicional
+
+Al implementar una cola de prioridad concurrente, en Java usamos ~wait()~
+y ~notify()~ para que un hilo consumidor espere si la cola está vacía.
+*El STM puro de Clojure no admite este patrón.*
+
+Las transacciones ~dosync~ deben ser puras y no bloqueantes porque pueden
+reintentarse. Si un hilo entra a un ~dosync~, ve la cola vacía, y decide
+bloquearse ahí, estaría bloqueando el hilo dentro de una transacción que
+el runtime podría necesitar revertir.
+
+** ¿Cómo se resuelve en la práctica?
+
+La solución estándar en Clojure moderno es ~core.async~, una biblioteca de
+*canales* que adopta el modelo CSP (Communicating Sequential Processes),
+el mismo que usa Go:
+
+#+BEGIN_SRC clojure
+;; Requiere [org.clojure/core.async "1.6.681"] en las dependencias
+(require '[clojure.core.async :refer [chan >!! <!! close!]])
+
+(def canal (chan 10))  ; canal con buffer de 10 elementos
+
+;; Productor: se bloquea si el canal está lleno
+(future (>!! canal "mensaje-1"))
+(future (>!! canal "mensaje-2"))
+
+;; Consumidor: se bloquea si el canal está vacío
+(println "Recibido:" (<!! canal))
+(println "Recibido:" (<!! canal))
+
+(close! canal)
+#+END_SRC
+
+Esta limitación del STM es importante para el Ejercicio 4 de la práctica:
+implementar el bloqueo condicional requiere salir del modelo STM y adoptar
+paso de mensajes.
+
+-----
+
+* 7. Resumen de tipos de referencia en Clojure
+
+| *Tipo*  | *Coordinación*     | *Cuándo usarlo*                              |
+|---------+--------------------+----------------------------------------------|
+| ~ref~   | STM (~dosync~)     | Múltiples variables que cambian juntas        |
+| ~atom~  | CAS (lock-free)    | Una variable independiente                    |
+| ~agent~ | Cola de mensajes   | Actualizaciones asíncronas no coordinadas     |
+| ~var~   | Sin sincronización | Estado por hilo (análogo a ~ThreadLocal~)     |
+
+Para esta práctica trabajamos principalmente con ~ref~ y ~atom~.
+~agent~ y ~var~ quedan fuera del alcance del curso.
+
+-----
+
+* 8. Para ejecutar los ejemplos
+
+#+BEGIN_SRC bash
+# Guardar cualquier ejemplo en un archivo, por ejemplo banco.clj, y ejecutar:
+clojure -M banco.clj
+
+# O en el REPL (más cómodo para experimentar):
+clj
+# Luego pegar el código directamente
+#+END_SRC
+
+Si usas el REPL en línea en [[https://tryclojure.org]], pega cada bloque de
+código por separado. Los ~future~ pueden necesitar un ~(Thread/sleep 200)~ al
+final para que los hilos terminen antes de que el REPL imprima el resultado.

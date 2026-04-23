@@ -1,0 +1,285 @@
+#+TITLE: Guía de Concurrencia: Java → Rust
+#+AUTHOR: Profa. Gilde Valeria Rodríguez
+#+DATE: Cómputo Concurrente 2026-2
+#+OPTIONS: toc:2 num:t ^:nil
+#+LATEX_HEADER: \usepackage[margin=2.5cm]{geometry}
+
+-----
+
+* 1. ¿Por qué Rust?
+
+En el curso hemos razonado sobre corrección de programas concurrentes en Java:
+race conditions, modelos de consistencia, candados y estructuras lock-free.
+Java nos permite cometer errores de concurrencia —un contador sin ~synchronized~
+compila y corre, solo que produce resultados incorrectos.
+
+Rust resuelve este problema desde otro ángulo: *el compilador rechaza en tiempo
+de compilación cualquier programa que tenga una data race*. No en tiempo de
+ejecución, no con un test, sino antes de que el programa exista.
+
+Esta guía te muestra cómo los conceptos que ya conoces de Java se expresan en
+Rust, para que la práctica sea una traducción de ideas familiares a una sintaxis
+nueva.
+
+** Correspondencia rápida Java → Rust
+
+| *Java*                          | *Rust*                            |
+|---------------------------------+-----------------------------------|
+| ~new Thread(r).start()~         | ~thread::spawn(move \|\| { ... })~|
+| ~thread.join()~                 | ~handle.join().unwrap()~          |
+| ~synchronized~ / ~ReentrantLock~| ~Mutex<T>~                        |
+| ~AtomicLong~, ~AtomicInteger~   | ~AtomicUsize~, ~AtomicI64~        |
+| ~volatile~                      | ~Ordering::SeqCst~ (ver §5)       |
+| ~AtomicReference~ compartida    | ~Arc<T>~                          |
+| ~lock.unlock()~ en ~finally~    | automático al salir del scope     |
+
+-----
+
+* 2. Instalación
+
+** Linux y macOS
+
+#+BEGIN_SRC bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+#+END_SRC
+
+El instalador descarga ~rustup~, el gestor de versiones de Rust (análogo a
+~sdkman~ en Java). Acepta la instalación por defecto. Al terminar, recarga
+la terminal o ejecuta:
+
+#+BEGIN_SRC bash
+source $HOME/.cargo/env
+#+END_SRC
+
+** Windows
+
+Descarga y ejecuta ~rustup-init.exe~ desde [[https://rustup.rs/]].
+Asegúrate de tener las herramientas de compilación de C++ de Visual Studio.
+
+** Verificación
+
+#+BEGIN_SRC bash
+rustc --version    # compilador
+cargo --version    # gestor de proyectos (equivalente a Maven/Gradle)
+#+END_SRC
+
+** Crear y ejecutar un proyecto
+
+#+BEGIN_SRC bash
+cargo new concurrencia_rust   # crea la estructura del proyecto
+cd concurrencia_rust
+cargo run                     # compila y ejecuta src/main.rs
+#+END_SRC
+
+Todos los ejemplos de esta guía van en ~src/main.rs~.
+
+-----
+
+* 3. Ownership: la regla que elimina las data races
+
+Antes de ver hilos, hay que entender la regla fundamental de Rust que hace
+posible la concurrencia segura:
+
+#+BEGIN_QUOTE
+En cualquier punto del programa, o existe *una* referencia mutable (~&mut T~),
+o existen *múltiples* referencias inmutables (~&T~) — pero nunca ambas al mismo
+tiempo.
+#+END_QUOTE
+
+Esta regla, verificada por el compilador, es exactamente la condición que hace
+imposible una data race: una data race requiere al menos un acceso de escritura
+concurrente con otro acceso. Si el compilador garantiza que nunca hay dos
+referencias mutables simultáneas, las data races son imposibles por construcción.
+
+Cuando intentas hacer el equivalente del contador sin ~synchronized~ de la
+Práctica 1, el compilador te lo impide:
+
+#+BEGIN_SRC rust
+use std::thread;
+
+fn main() {
+    let mut contador: i64 = 0;
+    let mut handles = vec![];
+
+    for _ in 0..4 {
+        handles.push(thread::spawn(|| {
+            contador += 1;   // ERROR: no puedes mover una referencia mutable
+        }));              //        a múltiples hilos simultáneamente
+    }
+    for h in handles { h.join().unwrap(); }
+}
+#+END_SRC
+
+El error del compilador dice exactamente qué regla se viola. En el Ejercicio 2
+de la práctica leerás ese error y lo traducirás al vocabulario del curso.
+
+-----
+
+* 4. Crear y esperar hilos
+
+#+BEGIN_SRC rust
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let mut handles = vec![];
+
+    for i in 0..5 {
+        // 'move' transfiere la propiedad de las variables capturadas al hilo.
+        // Sin 'move', el compilador rechaza el código porque el closure
+        // podría sobrevivir a la variable 'i' del stack del main.
+        let handle = thread::spawn(move || {
+            println!("Hola desde el hilo {}", i);
+            thread::sleep(Duration::from_millis(10));
+        });
+        handles.push(handle);
+    }
+
+    // join() espera que el hilo termine — análogo a Thread.join() en Java.
+    // unwrap() propaga cualquier panic del hilo hijo.
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Todos los hilos han terminado.");
+}
+#+END_SRC
+
+-----
+
+* 5. Candados: ~Mutex<T>~ y ~Arc<T>~
+
+En Java, ~synchronized~ protege una sección de código; el dato y el candado
+son independientes. En Rust, *el dato vive dentro del ~Mutex~*. No es posible
+acceder al dato sin haber adquirido el candado — es una garantía del sistema de
+tipos, no una convención del programador.
+
+Para compartir un ~Mutex~ entre varios hilos necesitamos ~Arc~ (Atomic Reference
+Counter), que es el equivalente a ~AtomicReference~ en Java: permite que múltiples
+dueños mantengan una referencia al mismo objeto con un contador de referencias
+atómico.
+
+#+BEGIN_SRC rust
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    // El dato (0) vive dentro del Mutex, que vive dentro del Arc.
+    let contador = Arc::new(Mutex::new(0_i64));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        // Arc::clone incrementa el contador de referencias — no clona el dato.
+        // Equivalente a pasar la misma referencia a otro hilo en Java.
+        let c = Arc::clone(&contador);
+
+        handles.push(thread::spawn(move || {
+            // lock() adquiere el Mutex y retorna un MutexGuard.
+            // Si otro hilo lo tiene, este hilo espera aquí — igual que en Java.
+            let mut num = c.lock().unwrap();
+
+            *num += 1;  // modificamos el dato a través del guard
+
+            // El candado se libera automáticamente cuando `num` sale del scope.
+            // Equivale al bloque finally { lock.unlock(); } de Java,
+            // pero el compilador garantiza que nunca se olvida.
+        }));
+    }
+
+    for h in handles { h.join().unwrap(); }
+
+    println!("Resultado: {}", *contador.lock().unwrap());
+    // Resultado esperado: 10 (siempre correcto, sin race condition)
+}
+#+END_SRC
+
+** Punto de linearización
+
+El punto de linearización del incremento es el momento en que ~lock()~ retorna
+y el hilo adquiere acceso exclusivo al dato. En términos del curso: la operación
+"toma efecto" en ese instante, que está dentro del intervalo ~[invocación, respuesta]~.
+
+-----
+
+* 6. Tipos atómicos y ordenamiento de memoria
+
+Rust no tiene la palabra clave ~volatile~ para concurrencia (en Rust, ~volatile~
+existe solo para I/O mapeado en memoria a nivel de hardware, que es un caso
+completamente distinto). Para operaciones lock-free, Rust expone tipos atómicos
+en ~std::sync::atomic~.
+
+La diferencia importante respecto a Java es que en Rust debes especificar
+*explícitamente el ordenamiento de memoria* de cada operación. Esto no es un
+detalle burocrático — es la misma teoría de modelos de memoria débil que
+formaliza el paper ~Herding Cats~ [Alglave et al., 2014]:
+
+| *Ordering*           | *Garantía*                                      | *Equivalente Java*              |
+|----------------------+-------------------------------------------------+---------------------------------|
+| ~SeqCst~             | Orden global total — el más fuerte              | ~volatile~ + ~synchronized~     |
+| ~Acquire~ / ~Release~| Sincronización por pares entre hilos            | ~volatile~ (visibilidad)        |
+| ~Relaxed~            | Solo atomicidad local, sin barreras de memoria  | ninguno directo                 |
+
+#+BEGIN_SRC rust
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    let atomico = Arc::new(AtomicI64::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let a = Arc::clone(&atomico);
+        handles.push(thread::spawn(move || {
+            // fetch_add retorna el valor ANTERIOR — análogo a getAndAdd() en Java.
+            // SeqCst garantiza que todos los hilos ven las escrituras en el mismo orden.
+            a.fetch_add(1, Ordering::SeqCst);
+        }));
+    }
+
+    for h in handles { h.join().unwrap(); }
+
+    println!("Resultado: {}", atomico.load(Ordering::SeqCst));
+    // Resultado esperado: 10
+}
+#+END_SRC
+
+** ¿Cuándo usar ~Relaxed~?
+
+~Ordering::Relaxed~ es correcto cuando la atomicidad de la operación individual
+importa pero el orden relativo entre operaciones de distintos hilos no importa.
+El contador quiescentemente consistente de la práctica es un ejemplo: el volcado
+al global usa ~SeqCst~, pero el contador local del ThreadLocal no necesita
+sincronización de ningún tipo porque es privado al hilo.
+
+-----
+
+* 7. Resumen: ¿qué garantiza el compilador y qué no?
+
+| *Propiedad*                              | *Java*              | *Rust*                     |
+|------------------------------------------+---------------------+----------------------------|
+| Data races imposibles                    | No (runtime)        | Sí (compilación)           |
+| Deadlocks imposibles                     | No                  | No (solo Clojure STM)      |
+| Liberación automática del candado        | No (requiere finally)| Sí (Drop al salir de scope)|
+| Operaciones atómicas sin GC              | No (GC presente)    | Sí                         |
+| Control explícito de ordenamiento memoria| No (JMM implícito)  | Sí (~Ordering~)            |
+
+Rust elimina las data races pero no los deadlocks. Si adquieres dos ~Mutex~ en
+orden inverso desde dos hilos distintos, el deadlock es posible exactamente
+igual que en Java.
+
+-----
+
+* 8. Para compilar y probar los ejemplos
+
+#+BEGIN_SRC bash
+# Copiar cualquier ejemplo en src/main.rs y ejecutar:
+cargo run
+
+# Para ver errores del compilador con contexto completo:
+cargo build 2>&1 | less
+#+END_SRC
+
+Los mensajes de error de Rust son notablemente descriptivos — incluyen el nombre
+de la regla violada, el número de línea, y frecuentemente una sugerencia de
+cómo corregirlo. Leer el error completo es parte del ejercicio.
