@@ -23,7 +23,7 @@ el comportamiento del monitor, la exclusión mutua, contención y justicia.
 
 -----
 
-* 1. ¿Qué es un Monitor?
+*  ¿Qué es un Monitor?
 
 Un *monitor* encapsula tres cosas en un solo objeto:
 
@@ -56,7 +56,7 @@ Un hilo puede despertar por una señal equivocada o por un
 
 -----
 
-* 2. LockedQueue: Productor-Consumidor con dos condiciones
+*  LockedQueue: Productor-Consumidor con dos condiciones
 
 ** Cuándo usar dos condiciones
 
@@ -134,10 +134,7 @@ class LockedQueue<T> {
             lock.unlock();
         }
     }
-}
-
-public class LockedQueue {
-    public static void main(String[] args) throws InterruptedException {
+        public static void main(String[] args) throws InterruptedException {
         LockedQueue<Integer> q = new LockedQueue<>(3); // capacidad 3
 
         // Productor: intenta insertar 6 items (más que la capacidad)
@@ -174,7 +171,7 @@ public class LockedQueue {
 -----
 
 
-* 3. SimpleReadWriteLock: lectores y escritores (Versión No Justa)
+*  SimpleReadWriteLock: lectores y escritores (Versión No Justa)
 
 ** La idea
 
@@ -324,7 +321,7 @@ class SimpleRWDemo {
 
 -----
 
-* 4. FifoReadWriteLock: Separar la condición para lograr Justicia
+*  FifoReadWriteLock: Separar la condición para lograr Justicia
 
 ** La diferencia clave
 

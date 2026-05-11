@@ -5,7 +5,7 @@
 
 -----
 
-* 1. Visión General del Sistema
+*  Visión General del Sistema
 
 En este ejemplo, estamos construyendo un =SimpleReentrantLock= (un candado reentrante) ensamblando piezas fundamentales de concurrencia. En lugar de usar los monitores nativos de Java (=synchronized=), estamos orquestando nuestro propio mecanismo utilizando tres capas:
 
@@ -270,14 +270,14 @@ class TASCondition implements Condition {
 
 -----
 
-* 2. Diseccionando las Clases
+*  Diseccionando las Clases
 
-** 2.1 TASLock: El Candado Base
+**  TASLock: El Candado Base
 Es un /SpinLock/ clásico. Utiliza una variable =AtomicBoolean= para garantizar que solo un hilo pueda cambiar el estado de =false= a =true= de forma atómica.
 - *Ventaja:* Muy rápido si la contención es corta.
 - *Desventaja:* Quema ciclos de CPU (espera activa) si el candado está ocupado mucho tiempo. Por eso, lo usaremos solo para proteger cambios de estado rapidísimos, no para bloquear hilos largos.
 
-** 2.2 TASCondition: La Variable de Condición
+**  TASCondition: La Variable de Condición
 Aquí es donde ocurre la magia de suspender hilos para no desperdiciar CPU.
 - Implementa una cola (=ConcurrentLinkedQueue=) para recordar quién está esperando.
 - *El método =await()=:* Hace tres cosas críticas:
@@ -286,7 +286,7 @@ Aquí es donde ocurre la magia de suspender hilos para no desperdiciar CPU.
   3. Le pide al sistema operativo que lo duerma (=LockSupport.park()=).
 - *El método =signalAll()=:* Recorre la cola y despierta a todos usando =LockSupport.unpark()=.
 
-** 2.3 SimpleReentrantLock: La Lógica de Reentrancia
+**  SimpleReentrantLock: La Lógica de Reentrancia
 Este candado actúa como un /Monitor/ de alto nivel. Utiliza el =TASLock= internamente para proteger sus variables de estado: =owner= y =holdCount=.
 
 *** El flujo de =lock()=:
@@ -302,7 +302,7 @@ Este candado actúa como un /Monitor/ de alto nivel. Utiliza el =TASLock= intern
 
 -----
 
-* 3. Ejecución del Demo
+*  Ejecución del Demo
 
 Al compilar y ejecutar =SimpleReentrantLockDemo=, verán la siguiente secuencia de eventos:
 
@@ -315,7 +315,7 @@ Al compilar y ejecutar =SimpleReentrantLockDemo=, verán la siguiente secuencia 
 
 -----
 
-* 4. Preguntas para reflexionar (Análisis de Código)
+*  Preguntas para reflexionar (Análisis de Código)
 
 Para asegurarnos de que comprenden la fragilidad de la programación concurrente, analicen detenidamente el código proporcionado para el método =unlock()= en =SimpleReentrantLock=:
 
