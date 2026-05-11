@@ -1,0 +1,341 @@
+#+TITLE: Construyendo un Candado Reentrante desde Cero
+#+AUTHOR: Profa. Gilde Valeria Rodríguez
+#+DATE: Cómputo Concurrente 2026-2
+#+OPTIONS: toc:2 num:t ^:nil
+
+-----
+
+* 1. Visión General del Sistema
+
+En este ejemplo, estamos construyendo un =SimpleReentrantLock= (un candado reentrante) ensamblando piezas fundamentales de concurrencia. En lugar de usar los monitores nativos de Java (=synchronized=), estamos orquestando nuestro propio mecanismo utilizando tres capas:
+
+1. *Exclusión Mutua Primitiva:* =TASLock= (Test-And-Set).
+2. *Suspensión Eficiente:* =TASCondition= (utilizando =LockSupport=).
+3. *Lógica de Reentrancia:* =SimpleReentrantLock= (control de =owner= y =holdCount=).
+
+Esta arquitectura de "envoltorios" (wrappers) es muy similar a cómo la Máquina Virtual de Java (JVM) implementa las herramientas de =java.util.concurrent=.
+
+
+#+BEGIN_SRC java
+// SimpleReentrantLock.java — Compilar: javac SimpleReentrantLock.java && java SimpleReentrantLockDemo
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.TimeUnit;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.LockSupport;
+import java.util.Date;
+
+public class SimpleReentrantLock implements Lock {
+    
+    // Candado base: un SpinLock (Test-and-Test-and-Set) simple
+    private Lock TAS = new TASLock();
+    private Condition condition = TAS.newCondition(); // Condición personalizada para este candado
+    
+    // Variables para la lógica reentrante
+    private long owner = -1;       // ID del hilo dueño actual
+    private int holdCount = 0;    // Nivel de anidamiento/recursión
+
+    @Override
+    public void lock() {
+        long me = Thread.currentThread().getId();
+        String threadName = Thread.currentThread().getName();
+
+        // 1. IDENTIFICACIÓN: ¿Ya soy el dueño de este candado?
+        if (owner == me) {
+            holdCount++;
+            System.out.println("  [" + threadName + "] REENTRA al candado. (holdCount = " + holdCount + ")");
+            return; // Entra directamente sin pelear por el candado base
+        }
+
+        try {
+            // 2. ADQUISICIÓN: No soy el dueño, necesito adquirir el candado base
+            System.out.println("  [" + threadName + "] intenta adquirir el candado TAS");
+            TAS.lock(); // Aquí se bloquea hasta que el candado base esté disponible
+            System.out.println("  [" + threadName + "] ADQUIRIÓ el candado TAS.");
+            
+
+            while (holdCount > 0) {
+                try {
+                    condition.await();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Sale una vez.");
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // 3. CONTABILIDAD: Tomo posesión oficial del candado
+            owner = me;
+            holdCount = 1;
+            System.out.println("  [" + threadName + "] ADQUIERE el candado por primera vez. (holdCount = 1)");
+        } finally  {
+            TAS.unlock(); // Liberamos el candado base inmediatamente para que otros puedan intentar adquirirlo
+        }
+    }
+
+    @Override
+    public void unlock() {
+        long me = Thread.currentThread().getId();
+        String threadName = Thread.currentThread().getName();
+
+
+        // Solo el dueño actual puede liberar el candado
+        if (owner == me) {
+            holdCount--;
+            System.out.println("  [" + threadName + "] Sale de un nivel. (holdCount restante = " + holdCount + ")");
+            
+            // Si salimos de todos los niveles de recursión, liberamos para los demás
+            if (holdCount == 0) {
+                System.out.println("  [" + threadName + "] LIBERA el candado completamente. owner = -1");
+                owner = -1;
+                condition.signalAll(); // Despertamos a cualquier hilo que esté esperando en lock()
+                System.out.println("    [" + Thread.currentThread().getName() + "] Avisa a Todos.");
+
+            }
+        } else {
+            throw new IllegalMonitorStateException("Excepción: El hilo " + threadName + " intentó liberar un candado que no le pertenece.");
+        }
+    }
+
+    // Métodos de la interfaz Lock no implementados para este demo educativo
+    @Override public void lockInterruptibly() throws InterruptedException {}
+    @Override public boolean tryLock() { return false; }
+    @Override public boolean tryLock(long time, TimeUnit unit) throws InterruptedException { return false; }
+    @Override public Condition newCondition() { throw new UnsupportedOperationException(); }
+}
+
+// ── Demo ──────────────────────────────────────────────────────────────────────
+class SimpleReentrantLockDemo {
+    
+    static SimpleReentrantLock lock = new SimpleReentrantLock();
+
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("=== Demostración: Candado Reentrante ===");
+        
+        // Hilo 1: Hará 3 llamadas recursivas anidadas
+        Thread hilo1 = new Thread(() -> {
+            try {
+            System.out.println("[LLEGADA] " + Thread.currentThread().getName() + " intenta entrar a su sección crítica.");
+            lock.lock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Ejecuta el lock una vez!");
+
+            lock.lock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Ejecuta el lock dos veces !");
+
+
+            lock.lock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Ejecuta el lock tres veces !");
+
+
+            
+                
+            } finally {
+                lock.unlock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Sale una vez.");
+                lock.unlock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Sale dos veces.");
+
+                lock.unlock();
+                System.out.println("    [" + Thread.currentThread().getName() + "] Sale tres veces  .");
+
+            }
+        }, "Hilo-1");
+
+        // Hilo 2: Intentará entrar mientras Hilo 1 está en su recursión
+        Thread hilo2 = new Thread(() -> {
+            System.out.println("[LLEGADA] " + Thread.currentThread().getName() + " intenta entrar a su sección crítica.");
+            lock.lock();
+            try {
+                System.out.println("    [" + Thread.currentThread().getName() + "] ¡Por fin logró entrar!");
+            } finally {
+                lock.unlock();
+            }
+        }, "Hilo-2");
+
+        hilo1.start();
+        // Damos una fracción de segundo para asegurar que Hilo 1 tome el candado primero
+        Thread.sleep(20); 
+        hilo2.start();
+
+        hilo1.join();
+        hilo2.join();
+        
+        System.out.println("=== Fin de la ejecución ===");
+    }
+}
+
+
+class TASLock implements Lock {
+    // Estado atómico del candado
+    private final AtomicBoolean state = new AtomicBoolean(false);
+
+    @Override
+    public void lock() {
+        // Test-And-Set clásico: gira mientras el valor anterior sea true
+        while (state.getAndSet(true)) {
+            // Espera activa (Spinning)
+            // Tip: En Java 9+ se puede usar Thread.onSpinWait() para optimizar el consumo de CPU
+        }
+    }
+
+    @Override
+    public void unlock() {
+        state.set(false); // Liberación directa
+    }
+
+    @Override
+    public Condition newCondition() {
+        return new TASCondition(this);
+    }
+
+    // Métodos adicionales de la interfaz Lock
+    @Override 
+    public boolean tryLock() { 
+        return !state.getAndSet(true); 
+    }
+    
+    @Override public void lockInterruptibly() throws InterruptedException {}
+    @Override public boolean tryLock(long time, TimeUnit unit) throws InterruptedException { return false; }
+}
+
+class TASCondition implements Condition {
+    
+    // Referencia al candado al que pertenece esta condición
+    private final Lock lock;
+    
+    // Cola para recordar qué hilos están esperando en esta condición
+    private final ConcurrentLinkedQueue<Thread> waiters = new ConcurrentLinkedQueue<>();
+
+    public TASCondition(Lock lock) {
+        this.lock = lock;
+    }
+
+    @Override
+    public void await() throws InterruptedException {
+        Thread current = Thread.currentThread();
+        
+        // 1. Me formo en la fila de los que están esperando
+        waiters.add(current);
+        
+        // 2. Libero el candado para que OTRO hilo pueda entrar a la sección crítica
+        lock.unlock(); 
+
+        try {
+            // 3. Mientras siga en la fila (nadie me ha sacado con un signal)
+            while (waiters.contains(current)) {
+                // Me duermo eficientemente usando el sistema operativo
+                LockSupport.park(this); 
+                
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+            }
+        } finally {
+            // 4. Me despertaron. ¡Debo volver a pelear por el candado antes de continuar!
+            lock.lock(); 
+        }
+    }
+
+    @Override
+    public void signal() {
+        // Saca al primer hilo de la fila (FIFO)
+        Thread t = waiters.poll(); 
+        if (t != null) {
+            // Lo despierta
+            LockSupport.unpark(t); 
+        }
+    }
+
+    @Override
+    public void signalAll() {
+        // Saca y despierta a TODOS los hilos de la fila
+        Thread t;
+        while ((t = waiters.poll()) != null) {
+            LockSupport.unpark(t);
+        }
+    }
+
+    // ── Métodos requeridos por la interfaz pero no usados en este demo ──
+    @Override public void awaitUninterruptibly() {}
+    @Override public long awaitNanos(long nanosTimeout) { return 0; }
+    @Override public boolean await(long time, TimeUnit unit) { return false; }
+    @Override public boolean awaitUntil(Date deadline) { return false; }
+}
+#+END_SRC
+
+
+-----
+
+* 2. Diseccionando las Clases
+
+** 2.1 TASLock: El Candado Base
+Es un /SpinLock/ clásico. Utiliza una variable =AtomicBoolean= para garantizar que solo un hilo pueda cambiar el estado de =false= a =true= de forma atómica.
+- *Ventaja:* Muy rápido si la contención es corta.
+- *Desventaja:* Quema ciclos de CPU (espera activa) si el candado está ocupado mucho tiempo. Por eso, lo usaremos solo para proteger cambios de estado rapidísimos, no para bloquear hilos largos.
+
+** 2.2 TASCondition: La Variable de Condición
+Aquí es donde ocurre la magia de suspender hilos para no desperdiciar CPU.
+- Implementa una cola (=ConcurrentLinkedQueue=) para recordar quién está esperando.
+- *El método =await()=:* Hace tres cosas críticas:
+  1. Se forma en la cola.
+  2. Libera el candado base (=lock.unlock()=) para que otro pueda avanzar.
+  3. Le pide al sistema operativo que lo duerma (=LockSupport.park()=).
+- *El método =signalAll()=:* Recorre la cola y despierta a todos usando =LockSupport.unpark()=.
+
+** 2.3 SimpleReentrantLock: La Lógica de Reentrancia
+Este candado actúa como un /Monitor/ de alto nivel. Utiliza el =TASLock= internamente para proteger sus variables de estado: =owner= y =holdCount=.
+
+*** El flujo de =lock()=:
+1. *Identificación:* Si el =owner= es el hilo actual, simplemente incrementa el =holdCount= y pasa directo. (¡Esta es la reentrancia!).
+2. *Adquisición:* Si no soy el dueño, adquiero el candado base (=TAS.lock()=).
+3. *Espera:* Si =holdCount > 0=, significa que otro hilo tiene el candado lógico. Llamo a =condition.await()=, lo que me duerme y suelta el candado =TAS= temporalmente.
+4. *Posesión:* Cuando despierto y es mi turno, me declaro el nuevo =owner=, pongo =holdCount= en 1, y finalmente suelto el candado =TAS= para que otros puedan evaluar el estado.
+
+*** El flujo de =unlock()=:
+1. Verifica que el hilo que llama realmente sea el dueño.
+2. Decrementa el =holdCount=.
+3. Si el =holdCount= llega a 0, significa que el hilo ha salido de todas sus llamadas recursivas. Se limpia el =owner= y se llama a =condition.signalAll()= para despertar a los competidores que están durmiendo en el =await()=.
+
+-----
+
+* 3. Ejecución del Demo
+
+Al compilar y ejecutar =SimpleReentrantLockDemo=, verán la siguiente secuencia de eventos:
+
+1. El *Hilo-1* entra a su sección crítica y llama a =lock()= tres veces seguidas. 
+2. Gracias a la lógica de =owner == me=, el hilo no se bloquea a sí mismo, sino que incrementa el =holdCount= hasta 3.
+3. El *Hilo-2* intenta entrar, adquiere el candado =TAS=, pero ve que =holdCount > 0=. Inmediatamente llama a =await()= y se va a dormir, cediendo el CPU.
+4. El *Hilo-1* llama a =unlock()= tres veces. En las dos primeras, solo disminuye el =holdCount=. 
+5. En el tercer =unlock()=, el =holdCount= llega a 0. El *Hilo-1* lanza =signalAll()=.
+6. El *Hilo-2* despierta, adquiere el candado conceptual, y por fin ejecuta su sección crítica.
+
+-----
+
+* 4. Preguntas para reflexionar (Análisis de Código)
+
+Para asegurarnos de que comprenden la fragilidad de la programación concurrente, analicen detenidamente el código proporcionado para el método =unlock()= en =SimpleReentrantLock=:
+
+#+BEGIN_SRC java
+@Override
+public void unlock() {
+    long me = Thread.currentThread().getId();
+    String threadName = Thread.currentThread().getName();
+
+    if (owner == me) {
+        holdCount--; 
+        // ...
+        if (holdCount == 0) {
+            owner = -1;
+            condition.signalAll(); 
+        }
+    }
+}
+#+END_SRC
+
+1. En el método =lock()=, utilizamos =TAS.lock()= para proteger la lectura y modificación de =holdCount= y =owner=. *Sin embargo, en el método =unlock()= no estamos adquiriendo =TAS.lock()= antes de modificar estas variables.*
+2. *Pregunta:* ¿Qué problema de concurrencia (condición de carrera) podría ocurrir si el Hilo A está ejecutando =unlock()= (modificando =holdCount= y =owner=) exactamente al mismo tiempo que el Hilo B entra a =lock()= y adquiere el =TAS=?
+3. *Reto:* Modifica el método =unlock()= para que las modificaciones a las variables de estado estén correctamente protegidas por el candado base, asegurando la consistencia de la memoria.

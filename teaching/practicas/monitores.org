@@ -173,7 +173,8 @@ public class LockedQueue {
 
 -----
 
-* 3. SimpleReadWriteLock: lectores y escritores
+
+* 3. SimpleReadWriteLock: lectores y escritores (Versión No Justa)
 
 ** La idea
 
@@ -181,13 +182,13 @@ Múltiples lectores pueden coexistir.
 Un escritor requiere acceso exclusivo.
 Una sola condición gestiona ambos casos.
 
-** El problema de esta versión: inanición
+** El problema de esta versión: Inanición por la "condición unida"
 
-Si llegan escritores continuamente, los lectores esperando
-pueden quedar en inanición (y viceversa). El =signalAll()= 
-despierta a todos, generando una alta *contención* y competencia por el mutex.
+Para hacer que este candado sea *no justo*, unimos las condiciones de bloqueo del escritor en una sola línea: =while (readers > 0 || writer)=. 
 
-** Código completo
+Al hacer esto, el escritor no tiene forma de "apartar su lugar" o indicar que ya está esperando. Simplemente se queda dormido esperando a que la sala esté 100% vacía. Si continúan llegando nuevos lectores sin parar, =readers= nunca llegará a 0, y el escritor sufrirá *inanición* (starvation). Además, cuando alguien sale y hace =signalAll()=, todos (lectores y escritores) despiertan y compiten por el candado a la fuerza, generando alta contención.
+
+** Código completo (No Justo)
 
 #+BEGIN_SRC java :tangle SimpleReadWriteLock.java
 // SimpleReadWriteLock.java — javac SimpleReadWriteLock.java && java SimpleRWDemo
@@ -234,7 +235,6 @@ public class SimpleReadWriteLock {
             } finally { lock.unlock(); }
         }
 
-        // Métodos no implementados de Lock (no necesarios para el ejemplo)
         public void lockInterruptibly() {}
         public boolean tryLock() { return false; }
         public boolean tryLock(long t, java.util.concurrent.TimeUnit u) { return false; }
@@ -245,12 +245,14 @@ public class SimpleReadWriteLock {
         public void lock() {
             lock.lock();
             try {
-                // Espera si hay cualquier lector O escritor activo
+                // AQUÍ ESTÁ LA INJUSTICIA: Condición unida.
+                // Espera pasivamente si hay CUALQUIER lector O escritor activo.
                 while (readers > 0 || writer) {
-                    System.out.println("  [" + Thread.currentThread().getName() + "] escritor espera (readers=" + readers + ", writer=" + writer + ")");
+                    System.out.println(" [FIRST WHILE - writer] [" + Thread.currentThread().getName() + "] escritor espera (readers=" + readers + ", writer=" + writer + ")");
                     try { condition.await(); } catch (InterruptedException e) {}
-                    System.out.println("  [WAKEUP] " + Thread.currentThread().getName() + " (Escritor) despertó. Re-evaluando disponibilidad de la sala...");
+                    System.out.println("  [WAKEUP FIRST WHILE] " + Thread.currentThread().getName() + " (Escritor) despertó. Re-evaluando disponibilidad de la sala...");
                 }
+                // Si logra salir del while, reclama la sala
                 writer = true;
                 System.out.println("  [" + Thread.currentThread().getName() + "] escritor entra");
             } finally { lock.unlock(); }
@@ -322,109 +324,42 @@ class SimpleRWDemo {
 
 -----
 
-* 4. FifoReadWriteLock: con justicia
+* 4. FifoReadWriteLock: Separar la condición para lograr Justicia
 
 ** La diferencia clave
 
-En =SimpleReadWriteLock=, el escritor solo levanta =writer = true=
-*después* de pasar todas las verificaciones.
-Eso deja una ventana donde nuevos escritores pueden colarse antes
-que los lectores esperando.
+Para arreglar la inanición de la versión anterior, necesitamos *separar* la condición del escritor en dos fases.
 
-En =FifoReadWriteLock=, el escritor levanta =writer = true= *antes*
-de esperar a los lectores actuales.
-Los nuevos lectores que lleguen verán =writer = true= y se pondrán
-en cola — sin inanición.
+En lugar de evaluar todo junto en un solo =while=, el =FifoReadWriteLock= hace lo siguiente:
+1. Espera a que el escritor actual (si lo hay) salga (=while (writer)=).
+2. *Levanta la mano* (=writer = true=) INMEDIATAMENTE. Al hacer esto, los nuevos lectores que vayan llegando se formarán en la cola, porque ya verán =writer = true=.
+3. Ahora sí, espera a que los lectores *que ya estaban adentro* terminen (=while (readAcquires != readReleases)=).
 
-| Paso            | Simple WriteLock          | Fifo WriteLock                   |
-|-----------------+---------------------------+----------------------------------|
-| 1. Llega        | espera readers=0 y writer=false | espera solo writer=false   |
-| 2. Avanza       | pone writer=true          | pone writer=true INMEDIATAMENTE  |
-| 3. Espera resto | ya pasó todo              | espera a que lectores activos salgan |
-
-** Código completo
+| Paso            | Simple WriteLock (No Justo) | Fifo WriteLock (Justo)           |
+|-----------------+-----------------------------+----------------------------------|
+| 1. Llega        | espera readers=0 y writer=false | espera solo a que writer=false   |
+| 2. Avanza       | pone writer=true            | pone writer=true INMEDIATAMENTE (Levanta la mano) |
+| 3. Espera resto | (ya pasó todo de golpe)     | espera a que lectores activos salgan |
 
 #+BEGIN_SRC java :tangle FifoReadWriteLock.java
-// FifoReadWriteLock.java — javac FifoReadWriteLock.java && java FifoRWDemo
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-public class FifoReadWriteLock {
-
-    // Contadores para saber cuántos lectores están activos
-    // readAcquires - readReleases = lectores activos en este momento
-    int     readAcquires = 0;
-    int     readReleases = 0;
-    boolean writer       = false;
-
-    Lock      lock      = new ReentrantLock();
-    Condition condition  = lock.newCondition();
-
-    public Lock readLock()  { return new ReadLock();  }
-    public Lock writeLock() { return new WriteLock(); }
-
-    // ── ReadLock ──────────────────────────────────────────────────────────
-    class ReadLock implements Lock {
-        public void lock() {
-            lock.lock();
-            try {
-                // Espera si hay escritor (actual o esperando con mano levantada)
-                while (writer) {
-                    System.out.println("  [" + Thread.currentThread().getName() + "] lector espera (escritor con mano levantada)");
-                    try { condition.await(); } catch (InterruptedException e) {}
-                    System.out.println("  [WAKEUP] " + Thread.currentThread().getName() + " (Lector) despertó. Revisa si el escritor ya bajó la mano...");
-                }
-                readAcquires++;
-                System.out.println("  [" + Thread.currentThread().getName() + "] lector entra  (activos=" + (readAcquires - readReleases) + ")");
-            } finally { lock.unlock(); }
-        }
-
-        public void unlock() {
-            lock.lock();
-            try {
-                readReleases++;
-                int activos = readAcquires - readReleases;
-                System.out.println("  [" + Thread.currentThread().getName() + "] lector sale   (activos=" + activos + ")");
-                // Si no quedan lectores activos, el escritor esperando puede avanzar
-                if (activos == 0) {
-                    System.out.println("  [" + Thread.currentThread().getName() + "] último lector sale. Llamando signalAll() para el escritor en espera...");
-                    condition.signalAll();
-                }
-            } finally { lock.unlock(); }
-        }
-
-        public void lockInterruptibly() {}
-        public boolean tryLock() { return false; }
-        public boolean tryLock(long t, java.util.concurrent.TimeUnit u) { return false; }
-        public java.util.concurrent.locks.Condition newCondition() { return null; }
-    }
-
-    // ── WriteLock ─────────────────────────────────────────────────────────
     class WriteLock implements Lock {
         public void lock() {
             lock.lock();
             try {
-                // Paso 1: espero a que salga el escritor actual (si hay uno)
+                // Espera si hay cualquier lector O escritor activo
                 while (writer) {
-                    System.out.println("  [" + Thread.currentThread().getName() + "] escritor espera a otro escritor");
+                    System.out.println(" [FIRST WHILE - writer] [" + Thread.currentThread().getName() + "] escritor espera (readers=" + readers + ", writer=" + writer + ")");
                     try { condition.await(); } catch (InterruptedException e) {}
-                    System.out.println("  [WAKEUP] " + Thread.currentThread().getName() + " (Escritor) despertó. Revisa si el otro escritor terminó...");
+                    System.out.println("  [WAKEUP FIRST WHILE] " + Thread.currentThread().getName() + " (Escritor) despertó. Re-evaluando disponibilidad de la sala...");
                 }
-
-                // Paso 2: LEVANTO LA MANO — nuevos lectores ya no pueden entrar
                 writer = true;
-                System.out.println("  [JUSTICIA] " + Thread.currentThread().getName() + " levanta la mano (writer=true). Nuevos lectores se formarán.");
-
-                // Paso 3: espero a que los lectores ACTUALES terminen
-                while (readAcquires != readReleases) {
-                    System.out.println("  [" + Thread.currentThread().getName() + "] escritor espera lectores activos ("
-                        + (readAcquires - readReleases) + " restantes)");
+                while (readers > 0) {
+                    System.out.println(" [SECOND WHILE - readers] [" + Thread.currentThread().getName() + "] escritor espera (readers=" + readers + ", writer=" + writer + ")");
                     try { condition.await(); } catch (InterruptedException e) {}
-                    System.out.println("  [WAKEUP] " + Thread.currentThread().getName() + " (Escritor) despertó. Revisa si ya salieron los lectores...");
+                    System.out.println("  [WAKEUP SECOND WHILE] " + Thread.currentThread().getName() + " (Escritor) despertó. Re-evaluando disponibilidad de la sala...");
                 }
-
-                System.out.println("  [" + Thread.currentThread().getName() + "] escritor entra a la sección crítica");
+                System.out.println("  [" + Thread.currentThread().getName() + "] escritor entra");
             } finally { lock.unlock(); }
         }
 
@@ -432,121 +367,12 @@ public class FifoReadWriteLock {
             lock.lock();
             try {
                 writer = false;
-                System.out.println("  [" + Thread.currentThread().getName() + "] escritor sale (baja la mano, writer=false)");
+                System.out.println("  [" + Thread.currentThread().getName() + "] escritor sale");
+                // Despierta tanto lectores como escritores (alta contención)
+                System.out.println("  [" + Thread.currentThread().getName() + "] escritor liberó sala. Avisando a TODOS (signalAll)...");
                 condition.signalAll();
             } finally { lock.unlock(); }
         }
 
-        public void lockInterruptibly() {}
-        public boolean tryLock() { return false; }
-        public boolean tryLock(long t, java.util.concurrent.TimeUnit u) { return false; }
-        public java.util.concurrent.locks.Condition newCondition() { return null; }
-    }
-}
-
-// ── Demo: verificar que el lector no sufre inanición ─────────────────────────
-class FifoRWDemo {
-    static int recurso = 0;
-
-    public static void main(String[] args) throws InterruptedException {
-        FifoReadWriteLock rw = new FifoReadWriteLock();
-
-        Thread lector1 = new Thread(() -> {
-            System.out.println("[LLEGADA] Lector-1 solicita leer.");
-            Lock rl = rw.readLock();
-            rl.lock();
-            try {
-                Thread.sleep(50);
-                System.out.println("  [Lector-1] lee: recurso=" + recurso);
-            } catch (InterruptedException e) {
-            } finally { rl.unlock(); }
-        }, "Lector-1");
-
-        Thread escritor1 = new Thread(() -> {
-            System.out.println("[LLEGADA] Escritor-1 solicita escribir.");
-            Lock wl = rw.writeLock();
-            wl.lock();
-            try {
-                recurso++;
-                Thread.sleep(100);
-                System.out.println("  [Escritor-1] escribe: recurso=" + recurso);
-            } catch (InterruptedException e) {
-            } finally { wl.unlock(); }
-        }, "Escritor-1");
-
-        Thread escritor2 = new Thread(() -> {
-            System.out.println("[LLEGADA] Escritor-2 solicita escribir.");
-            Lock wl = rw.writeLock();
-            wl.lock();
-            try {
-                recurso++;
-                Thread.sleep(80);
-                System.out.println("  [Escritor-2] escribe: recurso=" + recurso);
-            } catch (InterruptedException e) {
-            } finally { wl.unlock(); }
-        }, "Escritor-2");
-
-        Thread lector2 = new Thread(() -> {
-            System.out.println("[LLEGADA] Lector-2 solicita leer.");
-            Lock rl = rw.readLock();
-            rl.lock();
-            try {
-                Thread.sleep(50);
-                System.out.println("  [Lector-2] lee: recurso=" + recurso);
-            } catch (InterruptedException e) {
-            } finally { rl.unlock(); }
-        }, "Lector-2");
-
-        System.out.println("=== FifoReadWriteLock ===");
-        System.out.println("Orden de llegada programado: Lector-1, Escritor-1, Escritor-2, Lector-2");
-        System.out.println("Justicia esperada: El Lector-2 NO debe colarse antes que los escritores.");
-        System.out.println("=========================================================================\n");
-
-        lector1.start();
-        Thread.sleep(30);
-        escritor1.start();
-        Thread.sleep(10);
-        escritor2.start();
-        Thread.sleep(10);
-        lector2.start();
-
-        lector1.join();
-        escritor1.join();
-        escritor2.join();
-        lector2.join();
-
-        System.out.println("\n=== Fin. recurso final=" + recurso + " ===");
-    }
-}
 #+END_SRC
 
------
-
-* 5. Comparativa rápida
-
-| Aspecto                    | LockedQueue        | SimpleRWLock      | FifoRWLock          |
-|----------------------------+--------------------+-------------------+---------------------|
-| Número de condiciones      | 2 (notFull/notEmpty)| 1                | 1                   |
-| Señal usada                | =signal()=         | =signalAll()=     | =signalAll()=       |
-| Puede haber inanición      | No                 | Sí (lectores/escritores)| No            |
-| Complejidad                | Baja               | Media             | Media-alta          |
-| Patrón                     | Productor/Consumidor| Lectores-escritores| Lectores-escritores |
-
------
-
-* 6. Preguntas para reflexionar
-
-1. En =LockedQueue=, ¿qué pasaría si usáramos una sola condición
-   y =signalAll()= en lugar de dos condiciones con =signal()=?
-   ¿Seguiría siendo correcto? ¿Sería igual de eficiente?
-
-2. En =SimpleReadWriteLock.WriteLock=, la condición es =readers > 0 || writer=.
-   ¿Por qué =||= y no =&&=? Construye un contraejemplo donde =&&= produciría
-   un resultado incorrecto.
-
-3. En =FifoReadWriteLock=, el escritor levanta =writer = true= antes de
-   esperar a los lectores actuales. ¿Por qué esto garantiza que los nuevos
-   lectores no pueden adelantarse al escritor?
-
-4. Si tienes un sistema con muchos más lectores que escritores,
-   ¿cuál de los dos RWLock tiene mejor rendimiento? ¿Por qué?
