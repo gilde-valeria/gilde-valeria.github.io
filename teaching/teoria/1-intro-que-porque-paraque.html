@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2026-05-06 Wed 07:11 -->
+<!-- 2026-05-11 Mon 19:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>¿Qué es la Concurrencia? Origen, Propósito y Definición</title>
@@ -63,26 +63,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org77639bc">1. ¿Qué es la Concurrencia?</a></li>
-<li><a href="#org5d7a081">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
+<li><a href="#org5ebd6f6">1. ¿Qué es la Concurrencia?</a></li>
+<li><a href="#orgc424259">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
 <ul>
-<li><a href="#org8275844">El Origen (1961 - Atlas Computer)</a></li>
-<li><a href="#orgb3bbe71">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
-<li><a href="#org6cfc667">¿Multicore, Multiprocesador y Multihilo?</a></li>
+<li><a href="#orgd562d76">El Origen (1961 - Atlas Computer)</a></li>
+<li><a href="#org274d383">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
+<li><a href="#org0fbec90">¿Multicore, Multiprocesador y Multihilo?</a></li>
 </ul>
 </li>
-<li><a href="#org16ee76d">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
+<li><a href="#org735e4a0">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
 <ul>
-<li><a href="#org97db799">La Diferencia de Enfoque</a></li>
+<li><a href="#org46396e0">La Diferencia de Enfoque</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
-<section id="outline-container-org77639bc" class="outline-2">
-<h2 id="org77639bc">1. ¿Qué es la Concurrencia?</h2>
-<div class="outline-text-2" id="text-org77639bc">
+<section id="outline-container-org5ebd6f6" class="outline-2">
+<h2 id="org5ebd6f6">1. ¿Qué es la Concurrencia?</h2>
+<div class="outline-text-2" id="text-org5ebd6f6">
 <p>
 Coordinar agentes en presencia de adversarios.
 </p>
@@ -102,13 +102,13 @@ Coordinar agentes en presencia de adversarios.
 </div>
 </section>
 
-<section id="outline-container-org5d7a081" class="outline-2">
-<h2 id="org5d7a081">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
-<div class="outline-text-2" id="text-org5d7a081">
+<section id="outline-container-orgc424259" class="outline-2">
+<h2 id="orgc424259">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
+<div class="outline-text-2" id="text-orgc424259">
 </div>
-<div id="outline-container-org8275844" class="outline-3">
-<h3 id="org8275844">El Origen (1961 - Atlas Computer)</h3>
-<div class="outline-text-3" id="text-org8275844">
+<div id="outline-container-orgd562d76" class="outline-3">
+<h3 id="orgd562d76">El Origen (1961 - Atlas Computer)</h3>
+<div class="outline-text-3" id="text-orgd562d76">
 <p>
 La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
 </p>
@@ -118,7 +118,7 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </ul>
 
 
-<figure id="org355c2cd">
+<figure id="org180a578">
 <img src="../../images/STvsMT_CPU.png" alt="STvsMT_CPU.png">
 
 </figure>
@@ -127,9 +127,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 
 
 
-<div id="outline-container-orgb3bbe71" class="outline-3">
-<h3 id="orgb3bbe71">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
-<div class="outline-text-3" id="text-orgb3bbe71">
+<div id="outline-container-org274d383" class="outline-3">
+<h3 id="org274d383">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
+<div class="outline-text-3" id="text-org274d383">
 <p>
 ¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
 </p>
@@ -141,9 +141,9 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </div>
 </div>
 
-<div id="outline-container-org6cfc667" class="outline-3">
-<h3 id="org6cfc667">¿Multicore, Multiprocesador y Multihilo?</h3>
-<div class="outline-text-3" id="text-org6cfc667">
+<div id="outline-container-org0fbec90" class="outline-3">
+<h3 id="org0fbec90">¿Multicore, Multiprocesador y Multihilo?</h3>
+<div class="outline-text-3" id="text-org0fbec90">
 <p>
 Aunque a menudo se confunden, representan distintos niveles de integración y formas de gestionar los recursos del hardware.
 </p>
@@ -167,7 +167,7 @@ Ejemplo: Denelcor HEP (1982) y más tarde el Tera MTA (1990).
 </p>
 
 
-<figure id="org2ae88f6">
+<figure id="orge5e16b1">
 <img src="../../images/MultithreadComparison.png" alt="MultithreadComparison.png">
 
 </figure>
@@ -206,7 +206,7 @@ Ejemplo: IBM Power4 (2001), el primer procesador de doble núcleo en un solo chi
 </p>
 
 
-<figure id="org374840e">
+<figure id="org5585601">
 <img src="../../images/MulticoreVsMultiprocessor.png" alt="MulticoreVsMultiprocessor.png">
 
 </figure>
@@ -335,9 +335,9 @@ Cachés: A medida que avanzamos, la caché se vuelve más compleja. En multicore
 </div>
 </section>
 
-<section id="outline-container-org16ee76d" class="outline-2">
-<h2 id="org16ee76d">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
-<div class="outline-text-2" id="text-org16ee76d">
+<section id="outline-container-org735e4a0" class="outline-2">
+<h2 id="org735e4a0">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
+<div class="outline-text-2" id="text-org735e4a0">
 <blockquote>
 <p>
 A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable.
@@ -350,9 +350,9 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 </p>
 </div>
 
-<div id="outline-container-org97db799" class="outline-3">
-<h3 id="org97db799">La Diferencia de Enfoque</h3>
-<div class="outline-text-3" id="text-org97db799">
+<div id="outline-container-org46396e0" class="outline-3">
+<h3 id="org46396e0">La Diferencia de Enfoque</h3>
+<div class="outline-text-3" id="text-org46396e0">
 <ul class="org-ul">
 <li><b><b>Cómputo Paralelo:</b></b> Busca <b><b>Eficiencia</b></b>. Es un entorno "amigable" donde dividimos una tarea para terminar antes (ej. multiplicar matrices).</li>
 <li><b><b>Cómputo Distribuido:</b></b> Busca <b><b>Coordinación</b></b>. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.</li>
@@ -360,7 +360,7 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 
 
 
-<figure id="org6f051d1">
+<figure id="org19e96b4">
 <img src="../../images/procesador_atomic.png" alt="procesador_atomic.png">
 
 </figure>
