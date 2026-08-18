@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>De Java a Rust y Clojure: paradigmas de concurrencia · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 6 · 2026-2" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    background-color: #232629;
+    color: #7a7c7d;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+div.sourceCode
+  { color: #cfcfc2; background-color: #232629; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #cfcfc2; } /* Normal */
+code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+code span.an { color: #3f8058; } /* Annotation */
+code span.at { color: #2980b9; } /* Attribute */
+code span.bn { color: #f67400; } /* BaseN */
+code span.bu { color: #7f8c8d; } /* BuiltIn */
+code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #3daee9; } /* Char */
+code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+code span.co { color: #7a7c7d; } /* Comment */
+code span.cv { color: #7f8c8d; } /* CommentVar */
+code span.do { color: #a43340; } /* Documentation */
+code span.dt { color: #2980b9; } /* DataType */
+code span.dv { color: #f67400; } /* DecVal */
+code span.er { color: #da4453; text-decoration: underline; } /* Error */
+code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+code span.fl { color: #f67400; } /* Float */
+code span.fu { color: #8e44ad; } /* Function */
+code span.im { color: #27ae60; } /* Import */
+code span.in { color: #c45b00; } /* Information */
+code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+code span.op { color: #cfcfc2; } /* Operator */
+code span.ot { color: #27ae60; } /* Other */
+code span.pp { color: #27ae60; } /* Preprocessor */
+code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #da4453; } /* SpecialString */
+code span.st { color: #f44f4f; } /* String */
+code span.va { color: #27aeae; } /* Variable */
+code span.vs { color: #da4453; } /* VerbatimString */
+code span.wa { color: #da4453; } /* Warning */
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026-2</p>
+    <h1>De Java a Rust y Clojure: paradigmas de concurrencia</h1>
+    <p class="practica-sub">Práctica 6 · 2026-2</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica6_Lenguajes.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P6" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p6.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+        <li><a href="#contexto" id="toc-contexto">Contexto</a></li>
+    <li><a href="#data-races-útiles-cuando-la-relajación-es-correcta" id="toc-data-races-útiles-cuando-la-relajación-es-correcta">Data Races útiles: cuando la relajación es correcta</a></li>
+    <li><a href="#ejemplos-aplicados" id="toc-ejemplos-aplicados">Ejemplos Aplicados</a></li>
+    <li><a href="#tabla-comparativa" id="toc-tabla-comparativa">Tabla Comparativa</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    <li><a href="#referencias" id="toc-referencias">Referencias</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+        <p>A lo largo del curso hemos razonado sobre corrección en programas
+    concurrentes: linealizabilidad, consistencia secuencial, condiciones de progreso
+    y estructuras lock-free.
+    Todo ese análisis se ha hecho en Java.
+    Sin embargo, los mismos problemas, y sus soluciones, se expresan de maneras
+    radicalmente distintas en otros lenguajes.
+    Esta práctica compara tres lenguajes que representan tres filosofías de
+    diseño distintas ante el mismo problema: cómo lidiar con el estado
+    compartido y el tiempo.</p>
+    <p>Una dimensión que el curso no ha explorado explícitamente es que las
+    <em>data races</em>, ese fenómeno que en la Práctica 1 vimos producir
+    resultados incorrectos, no son siempre un error.
+    De hecho, algunas de las estructuras más eficientes que existen en la
+    literatura explotan deliberadamente el comportamiento relajado de la memoria
+    para lograr escalabilidad.
+    Veremos un ejemplo concreto del libro de Herlihy &amp; Shavit [HS08].</p>
+    <h2 id="contexto">Contexto</h2>
+    <h3 id="java-el-modelo-clásico-de-memoria-compartida">Java: el modelo clásico de memoria compartida</h3>
+    <p>Java nació en la era de los hilos del sistema operativo.
+    Su modelo de concurrencia está basado en memoria compartida: todos los hilos
+    viven en el mismo proceso y acceden al mismo <em>heap</em>.
+    Cada hilo tiene su propia <em>stack</em> con variables locales, pero los objetos
+    creados con <code>new</code> residen en el heap y son “visibles” para todos.</p>
+    <ul>
+    <li><p><strong>Gestión de memoria:</strong> Heap compartido + stacks por hilo.
+    Recolector de basura (GC) automático, evita fugas pero puede
+    introducir pausas <em>stop-the-world</em>.</p></li>
+    <li><p><strong>Sincronización:</strong> Candados implícitos
+    (<code>synchronized</code>) o explícitos (<code>ReentrantLock</code>).
+    El programador protege secciones críticas manualmente.</p></li>
+    <li><p><strong>Volatile y fences:</strong> La palabra clave <code>volatile</code>
+    garantiza visibilidad y establece barreras de memoria que impiden que
+    el compilador o la CPU reordenen instrucciones.
+    No garantiza atomicidad.</p></li>
+    <li><p><strong>Tipos atómicos:</strong> <code>AtomicInteger</code>, <code>AtomicLong</code>,
+    <code>AtomicReference</code>, los mismos que usamos en las Prácticas 5
+    y 6 para operaciones CAS.</p></li>
+    </ul>
+    <p>El modelo de memoria de Java (JMM), especificado en el JSR-133
+    [Manson et al., POPL 2005], define formalmente qué valores puede leer un hilo
+    de una variable escrita por otro. El JMM es un ejemplo de modelo de memoria
+    débil: el hardware moderno puede reordenar instrucciones y mantener cachés
+    locales, y el JMM define exactamente cuándo esos reordenamientos son
+    visibles, es el mismo tipo de modelo que estudia <em>Herding Cats</em>
+    [Alglave et al., 2014].</p>
+    <h3 id="rust-concurrencia-sin-miedo-fearless-concurrency">Rust: concurrencia sin miedo (<em>Fearless Concurrency</em>)</h3>
+    <p><strong>Hola mundo en:</strong> <a href="https://github.com/gilde-valeria/gilde-valeria.github.io/blob/main/teaching/practicas/concurrencia-lenguajes/de-java-a-rust.org" class="uri">https://github.com/gilde-valeria/gilde-valeria.github.io/blob/main/teaching/practicas/concurrencia-lenguajes/de-java-a-rust.org</a></p>
+    <p>Rust ataca el problema desde la raíz: el compilador rechaza programas con
+    <em>data races</em>.
+    Esto se logra sin un recolector de basura, a través de un sistema de tipos
+    que rastrea en tiempo de compilación quién posee cada dato y cuándo se
+    puede acceder a él.</p>
+    <ul>
+    <li><p><strong>Gestión de memoria:</strong> Heap y Stack, sin GC.
+    El sistema de <em>Ownership</em> (propiedad) y <em>Borrowing</em>
+    (préstamo) garantiza que la memoria se libera exactamente cuando
+    deja de usarse, sin pausas ni fugas.</p></li>
+    <li><p><strong>La regla de oro:</strong> En cualquier punto del programa, o existe
+    <em>una</em> referencia mutable (<code>&amp;mut T</code>), o existen
+    <em>múltiples</em> referencias inmutables (<code>&amp;T</code>), pero nunca
+    ambas al mismo tiempo.
+    Esta regla hace imposibles los data races, si el código compila,
+    no tiene data races.</p></li>
+    <li><p><strong>Mutex acoplado al dato:</strong> <code>Mutex&lt;T&gt;</code> en Rust no solo
+    protege el acceso, el dato vive <em>dentro</em> del Mutex.
+    No puedes leer el dato sin antes adquirir el lock.
+    En Java, el programador decide qué proteger; en Rust, el compilador
+    lo impone.</p></li>
+    <li><p><strong>Compartir entre hilos:</strong> <code>Arc&lt;T&gt;</code> (Atomic Reference
+    Counter), análogo a <code>AtomicReference</code> en Java, permite que
+    múltiples hilos posean una referencia al mismo dato.</p></li>
+    <li><p><strong>Ordenamiento de memoria explícito:</strong>
+    <code>std::sync::atomic</code> expone <code>Ordering::SeqCst</code>,
+    <code>Ordering::Acquire</code>, <code>Ordering::Release</code>, el mismo
+    vocabulario de barreras de memoria que <em>Herding Cats</em>
+    formaliza.</p></li>
+    </ul>
+    <p>Rust es el lenguaje preferido para programación de sistemas de bajo nivel
+    donde el rendimiento y la ausencia de GC son críticos: sistemas operativos,
+    drivers, contratos inteligentes en blockchain.</p>
+    <h3 id="clojure-estado-identidad-y-el-tiempo">Clojure: estado, identidad y el tiempo</h3>
+    <p><strong>Hola mundo en:</strong> <a href="https://github.com/gilde-valeria/gilde-valeria.github.io/blob/main/teaching/practicas/concurrencia-lenguajes/de-java-a-clojure.org" class="uri">https://github.com/gilde-valeria/gilde-valeria.github.io/blob/main/teaching/practicas/concurrencia-lenguajes/de-java-a-clojure.org</a></p>
+    <p>Clojure corre sobre la JVM, por lo que hereda el heap, los stacks y el
+    recolector de basura de Java.
+    Sin embargo, su filosofía de concurrencia es radicalmente distinta: en lugar
+    de proteger el acceso a la memoria, elimina el estado mutable por defecto.</p>
+    <ul>
+    <li><p><strong>Inmutabilidad por defecto:</strong> Las estructuras de datos de
+    Clojure (listas, vectores, mapas) son persistentes e inmutables.
+    Modificar un vector no destruye el original, crea una nueva versión
+    compartiendo estructura con el anterior
+    (<em>persistent data structures</em>).</p></li>
+    <li><p><strong>Separación de identidad y estado:</strong> Clojure distingue entre
+    la <em>identidad</em> (la referencia, ej. ‘la cuenta de Alice’) y el
+    <em>estado</em> (el valor en un momento dado, ej. ‘1 000 pesos’).
+    Los <code>ref</code>, <code>atom</code> y <code>agent</code> son tipos de
+    identidad con diferentes semánticas de actualización.</p></li>
+    <li><p><strong>Para qué se usa en la industria:</strong> Nubank lo usa para su
+    core bancario.
+    Se usa en motores de emparejamiento (<em>matching engines</em>),
+    procesamiento de eventos en tiempo real, y pipelines de datos.
+    El STM brilla cuando necesitas actualizar múltiples variables
+    coordinadamente sin riesgo de deadlock.</p></li>
+    </ul>
+    <h4 class="unnumbered" id="software-transactional-memory-stm">Software Transactional Memory (STM)</h4>
+    <div class="keybox">
+    <p><strong>¿Qué es STM?</strong>
+    Es un modelo de concurrencia que traslada la abstracción de las transacciones
+    de base de datos al acceso a memoria.
+    En lugar de usar candados explícitos, el programador declara un bloque
+    transaccional (<code>dosync</code> en Clojure).
+    Dentro del bloque, todas las lecturas y escrituras a <code>ref</code>s se registran
+    en un log local al hilo.
+    Al terminar el bloque, el runtime verifica si algún otro hilo modificó los
+    mismos <code>ref</code>s durante la ejecución.
+    Si hubo conflicto, descarta el log y reintenta la transacción desde cero.
+    Si no hubo conflicto, aplica todos los cambios atómicamente.</p>
+    </div>
+    <p>Las propiedades que garantiza el STM de Clojure son análogas a las
+    propiedades ACID de una base de datos, pero en memoria:</p>
+    <div class="center">
+    <table>
+    <thead>
+    <tr class="header">
+    <th style="text-align: left;"><strong>Propiedad</strong></th>
+    <th style="text-align: left;"><strong>Significado en STM</strong></th>
+    <th style="text-align: left;"><strong>Equivalente en el curso</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td style="text-align: left;">Atomicidad</td>
+    <td style="text-align: left;">Todos los cambios ocurren o ninguno</td>
+    <td style="text-align: left;">Punto de linearización único</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Consistencia</td>
+    <td style="text-align: left;">El estado resultante respeta los invariantes</td>
+    <td style="text-align: left;">Objeto correcto</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;">Aislamiento</td>
+    <td style="text-align: left;">Transacciones conc. no se ven entre sí</td>
+    <td style="text-align: left;">Operaciones no superpuestas</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Durabilidad*</td>
+    <td style="text-align: left;">*No garantizada — STM es en RAM</td>
+    <td style="text-align: left;">N/A</td>
+    </tr>
+    <tr class="odd">
+    <td colspan="3" style="text-align: left;">Tabla 1: Propiedades del STM de Clojure y su equivalente en el curso.</td>
+    </tr>
+    </tbody>
+    </table>
+    </div>
+    <p>La diferencia crucial frente a los candados: con STM no es posible un deadlock
+    causado por el orden de adquisición de locks, porque no existen locks
+    explícitos.
+    La resolución de conflictos la hace el runtime, no el programador.</p>
+    <h2 id="data-races-útiles-cuando-la-relajación-es-correcta">Data Races útiles: cuando la relajación es correcta</h2>
+    <p>En la Práctica 1 vimos que un contador compartido sin sincronización
+    produce resultados incorrectos.
+    En la Práctica 5 analizamos los modelos de consistencia que formalizan
+    exactamente qué significa ‘incorrecto’.
+    Sin embargo, Herlihy y Shavit argumentan que existen
+    situaciones donde permitir intencionalmente que un hilo lea un valor
+    ‘obsoleto’ o ‘inconsistente’ es no solo aceptable, sino la base de
+    implementaciones correctas y eficientes.</p>
+    <h3 id="el-contador-de-consistencia-quiescente">El contador de Consistencia Quiescente</h3>
+    <p>El siguiente ejemplo, adaptado directamente de Herlihy &amp; Shavit, muestra
+    un contador concurrente que <em>no</em> es linealizable ni secuencialmente
+    consistente, pero sí es <em>quiescentemente consistente</em>, y eso es
+    suficiente para muchas aplicaciones de alto rendimiento.</p>
+    <div class="sourceCode" id="lst:qcs" data-language="Java" data-caption="Contador quiescentemente consistente." label="lst:qcs"><pre class="sourceCode java"><code class="language-java"><span id="lst:qcs-1"><a href="#lst:qcs-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">atomic</span><span class="op">.</span><span class="im">AtomicLong</span><span class="op">;</span></span>
+<span id="lst:qcs-2"><a href="#lst:qcs-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:qcs-3"><a href="#lst:qcs-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="lst:qcs-4"><a href="#lst:qcs-4" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Adaptado de Herlihy <span class="er">&amp;</span> Shavit<span class="co">,</span> The Art of Multiprocessor Programming<span class="co">,</span></span>
+<span id="lst:qcs-5"><a href="#lst:qcs-5" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Capitulo <span class="co">5. </span>Contador con Consistencia Quiescente<span class="co">.</span></span>
+<span id="lst:qcs-6"><a href="#lst:qcs-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span></span>
+<span id="lst:qcs-7"><a href="#lst:qcs-7" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> ADVERTENCIA INTENCIONAL<span class="co">:</span> fetch<span class="co">()</span> puede devolver un valor desactualizado</span>
+<span id="lst:qcs-8"><a href="#lst:qcs-8" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> mientras hay incrementos en vuelo<span class="co">.</span> La <span class="co">&quot;</span>data race<span class="co">&quot;</span> es deliberada<span class="co">:</span></span>
+<span id="lst:qcs-9"><a href="#lst:qcs-9" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> el hilo lector puede ver un valor que no refleja los incrementos locales</span>
+<span id="lst:qcs-10"><a href="#lst:qcs-10" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> de los otros hilos<span class="co">.</span> Si todos los hilos cesan <span class="co">(</span>quiescence<span class="co">),</span> el valor</span>
+<span id="lst:qcs-11"><a href="#lst:qcs-11" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> sera correcto<span class="co">.</span></span>
+<span id="lst:qcs-12"><a href="#lst:qcs-12" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span></span>
+<span id="lst:qcs-13"><a href="#lst:qcs-13" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Propiedad<span class="co">:</span> Quiescent Consistency <span class="co">(</span>no Linearizable<span class="co">,</span> no Seq<span class="co">.</span> Consistent<span class="co">).</span></span>
+<span id="lst:qcs-14"><a href="#lst:qcs-14" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="lst:qcs-15"><a href="#lst:qcs-15" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> QCSCounter <span class="op">{</span></span>
+<span id="lst:qcs-16"><a href="#lst:qcs-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">AtomicLong</span> globalCount <span class="op">=</span> <span class="kw">new</span> <span class="bu">AtomicLong</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span></span>
+<span id="lst:qcs-17"><a href="#lst:qcs-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span> threshold<span class="op">;</span></span>
+<span id="lst:qcs-18"><a href="#lst:qcs-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:qcs-19"><a href="#lst:qcs-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// La &quot;data race&quot; util: cada hilo tiene su copia local (stack privado).</span></span>
+<span id="lst:qcs-20"><a href="#lst:qcs-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// No hay sincronizacion entre el ThreadLocal y globalCount</span></span>
+<span id="lst:qcs-21"><a href="#lst:qcs-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// durante los incrementos -- eso es intencional.</span></span>
+<span id="lst:qcs-22"><a href="#lst:qcs-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">ThreadLocal</span><span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> local <span class="op">=</span></span>
+<span id="lst:qcs-23"><a href="#lst:qcs-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ThreadLocal</span><span class="op">.</span><span class="fu">withInitial</span><span class="op">(()</span> <span class="op">-&gt;</span> <span class="dv">0L</span><span class="op">);</span></span>
+<span id="lst:qcs-24"><a href="#lst:qcs-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:qcs-25"><a href="#lst:qcs-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">QCSCounter</span><span class="op">(</span><span class="dt">int</span> threshold<span class="op">)</span> <span class="op">{</span> <span class="kw">this</span><span class="op">.</span><span class="fu">threshold</span> <span class="op">=</span> threshold<span class="op">;</span> <span class="op">}</span></span>
+<span id="lst:qcs-26"><a href="#lst:qcs-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:qcs-27"><a href="#lst:qcs-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="lst:qcs-28"><a href="#lst:qcs-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> current <span class="op">=</span> local<span class="op">.</span><span class="fu">get</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="lst:qcs-29"><a href="#lst:qcs-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>current <span class="op">&gt;=</span> threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst:qcs-30"><a href="#lst:qcs-30" aria-hidden="true" tabindex="-1"></a>            globalCount<span class="op">.</span><span class="fu">addAndGet</span><span class="op">(</span>current<span class="op">);</span> <span class="co">// volcado atomico al global</span></span>
+<span id="lst:qcs-31"><a href="#lst:qcs-31" aria-hidden="true" tabindex="-1"></a>            local<span class="op">.</span><span class="fu">set</span><span class="op">(</span><span class="dv">0L</span><span class="op">);</span></span>
+<span id="lst:qcs-32"><a href="#lst:qcs-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="lst:qcs-33"><a href="#lst:qcs-33" aria-hidden="true" tabindex="-1"></a>            local<span class="op">.</span><span class="fu">set</span><span class="op">(</span>current<span class="op">);</span> <span class="co">// sin sincronizacion -- data race deliberada</span></span>
+<span id="lst:qcs-34"><a href="#lst:qcs-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="lst:qcs-35"><a href="#lst:qcs-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:qcs-36"><a href="#lst:qcs-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:qcs-37"><a href="#lst:qcs-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// fetch() puede ser incorrecto durante ejecucion concurrente</span></span>
+<span id="lst:qcs-38"><a href="#lst:qcs-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (ignora los contadores locales de otros hilos).</span></span>
+<span id="lst:qcs-39"><a href="#lst:qcs-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">fetch</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> globalCount<span class="op">.</span><span class="fu">get</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="lst:qcs-40"><a href="#lst:qcs-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <div class="warnbox">
+    <p><strong>Nota:</strong> La ‘data race’ aquí no es un bug, es una decisión de
+    diseño consciente.
+    El análisis de corrección formal dice: este contador satisface
+    Consistencia Quiescente pero no Linealizabilidad ni Consistencia Secuencial.
+    Para aplicaciones donde se consulta el contador solo en periodos de inactividad
+    (ej. estadísticas periódicas, métricas de rendimiento), esto es
+    completamente correcto y drásticamente más rápido que un
+    <code>AtomicLong</code> puro bajo alta contención.</p>
+    </div>
+    <h3 id="por-qué-es-más-rápido">¿Por qué es más rápido?</h3>
+    <p>El costo de <code>AtomicLong.incrementAndGet()</code> bajo alta contención es
+    alto: todos los núcleos intentan invalidar la misma línea de caché
+    (<em>cache line bouncing</em>).
+    El contador quiescente distribuye el trabajo: cada hilo escribe en su propia
+    memoria (su stack, a través del <code>ThreadLocal</code>) y solo ocurre
+    contención en el volcado al global, que sucede una vez cada
+    <code>threshold</code> incrementos.
+    El costo de 1 000 incrementos pasa de <span class="math inline">\(O(1{,}000)\)</span> operaciones atómicas a
+    <span class="math inline">\(O(1{,}000/\mathit{threshold})\)</span> operaciones atómicas.</p>
+    <p>Esta es exactamente la idea detrás del <strong>SloppyCounter</strong> de la
+    Práctica 5 y del <strong>árbol de difracción de Shavit</strong>: relajar la
+    consistencia para ganar escalabilidad.
+    La pregunta correcta no es ‘¿hay una data race?’ sino ‘¿qué modelo de
+    consistencia necesita mi aplicación?’</p>
+    <h2 id="ejemplos-aplicados">Ejemplos Aplicados</h2>
+    <h3 id="qué-es-un-smart-contract">¿Qué es un Smart Contract?</h3>
+    <div class="keybox">
+    <p><strong>Un contrato inteligente (<em>smart contract</em>)</strong> es un programa que
+    reside en una cadena de bloques (blockchain) y se ejecuta automáticamente
+    cuando se cumplen condiciones predefinidas, sin necesidad de un intermediario.
+    El código y sus resultados son inmutables y verificables públicamente.
+    En términos de cómputo concurrente, un contrato inteligente es un objeto
+    compartido accedido por múltiples transacciones que ocurren
+    simultáneamente — exactamente el escenario que hemos analizado en el curso.</p>
+    </div>
+    <p>La conexión con el curso es directa: una blockchain debe garantizar que el
+    estado global (el registro de balances) sea linealizable — cada transacción
+    debe parecer que ocurrió en un único instante de tiempo real.
+    Si no fuera linealizable, sería posible gastar el mismo saldo dos veces
+    (el famoso <em>double-spend problem</em>).</p>
+    <p><strong>¿Por qué Rust?</strong>
+    Redes como Solana o Polkadot usan Rust para sus contratos inteligentes porque:
+    (1) compila a WebAssembly (Wasm) o bytecode determinista,
+    (2) no tiene Garbage Collector (las pausas GC son inaceptables cuando cada
+    instrucción cuesta <em>gas</em>), y
+    (3) el sistema de tipos garantiza ausencia de data races en tiempo de
+    compilación — propiedad crítica cuando el contrato maneja valor real.</p>
+    <h3 id="contrato-inteligente-de-tokens-en-rust">Contrato inteligente de tokens en Rust</h3>
+    <div class="sourceCode" id="lst:rust" data-language="Rust" data-caption="Contrato inteligente de tokens en Rust.
+               Compilar: \texttt{rustc -{}-edition 2021 contrato.rs \&amp;\&amp; ./contrato}" label="lst:rust"><pre class="sourceCode rust"><code class="language-rust"><span id="lst:rust-1"><a href="#lst:rust-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::collections::</span>HashMap<span class="op">;</span></span>
+<span id="lst:rust-2"><a href="#lst:rust-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::sync::</span><span class="op">{</span>Arc<span class="op">,</span> Mutex<span class="op">};</span></span>
+<span id="lst:rust-3"><a href="#lst:rust-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="lst:rust-4"><a href="#lst:rust-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-5"><a href="#lst:rust-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// Estado del contrato: un mapa de direcciones a balances.</span></span>
+<span id="lst:rust-6"><a href="#lst:rust-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// El dato vive DENTRO del Mutex -- no se puede acceder sin el lock.</span></span>
+<span id="lst:rust-7"><a href="#lst:rust-7" aria-hidden="true" tabindex="-1"></a><span class="co">/// Arc permite que multiples hilos (transacciones) compartan la referencia.</span></span>
+<span id="lst:rust-8"><a href="#lst:rust-8" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> TokenContract <span class="op">{</span></span>
+<span id="lst:rust-9"><a href="#lst:rust-9" aria-hidden="true" tabindex="-1"></a>    balances<span class="op">:</span> Mutex<span class="op">&lt;</span>HashMap<span class="op">&lt;</span><span class="dt">String</span><span class="op">,</span> <span class="dt">u64</span><span class="op">&gt;&gt;,</span></span>
+<span id="lst:rust-10"><a href="#lst:rust-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst:rust-11"><a href="#lst:rust-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-12"><a href="#lst:rust-12" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> TokenContract <span class="op">{</span></span>
+<span id="lst:rust-13"><a href="#lst:rust-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="lst:rust-14"><a href="#lst:rust-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="kw">mut</span> state <span class="op">=</span> <span class="pp">HashMap::</span>new()<span class="op">;</span></span>
+<span id="lst:rust-15"><a href="#lst:rust-15" aria-hidden="true" tabindex="-1"></a>        state<span class="op">.</span>insert(<span class="st">&quot;Alice&quot;</span><span class="op">.</span>to_string()<span class="op">,</span> <span class="dv">1000</span>)<span class="op">;</span></span>
+<span id="lst:rust-16"><a href="#lst:rust-16" aria-hidden="true" tabindex="-1"></a>        state<span class="op">.</span>insert(<span class="st">&quot;Bob&quot;</span><span class="op">.</span>to_string()<span class="op">,</span>    <span class="dv">500</span>)<span class="op">;</span></span>
+<span id="lst:rust-17"><a href="#lst:rust-17" aria-hidden="true" tabindex="-1"></a>        TokenContract <span class="op">{</span> balances<span class="op">:</span> <span class="pp">Mutex::</span>new(state) <span class="op">}</span></span>
+<span id="lst:rust-18"><a href="#lst:rust-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:rust-19"><a href="#lst:rust-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-20"><a href="#lst:rust-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Punto de linearizacion: el momento en que lock() retorna.</span></span>
+<span id="lst:rust-21"><a href="#lst:rust-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> transfer(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> from<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span><span class="op">,</span> to<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span><span class="op">,</span> amount<span class="op">:</span> <span class="dt">u64</span>) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="lst:rust-22"><a href="#lst:rust-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="kw">mut</span> b <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>balances<span class="op">.</span>lock()<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="lst:rust-23"><a href="#lst:rust-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> from_bal <span class="op">=</span> b<span class="op">.</span>get(from)<span class="op">.</span>copied()<span class="op">.</span>unwrap_or(<span class="dv">0</span>)<span class="op">;</span></span>
+<span id="lst:rust-24"><a href="#lst:rust-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> from_bal <span class="op">&lt;</span> amount <span class="op">{</span></span>
+<span id="lst:rust-25"><a href="#lst:rust-25" aria-hidden="true" tabindex="-1"></a>            <span class="pp">println!</span>(<span class="st">&quot;[RECHAZADA] {} no tiene fondos&quot;</span><span class="op">,</span> from)<span class="op">;</span></span>
+<span id="lst:rust-26"><a href="#lst:rust-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="cn">false</span><span class="op">;</span></span>
+<span id="lst:rust-27"><a href="#lst:rust-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="lst:rust-28"><a href="#lst:rust-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>b<span class="op">.</span>entry(from<span class="op">.</span>to_string())<span class="op">.</span>or_insert(<span class="dv">0</span>) <span class="op">-=</span> amount<span class="op">;</span></span>
+<span id="lst:rust-29"><a href="#lst:rust-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>b<span class="op">.</span>entry(to<span class="op">.</span>to_string())<span class="op">.</span>or_insert(<span class="dv">0</span>)   <span class="op">+=</span> amount<span class="op">;</span></span>
+<span id="lst:rust-30"><a href="#lst:rust-30" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">&quot;[OK] {} -&gt; {} : {} tokens&quot;</span><span class="op">,</span> from<span class="op">,</span> to<span class="op">,</span> amount)<span class="op">;</span></span>
+<span id="lst:rust-31"><a href="#lst:rust-31" aria-hidden="true" tabindex="-1"></a>        <span class="cn">true</span></span>
+<span id="lst:rust-32"><a href="#lst:rust-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// El Mutex se libera automaticamente al salir del scope (drop).</span></span>
+<span id="lst:rust-33"><a href="#lst:rust-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Equivale al bloque finally { lock.unlock(); } de Java,</span></span>
+<span id="lst:rust-34"><a href="#lst:rust-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// pero garantizado por el compilador.</span></span>
+<span id="lst:rust-35"><a href="#lst:rust-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:rust-36"><a href="#lst:rust-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-37"><a href="#lst:rust-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> balance(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> addr<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="dt">u64</span> <span class="op">{</span></span>
+<span id="lst:rust-38"><a href="#lst:rust-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>balances<span class="op">.</span>lock()<span class="op">.</span>unwrap()<span class="op">.</span>get(addr)<span class="op">.</span>copied()<span class="op">.</span>unwrap_or(<span class="dv">0</span>)</span>
+<span id="lst:rust-39"><a href="#lst:rust-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:rust-40"><a href="#lst:rust-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst:rust-41"><a href="#lst:rust-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-42"><a href="#lst:rust-42" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="lst:rust-43"><a href="#lst:rust-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> contract <span class="op">=</span> <span class="pp">Arc::</span>new(<span class="pp">TokenContract::</span>new())<span class="op">;</span></span>
+<span id="lst:rust-44"><a href="#lst:rust-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="lst:rust-45"><a href="#lst:rust-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-46"><a href="#lst:rust-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">3</span> <span class="op">{</span></span>
+<span id="lst:rust-47"><a href="#lst:rust-47" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> c <span class="op">=</span> <span class="pp">Arc::</span>clone(<span class="op">&amp;</span>contract)<span class="op">;</span></span>
+<span id="lst:rust-48"><a href="#lst:rust-48" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(<span class="pp">thread::</span>spawn(<span class="kw">move</span> <span class="op">||</span> <span class="op">{</span></span>
+<span id="lst:rust-49"><a href="#lst:rust-49" aria-hidden="true" tabindex="-1"></a>            c<span class="op">.</span>transfer(<span class="st">&quot;Alice&quot;</span><span class="op">,</span> <span class="st">&quot;Bob&quot;</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">;</span></span>
+<span id="lst:rust-50"><a href="#lst:rust-50" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>))<span class="op">;</span></span>
+<span id="lst:rust-51"><a href="#lst:rust-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:rust-52"><a href="#lst:rust-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> handles <span class="op">{</span> h<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span> <span class="op">}</span></span>
+<span id="lst:rust-53"><a href="#lst:rust-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:rust-54"><a href="#lst:rust-54" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Balance Alice: {}&quot;</span><span class="op">,</span> contract<span class="op">.</span>balance(<span class="st">&quot;Alice&quot;</span>))<span class="op">;</span></span>
+<span id="lst:rust-55"><a href="#lst:rust-55" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Balance Bob:   {}&quot;</span><span class="op">,</span> contract<span class="op">.</span>balance(<span class="st">&quot;Bob&quot;</span>))<span class="op">;</span></span>
+<span id="lst:rust-56"><a href="#lst:rust-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <h3 id="transacciones-bancarias-en-clojure-stm">Transacciones bancarias en Clojure (STM)</h3>
+    <p>El problema clásico de los candados para transferencias bancarias: para
+    transferir de la cuenta <span class="math inline">\(A\)</span> a la cuenta <span class="math inline">\(B\)</span>, hay que bloquear <span class="math inline">\(A\)</span>, luego
+    bloquear <span class="math inline">\(B\)</span>.
+    Si otro hilo bloquea <span class="math inline">\(B\)</span> primero y luego <span class="math inline">\(A\)</span>, hay deadlock.
+    Clojure elimina este problema completamente: no existen locks explícitos.</p>
+    <div class="sourceCode" id="lst:clj" data-language="Clojure" data-caption="Transferencias bancarias con STM en Clojure.
+               Ejecutar: \texttt{clojure -M -m banco.core}" label="lst:clj"><pre class="sourceCode clojure"><code class="language-clojure"><span id="lst:clj-1"><a href="#lst:clj-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> banco.core)</span>
+<span id="lst:clj-2"><a href="#lst:clj-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:clj-3"><a href="#lst:clj-3" aria-hidden="true" tabindex="-1"></a><span class="co">;; &#39;ref&#39; crea una identidad coordinable via STM.</span></span>
+<span id="lst:clj-4"><a href="#lst:clj-4" aria-hidden="true" tabindex="-1"></a><span class="co">;; @cuenta-alice dereferencia el ref para leer el valor actual.</span></span>
+<span id="lst:clj-5"><a href="#lst:clj-5" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-alice </span>(<span class="kw">ref</span> <span class="dv">1000</span>))</span>
+<span id="lst:clj-6"><a href="#lst:clj-6" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-bob   </span>(<span class="kw">ref</span>  <span class="dv">500</span>))</span>
+<span id="lst:clj-7"><a href="#lst:clj-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:clj-8"><a href="#lst:clj-8" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> transferir</span></span>
+<span id="lst:clj-9"><a href="#lst:clj-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Transfiere cantidad de origen a destino de forma atomica.</span></span>
+<span id="lst:clj-10"><a href="#lst:clj-10" aria-hidden="true" tabindex="-1"></a><span class="st">   Si dos hilos colisionan, el STM reintenta automaticamente.</span></span>
+<span id="lst:clj-11"><a href="#lst:clj-11" aria-hidden="true" tabindex="-1"></a><span class="st">   No es posible deadlock: no hay locks, solo transacciones STM.&quot;</span></span>
+<span id="lst:clj-12"><a href="#lst:clj-12" aria-hidden="true" tabindex="-1"></a>  [origen destino cantidad]</span>
+<span id="lst:clj-13"><a href="#lst:clj-13" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dosync</span>                      <span class="co">; abre la transaccion STM</span></span>
+<span id="lst:clj-14"><a href="#lst:clj-14" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let</span> [saldo <span class="at">@origen</span>]</span>
+<span id="lst:clj-15"><a href="#lst:clj-15" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">if</span> (<span class="kw">&gt;=</span> saldo cantidad)</span>
+<span id="lst:clj-16"><a href="#lst:clj-16" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">do</span></span>
+<span id="lst:clj-17"><a href="#lst:clj-17" aria-hidden="true" tabindex="-1"></a>          <span class="co">;; alter aplica una funcion al ref dentro de la transaccion.</span></span>
+<span id="lst:clj-18"><a href="#lst:clj-18" aria-hidden="true" tabindex="-1"></a>          <span class="co">;; Si hay conflicto al commit, dosync se reintenta.</span></span>
+<span id="lst:clj-19"><a href="#lst:clj-19" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">alter</span> origen  <span class="kw">-</span> cantidad)</span>
+<span id="lst:clj-20"><a href="#lst:clj-20" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">alter</span> destino <span class="kw">+</span> cantidad))</span>
+<span id="lst:clj-21"><a href="#lst:clj-21" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">println</span> <span class="st">&quot;Fondos insuficientes&quot;</span>)))))</span>
+<span id="lst:clj-22"><a href="#lst:clj-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:clj-23"><a href="#lst:clj-23" aria-hidden="true" tabindex="-1"></a><span class="co">;; 100 transferencias concurrentes de 5 pesos cada una</span></span>
+<span id="lst:clj-24"><a href="#lst:clj-24" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> simular </span>[]</span>
+<span id="lst:clj-25"><a href="#lst:clj-25" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [fs (<span class="kw">doall</span> (<span class="kw">repeatedly</span> <span class="dv">100</span></span>
+<span id="lst:clj-26"><a href="#lst:clj-26" aria-hidden="true" tabindex="-1"></a>                    #(<span class="kw">future</span> (transferir cuenta-alice cuenta-bob <span class="dv">5</span>))))]</span>
+<span id="lst:clj-27"><a href="#lst:clj-27" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">doseq</span> [f fs] <span class="at">@f</span>)</span>
+<span id="lst:clj-28"><a href="#lst:clj-28" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">println</span> <span class="st">&quot;Alice:&quot;</span> <span class="at">@cuenta-alice</span>)   <span class="co">; esperado: 500</span></span>
+<span id="lst:clj-29"><a href="#lst:clj-29" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">println</span> <span class="st">&quot;Bob:  &quot;</span> <span class="at">@cuenta-bob</span>)     <span class="co">; esperado: 1000</span></span>
+<span id="lst:clj-30"><a href="#lst:clj-30" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">println</span> <span class="st">&quot;Total:&quot;</span> (<span class="kw">+</span> <span class="at">@cuenta-alice</span> <span class="at">@cuenta-bob</span>)))) <span class="co">; siempre 1500</span></span>
+<span id="lst:clj-31"><a href="#lst:clj-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst:clj-32"><a href="#lst:clj-32" aria-hidden="true" tabindex="-1"></a>(simular)</span></code></pre></div>
+    <div class="warnbox">
+    <p><strong>Restricción importante:</strong>
+    Las funciones pasadas a <code>alter</code> deben ser <em>puras</em>
+    (sin efectos secundarios), porque el STM puede ejecutarlas múltiples veces
+    si reintenta la transacción.
+    Si pones un <code>println</code> dentro de un <code>dosync</code>, puede imprimirse
+    más veces de las esperadas.
+    Para efectos secundarios en transacciones, Clojure provee <code>io!</code> que
+    lanza una excepción si se llama dentro de <code>dosync</code>.</p>
+    </div>
+    <hr />
+    <h2 id="tabla-comparativa">Tabla Comparativa</h2>
+    <div class="center">
+    <table>
+    <thead>
+    <tr class="header">
+    <th style="text-align: left;"><strong>Aspecto</strong></th>
+    <th style="text-align: center;"><strong>Java</strong></th>
+    <th style="text-align: center;"><strong>Rust</strong></th>
+    <th style="text-align: center;"><strong>Clojure</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td style="text-align: left;">Heap compartido</td>
+    <td style="text-align: center;">Sí</td>
+    <td style="text-align: center;">Sí</td>
+    <td style="text-align: center;">Sí (JVM)</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Recolector de basura</td>
+    <td style="text-align: center;">Sí (pausa GC)</td>
+    <td style="text-align: center;">No (Ownership)</td>
+    <td style="text-align: center;">Sí (JVM GC)</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;">Candados explícitos</td>
+    <td style="text-align: center;"><code>synchronized</code> / <code>RL</code></td>
+    <td style="text-align: center;"><code>Mutex&lt;T&gt;</code></td>
+    <td style="text-align: center;">No (STM)</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;"><code>volatile</code> / fences</td>
+    <td style="text-align: center;"><code>volatile</code> keyword</td>
+    <td style="text-align: center;"><code>Ordering::*</code></td>
+    <td style="text-align: center;">No necesario</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;">Dato acoplado al lock</td>
+    <td style="text-align: center;">No</td>
+    <td style="text-align: center;">Sí (vive en Mutex)</td>
+    <td style="text-align: center;">Sí (en <code>ref</code>)</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Modelo de consistencia</td>
+    <td style="text-align: center;">Linealizable</td>
+    <td style="text-align: center;">Linealizable</td>
+    <td style="text-align: center;">Linealizable</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;"></td>
+    <td style="text-align: center;">(con sync)</td>
+    <td style="text-align: center;">(con Mutex)</td>
+    <td style="text-align: center;">(con dosync)</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Data races posibles</td>
+    <td style="text-align: center;">Sí (runtime)</td>
+    <td style="text-align: center;">No (compilación)</td>
+    <td style="text-align: center;">No (inmutabilidad)</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;">Deadlocks posibles</td>
+    <td style="text-align: center;">Sí</td>
+    <td style="text-align: center;">Sí (mult. Mutex)</td>
+    <td style="text-align: center;">No (STM reintenta)</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;">Uso típico HPC</td>
+    <td style="text-align: center;">Estructuras de</td>
+    <td style="text-align: center;">Sistemas</td>
+    <td style="text-align: center;">Sistemas</td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;"></td>
+    <td style="text-align: center;">datos conc.</td>
+    <td style="text-align: center;">bajo nivel</td>
+    <td style="text-align: center;">financieros</td>
+    </tr>
+    <tr class="even">
+    <td colspan="4" style="text-align: left;">Tabla 2: Comparativa de modelos de concurrencia.
+    RL = <code>ReentrantLock</code>.</td>
+    </tr>
+    </tbody>
+    </table>
+    </div>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <p><strong>Instrucciones:</strong></p>
+    <ul>
+    <li><p>La práctica se resuelve en equipos de máximo 3 integrantes.
+    Entrega un PDF con las respuestas teóricas y, para los ejercicios
+    con código, una breve descripción de cada programa.</p></li>
+    <li><p>Solo un integrante sube la práctica; los demás escriben un
+    comentario privado con el nombre de quien entregó.
+    ZIP nombrado: <code>P6_ApellidoPaternoNombre</code>.</p></li>
+    <li><p>Entornos: Java 21 LTS.
+    Rust: instalar con<br />
+    <code>curl –proto ’=https’ –tlsv1.2 -sSf https://sh.rustup.rs | sh</code><br />
+    Clojure: REPL en línea en <a href="https://tryclojure.org" class="uri">https://tryclojure.org</a>
+    si no tienen instalación local.</p></li>
+    </ul>
+    <p><strong>Puntaje total: 100</strong>
+    <strong>Tiempo estimado: <span class="math inline">\(\approx\)</span> 1 hr 30 min</strong></p>
+    <hr />
+    <h3 id="ejercicio-1-rust-el-compilador-como-árbitro">Ejercicio 1 — Rust: el compilador como árbitro</h3>
+    <p><em>[1hr / 50 puntos]</em></p>
+    <p>Este ejercicio tiene dos partes.
+    En la primera intentarás escribir código incorrecto en Rust y observarás
+    cómo el compilador lo rechaza.
+    En la segunda extenderás el contrato inteligente del Listing <a href="#lst:rust" data-reference-type="ref" data-reference="lst:rust">[lst:rust]</a> de la
+    práctica.</p>
+    <h3 class="unnumbered" id="parte-a-el-rechazo-del-compilador-20-pts">Parte A: el rechazo del compilador <span class="nodecor">(20 pts)</span></h3>
+    <ol>
+    <li><p>El siguiente código intenta replicar la race condition del contador
+    de la Práctica 1 en Rust.
+    Cópialo en un archivo <code>race.rs</code>, intenta compilarlo con
+    <code>rustc race.rs</code> y pega el error del compilador en tu respuesta.</p></li>
+    </ol>
+    <div class="sourceCode" id="lst:race" data-language="Rust" data-caption="C\&#39;odigo con race condition --- NO compila en Rust." label="lst:race"><pre class="sourceCode rust"><code class="language-rust"><span id="lst:race-1"><a href="#lst:race-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="lst:race-2"><a href="#lst:race-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:race-3"><a href="#lst:race-3" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="lst:race-4"><a href="#lst:race-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> counter<span class="op">:</span> <span class="dt">i64</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>   <span class="co">// variable en el stack del main</span></span>
+<span id="lst:race-5"><a href="#lst:race-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="lst:race-6"><a href="#lst:race-6" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:race-7"><a href="#lst:race-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">4</span> <span class="op">{</span></span>
+<span id="lst:race-8"><a href="#lst:race-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Intentamos pasar una referencia mutable a otro hilo</span></span>
+<span id="lst:race-9"><a href="#lst:race-9" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(<span class="pp">thread::</span>spawn(<span class="op">||</span> <span class="op">{</span></span>
+<span id="lst:race-10"><a href="#lst:race-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">1_000_000</span> <span class="op">{</span></span>
+<span id="lst:race-11"><a href="#lst:race-11" aria-hidden="true" tabindex="-1"></a>                counter <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// &lt;- el compilador rechaza esto</span></span>
+<span id="lst:race-12"><a href="#lst:race-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="lst:race-13"><a href="#lst:race-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>))<span class="op">;</span></span>
+<span id="lst:race-14"><a href="#lst:race-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst:race-15"><a href="#lst:race-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> handles <span class="op">{</span> h<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span> <span class="op">}</span></span>
+<span id="lst:race-16"><a href="#lst:race-16" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Contador: {}&quot;</span><span class="op">,</span> counter)<span class="op">;</span></span>
+<span id="lst:race-17"><a href="#lst:race-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <ol>
+    <li><p>Lee el mensaje de error del compilador.
+    Identifica las frases clave y tradúcelas al vocabulario del curso:
+    ?‘qué regla del sistema de Ownership/Borrowing se viola?
+    ?‘Cómo se relaciona esa regla con la definición formal de
+    data race (dos accesos concurrentes al mismo dato, al menos uno de
+    escritura, sin sincronización)?</p></li>
+    <li><p>Corrige el código usando <code>Arc&lt;Mutex&lt;i64&gt;&gt;</code> para obtener el
+    contador linealizable.
+    Verifica que el resultado es siempre 4 000 000.</p></li>
+    </ol>
+    <h3 class="unnumbered" id="parte-b-extender-el-contrato-30-pts">Parte B: extender el contrato <span class="nodecor">(30 pts)</span></h3>
+    <p>Extiende <code>TokenContract</code> del Listing <a href="#lst:rust" data-reference-type="ref" data-reference="lst:rust">[lst:rust]</a> de la práctica
+    añadiendo dos operaciones:</p>
+    <ul>
+    <li><p><code>mint(addr: &amp;str, amount: u64)</code> —
+    crea <code>amount</code> nuevos tokens y los deposita en <code>addr</code>.</p></li>
+    <li><p><code>burn(addr: &amp;str, amount: u64) -&gt; bool</code> —
+    destruye <code>amount</code> tokens de <code>addr</code>.
+    Retorna <code>false</code> si la cuenta no tiene fondos suficientes.</p></li>
+    </ul>
+    <ol>
+    <li><p>Lanza 10 hilos concurrentes que ejecuten en un bucle de 100
+    iteraciones: cada hilo elige aleatoriamente entre <code>transfer</code>,
+    <code>mint</code> y <code>burn</code> con montos pequeños.
+    Al terminar todos, verifica que se cumple el siguiente invariante:</p></li>
+    </ol>
+    <div class="sourceCode" id="lst:inv" data-language="Java" data-caption="Invariante del contrato." label="lst:inv"><pre class="sourceCode java"><code class="language-java"><span id="lst:inv-1"><a href="#lst:inv-1" aria-hidden="true" tabindex="-1"></a><span class="co">// suma_balances_actual == suma_balances_inicial + total_minted - total_burned</span></span>
+<span id="lst:inv-2"><a href="#lst:inv-2" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="lst:inv-3"><a href="#lst:inv-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Para verificarlo, rastrear total_minted y total_burned.</span></span>
+<span id="lst:inv-4"><a href="#lst:inv-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Agregar contadores atomicos al SmartContract:</span></span>
+<span id="lst:inv-5"><a href="#lst:inv-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   minted: AtomicU64</span></span>
+<span id="lst:inv-6"><a href="#lst:inv-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   burned:  AtomicU64</span></span></code></pre></div>
+    <ol>
+    <li><p>Identifica el punto de linearización de <code>mint()</code> y de
+    <code>burn()</code>.
+    ?‘En qué línea exacta del código ocurre?
+    ?‘Por qué el invariante se mantiene aunque haya 10 hilos
+    modificando el estado simultáneamente?</p></li>
+    </ol>
+    <hr />
+    <h3 id="ejercicio-2-clojure-observar-el-stm-en-acción">Ejercicio 2 — Clojure: observar el STM en acción</h3>
+    <p><em>[1hr min / 50 puntos]</em></p>
+    <p>En este ejercicio modificarás el código de Clojure para hacer observable
+    el comportamiento interno del STM: cuántas veces reintenta transacciones,
+    y qué pasa cuando introduces efectos secundarios dentro de un bloque
+    transaccional.</p>
+    <h3 class="unnumbered" id="parte-a-contando-reintentos-25-pts">Parte A: contando reintentos <span class="nodecor">(25 pts)</span></h3>
+    <ol>
+    <li><p>Copia el código del Listing <a href="#lst:clj" data-reference-type="ref" data-reference="lst:clj">[lst:clj]</a> de la práctica en un archivo
+    (o en el REPL de <a href="https://tryclojure.org" class="uri">https://tryclojure.org</a>) y añade un
+    contador de reintentos <em>fuera</em> del <code>dosync</code>:</p></li>
+    </ol>
+    <div class="sourceCode" id="lst:stm" data-language="Clojure" data-caption="Contador de reintentos STM." label="lst:stm"><pre class="sourceCode clojure"><code class="language-clojure"><span id="lst:stm-1"><a href="#lst:stm-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> banco.core)</span>
+<span id="lst:stm-2"><a href="#lst:stm-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:stm-3"><a href="#lst:stm-3" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-alice </span>(<span class="kw">ref</span> <span class="dv">1000</span>))</span>
+<span id="lst:stm-4"><a href="#lst:stm-4" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-bob   </span>(<span class="kw">ref</span>  <span class="dv">500</span>))</span>
+<span id="lst:stm-5"><a href="#lst:stm-5" aria-hidden="true" tabindex="-1"></a><span class="co">;; atom: actualizacion atomica sin coordinacion con otros refs</span></span>
+<span id="lst:stm-6"><a href="#lst:stm-6" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> intentos </span>(<span class="kw">atom</span> <span class="dv">0</span>))</span>
+<span id="lst:stm-7"><a href="#lst:stm-7" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:stm-8"><a href="#lst:stm-8" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> transferir </span>[origen destino cantidad]</span>
+<span id="lst:stm-9"><a href="#lst:stm-9" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dosync</span></span>
+<span id="lst:stm-10"><a href="#lst:stm-10" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">swap!</span> intentos <span class="kw">inc</span>)   <span class="co">; &lt;- DENTRO del dosync: corre en cada reintento</span></span>
+<span id="lst:stm-11"><a href="#lst:stm-11" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let</span> [saldo <span class="at">@origen</span>]</span>
+<span id="lst:stm-12"><a href="#lst:stm-12" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">if</span> (<span class="kw">&gt;=</span> saldo cantidad)</span>
+<span id="lst:stm-13"><a href="#lst:stm-13" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">do</span> (<span class="kw">alter</span> origen  <span class="kw">-</span> cantidad)</span>
+<span id="lst:stm-14"><a href="#lst:stm-14" aria-hidden="true" tabindex="-1"></a>            (<span class="kw">alter</span> destino <span class="kw">+</span> cantidad))</span>
+<span id="lst:stm-15"><a href="#lst:stm-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">nil</span>))))</span>
+<span id="lst:stm-16"><a href="#lst:stm-16" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:stm-17"><a href="#lst:stm-17" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> simular </span>[n monto]</span>
+<span id="lst:stm-18"><a href="#lst:stm-18" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">reset!</span> intentos <span class="dv">0</span>)</span>
+<span id="lst:stm-19"><a href="#lst:stm-19" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> [fs (<span class="kw">doall</span> (<span class="kw">repeatedly</span> n</span>
+<span id="lst:stm-20"><a href="#lst:stm-20" aria-hidden="true" tabindex="-1"></a>                    #(<span class="kw">future</span> (transferir cuenta-alice cuenta-bob monto))))]</span>
+<span id="lst:stm-21"><a href="#lst:stm-21" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">doseq</span> [f fs] <span class="at">@f</span>)</span>
+<span id="lst:stm-22"><a href="#lst:stm-22" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:alice</span>    <span class="at">@cuenta-alice</span></span>
+<span id="lst:stm-23"><a href="#lst:stm-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">:bob</span>      <span class="at">@cuenta-bob</span></span>
+<span id="lst:stm-24"><a href="#lst:stm-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">:intentos</span> <span class="at">@intentos</span></span>
+<span id="lst:stm-25"><a href="#lst:stm-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">:futuros</span>  n}))</span>
+<span id="lst:stm-26"><a href="#lst:stm-26" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="lst:stm-27"><a href="#lst:stm-27" aria-hidden="true" tabindex="-1"></a><span class="co">;; Ejecuta con distintos niveles de contencion:</span></span>
+<span id="lst:stm-28"><a href="#lst:stm-28" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> (simular  <span class="dv">10</span> <span class="dv">10</span>))</span>
+<span id="lst:stm-29"><a href="#lst:stm-29" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> (simular <span class="dv">100</span> <span class="dv">10</span>))</span>
+<span id="lst:stm-30"><a href="#lst:stm-30" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> (simular <span class="dv">500</span>  <span class="dv">5</span>))</span></code></pre></div>
+    <ol>
+    <li><p>Ejecuta las tres llamadas a <code>simular</code> y registra los
+    resultados.
+    Para cada ejecución calcula:</p>
+    <ul>
+    <li><p>Número de transferencias que realmente ocurrieron
+    (cuántas veces cambió el saldo de Alice).</p></li>
+    <li><p>Número de intentos totales registrados.</p></li>
+    <li><p>Promedio de intentos por transacción exitosa.</p></li>
+    </ul></li>
+    <li><p>?‘Por qué el número de intentos aumenta con más hilos
+    concurrentes?
+    Explica en términos del protocolo STM: ?‘qué condición hace que
+    una transacción se reintente?
+    ?‘Puede haber livelock (todas las transacciones se reintenten
+    indefinidamente)?
+    ?‘El STM de Clojure garantiza progreso?</p></li>
+    </ol>
+    <h3 class="unnumbered" id="parte-b-efectos-secundarios-y-pureza-25-pts">Parte B: efectos secundarios y pureza <span class="nodecor">(25 pts)</span></h3>
+    <ol>
+    <li><p>Modifica <code>transferir</code> para añadir un <code>println</code>
+    dentro del <code>dosync</code>:</p></li>
+    </ol>
+    <div class="sourceCode" id="lst:side" data-language="Clojure" data-caption="Transferir con efecto secundario." label="lst:side"><pre class="sourceCode clojure"><code class="language-clojure"><span id="lst:side-1"><a href="#lst:side-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> transferir-con-print </span>[origen destino cantidad]</span>
+<span id="lst:side-2"><a href="#lst:side-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dosync</span></span>
+<span id="lst:side-3"><a href="#lst:side-3" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">println</span> <span class="st">&quot;ejecutando transaccion&quot;</span>)  <span class="co">; efecto secundario en STM</span></span>
+<span id="lst:side-4"><a href="#lst:side-4" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let</span> [saldo <span class="at">@origen</span>]</span>
+<span id="lst:side-5"><a href="#lst:side-5" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">if</span> (<span class="kw">&gt;=</span> saldo cantidad)</span>
+<span id="lst:side-6"><a href="#lst:side-6" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">do</span> (<span class="kw">alter</span> origen  <span class="kw">-</span> cantidad)</span>
+<span id="lst:side-7"><a href="#lst:side-7" aria-hidden="true" tabindex="-1"></a>            (<span class="kw">alter</span> destino <span class="kw">+</span> cantidad))</span>
+<span id="lst:side-8"><a href="#lst:side-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">nil</span>))))</span></code></pre></div>
+    <ol>
+    <li><p>Ejecuta <code>(simular 50 10)</code> usando esta versión.
+    Cuenta cuántas veces se imprime <code>"ejecutando transaccion"</code>
+    y cuántas transferencias realmente ocurrieron (cambios en el saldo).
+    ?‘Son iguales?
+    ?‘Por qué?</p></li>
+    <li><p>Relaciona tu observación con el principio: <em>las funciones
+    dentro de un <code>dosync</code> deben ser puras (sin efectos
+    secundarios)</em>.
+    ?‘Qué problema concreto introduce <code>println</code> dentro de la
+    transacción?
+    ?‘Cómo lo resolverías si realmente necesitaras registrar en un
+    log cada transferencia exitosa?</p></li>
+    </ol>
+    <div class="keybox">
+    <p><strong>Pista:</strong>
+    Clojure tiene <code>(io! body)</code> — una macro que lanza una excepción
+    si se llama dentro de un <code>dosync</code>.
+    Prueba a envolver el <code>println</code> con
+    <code>(io! (println ...))</code> y observa qué pasa.</p>
+    </div>
+    <h2 class="unnumbered" id="referencias">Referencias</h2>
+    <ul>
+    <li><p>Maurice Herlihy and Nir Shavit.
+    <em>The Art of Multiprocessor Programming</em>.
+    Morgan Kaufmann, 2008. — Cap. 5 (Consistency, §5.3 Quiescent Consistency).</p></li>
+    <li><p>Nir Shavit.
+    Data structures in the multicore age.
+    <em>Commun. ACM</em>, 54(3):76–84, 2011.</p></li>
+    <li><p>Jeremy Manson, William Pugh, and Sarita V. Adve.
+    The Java Memory Model.
+    <em>POPL 2005</em>, pp. 378–391.</p></li>
+    <li><p>Jade Alglave, Luc Maranget, and Michael Tautschnig.
+    Herding Cats: Modelling, Simulation, Testing, and Data Mining for Weak Memory.
+    <em>ACM TOPLAS</em>, 36(2):7:1–7:74, 2014.</p></li>
+    <li><p>Paolo Viotti and Marko Vukolić.
+    Consistency in Non-Transactional Distributed Storage Systems.
+    <em>ACM Comput. Surv.</em>, 49(1), 2016.</p></li>
+    <li><p>The Rust Reference — Concurrency primitives.
+    <a href="https://doc.rust-lang.org/std/sync/" class="uri">https://doc.rust-lang.org/std/sync/</a></p></li>
+    <li><p>Rich Hickey. Clojure Refs and Transactions.
+    <a href="https://clojure.org/reference/refs" class="uri">https://clojure.org/reference/refs</a></p></li>
+    </ul>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

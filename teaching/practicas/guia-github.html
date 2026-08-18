@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cómo agregar ejercicios a un repositorio de GitHub · Cómputo Concurrente</title>
+<meta name="description" content="Guía" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style></head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Cómo agregar ejercicios a un repositorio de GitHub</h1>
+    <p class="practica-sub">Guía</p>
+    <div class="practica-actions">
+      
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente" target="_blank" rel="noopener">Códigos en GitHub</a>
+      
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#cómo-agregar-ejercicios-al-repositorio-de-github" id="toc-cómo-agregar-ejercicios-al-repositorio-de-github">Cómo agregar ejercicios al repositorio de GitHub</a></li>
+    <li><a href="#clonar-el-repositorio-descargar-una-copia" id="toc-clonar-el-repositorio-descargar-una-copia">Clonar el repositorio (descargar una copia)</a></li>
+    <li><a href="#crear-o-modificar-archivos" id="toc-crear-o-modificar-archivos">Crear o modificar archivos</a></li>
+    <li><a href="#guardar-los-cambios-en-git" id="toc-guardar-los-cambios-en-git">Guardar los cambios en Git</a></li>
+    <li><a href="#subir-los-cambios-a-github" id="toc-subir-los-cambios-a-github">Subir los cambios a GitHub</a></li>
+    <li><a href="#verificar-en-github" id="toc-verificar-en-github">Verificar en GitHub</a></li>
+    <li><a href="#errores-comunes-y-soluciones" id="toc-errores-comunes-y-soluciones">Errores comunes y soluciones</a></li>
+    <li><a href="#resumen-rápido" id="toc-resumen-rápido">Resumen rápido</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="cómo-agregar-ejercicios-al-repositorio-de-github">Cómo agregar ejercicios al repositorio de GitHub</h2>
+    <p>Si nunca has usado Git, piensa en él como una herramienta que guarda cambios en archivos y permite compartirlos con otras personas.</p>
+    <h3 id="antes-de-empezar">Antes de empezar</h3>
+    <p>Asegúrate de que tienes Git instalado en tu computadora. Puedes verificarlo ejecutando:</p>
+    <pre><code>git --version</code></pre>
+    <p>Si no lo tienes, descárgalo desde <code>https://git-scm.com/</code>.</p>
+    <h2 id="clonar-el-repositorio-descargar-una-copia">Clonar el repositorio (descargar una copia)</h2>
+    <p>Para trabajar en el repositorio, lo primero que debes hacer es clonar el proyecto en tu computadora.</p>
+    <p><strong>Comando para clonar el repositorio:</strong></p>
+    <pre><code>git clone https://github.com/TU_USUARIO/NOMBRE_DEL_REPO.git
+cd NOMBRE_DEL_REPO</code></pre>
+    <h2 id="crear-o-modificar-archivos">Crear o modificar archivos</h2>
+    <p>Puedes crear o editar los archivos que quieras dentro del repositorio. Por ejemplo, para crear un nuevo archivo de Python:</p>
+    <pre><code>touch ejercicio1.py  # Crea un archivo vacío llamado ejercicio1.py</code></pre>
+    <h2 id="guardar-los-cambios-en-git">Guardar los cambios en Git</h2>
+    <p>Cada vez que realices cambios, debes seguir estos pasos:</p>
+    <h3 id="ver-qué-archivos-cambiaron">Ver qué archivos cambiaron</h3>
+    <pre><code>git status</code></pre>
+    <h3 id="añadir-los-archivos-a-la-zona-de-preparación">Añadir los archivos a la "zona de preparación"</h3>
+    <pre><code>git add .</code></pre>
+    <h3 id="guardar-los-cambios-con-un-mensaje">Guardar los cambios con un mensaje</h3>
+    <pre><code>git commit -m &quot;Agregando ejercicios extra&quot;</code></pre>
+    <h2 id="subir-los-cambios-a-github">Subir los cambios a GitHub</h2>
+    <p>Para enviar los cambios al repositorio en línea:</p>
+    <pre><code>git push origin main</code></pre>
+    <h2 id="verificar-en-github">Verificar en GitHub</h2>
+    <p>Si todo salió bien, los nuevos archivos aparecerán en la página del repositorio en GitHub.</p>
+    <h2 id="errores-comunes-y-soluciones">Errores comunes y soluciones</h2>
+    <ul>
+    <li><p><strong>Git te pide tu usuario y contraseña:</strong> Configura SSH o usa:</p>
+    <pre><code>git config --global credential.helper store</code></pre></li>
+    <li><p><strong>Error: "fatal: not a git repository"</strong>: Verifica que estés dentro de la carpeta correcta usando:</p>
+    <pre><code>cd NOMBRE_DEL_REPO</code></pre></li>
+    <li><p><strong>Error: "Updates were rejected"</strong>: Si hay cambios en GitHub que no tienes, usa:</p>
+    <pre><code>git pull origin main --rebase
+git push origin main</code></pre></li>
+    </ul>
+    <h2 id="resumen-rápido">Resumen rápido</h2>
+    <ol>
+    <li><p>Clonar el repositorio:</p>
+    <pre><code>git clone https://github.com/TU_USUARIO/NOMBRE_DEL_REPO.git
+cd NOMBRE_DEL_REPO</code></pre></li>
+    <li><p>Crear o modificar archivos.</p></li>
+    <li><p>Guardar los cambios:</p>
+    <pre><code>git add .
+git commit -m &quot;Mensaje del cambio&quot;</code></pre></li>
+    <li><p>Subir los cambios a GitHub:</p>
+    <pre><code>git push origin main</code></pre></li>
+    </ol>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

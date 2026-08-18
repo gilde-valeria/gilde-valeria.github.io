@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spinlocks y algunas primitivas · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 4" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Spinlocks y algunas primitivas</h1>
+    <p class="practica-sub">Práctica 4</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica4.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P4" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p4.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>Un Candado es un objeto que garantiza la exclusión mutua, sin embargo, en la práctica ¿qué hacemos si no pudimos obtener el candado?
+    Hay dos opciones:</p>
+    <ol>
+    <li><p>Esperamos activamente (Peterson, Bakery y Filter dan vueltas en un ciclo <em>while</em>)</p></li>
+    <li><p>Le pedimos al sistema operativo que agende otro hilo (Monitores: Candado Reentrante, Objeto <em>CountDownLatch</em>, Semáforos, etc).</p></li>
+    </ol>
+    <p>En esta práctica nos vamos a enfocar en los candados que cumplen con el primer punto, a este tipo de candados les conocemos como Spinlocks, son objetos que permiten que los hilos esperen activamente hasta lograr entrar a la sección crítica.</p>
+    <p>Hasta ahora hemos visto implementaciones de Candados que tienen una relevancia teórica, sin embargo, en la práctica necesitamos eficiencia y lidiar con los hilos que no tienen éxito: lidiar con la <strong>contención</strong>.</p>
+    <p><strong>Contención:</strong> ocurre cuando múltiples hilos intentan acceder al candado al mismo tiempo, una contención alta implica que son muchos hilos al mismo tiempo y una contención baja implica que solo son algunos.</p>
+    <p>Es imposible crear candados eficientes para cualquier número de hilos sin operaciones primitivas (<em>testAndSet()</em>, <em>get()</em>, <em>compareAndSet()</em>), en esta práctica se muestran ejemplos de candados que las utilizan. Son herramientas poderosas de sincronización, más poderosas que <em>volatile</em> (<strong>Ojo:</strong> No podemos utilizar candados porque estamos creando candados, no <em>synchronized</em>).
+    En la teoría veremos porque <em>compareAndSet()</em> es más poderosa que <em>testAndSet()</em> y que simples operaciones de escritura/lectura (<em>write()</em> o <em>read</em>).</p>
+    <p>Todos los candados utilizan la instrucción <em>var.testAndSet(true)</em> (<em>getAndSet()</em>), esta instrucción reemplaza el valor de la variable <span class="math inline">\(var\)</span> con <span class="math inline">\(true\)</span> y devuelve el anterior. <span class="math inline">\(BackoffLock()\)</span>, además, utiliza una ventana de tiempo para aliviar la contención.
+    <span class="math inline">\(MCSLock()\)</span> y <span class="math inline">\(CLHLock()\)</span> incorporan una cola para, además de determinar el hilo que puede acceder a la sección critica, formar a los demás y así distribuir aún más la contención.</p>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P4" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P4</a></p>
+    <ul>
+    <li><p>Programa 1 (CounterAtomic): Contador linealizable no bloqueante, utiliza primitivas: getAndIncrement y get</p></li>
+    <li><p>Programa 2 (RunSpin): Programa 2: Programa para medir el tiempo de los siguientes candados:</p>
+    <ol>
+    <li><p>Lock lock = new TASLock();</p></li>
+    <li><p>Lock lock = new TTASLock();</p></li>
+    <li><p>Lock lock = new BackoffLock();</p></li>
+    <li><p>Lock lock = new MCSLock();</p></li>
+    <li><p>Lock lock = new ALock(numberThreads);</p></li>
+    <li><p>Lock lock = new ReentrantLock();</p></li>
+    <li><p>Lock lock = new CLHLock();</p></li>
+    </ol></li>
+    </ul>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <ul>
+    <li><p>Entrega en un pdf las respuestas de los ejercicios que no requieran implementarse y añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Los programas deben ir un zip. Debes realizar un programa en cada ejercicio que indique “Implementar”.</p></li>
+    <li><p>Recuerda que debes utilizar Java 21 LTS.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 2hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    <strong>Si ningún integrante en el equipo tiene una computadora con al menos 8 hilos comuníqueselo a la profesora.</strong></p>
+    <ol>
+    <li><p>La idea de las implementaciones de spinlocks (programas TASLock(), TTASLock(), BackoffLock(), MCSLock(), ALock(), CLHLock()) es aliviar la Contención distribuyendo a los hilos es distintas variables o dando tiempos fuera. Sin embargo, como investigaron la relación del <em>throughput</em> con el número de hilos en su práctica 2, el que ocupen un spinlock en un sistema dependerá del tamaño de las tareas, del hardware (sus compus), número de cores, la aplicación (si requieren Justicia o no).</p></li>
+    <li><p>Utiliza el programa <em>RunSpin</em> para probar cada uno de los spinlocks, cada integrante en el equipo debe completar la siguiente tabla: (<strong>max-1</strong> es el número máximo de hilos en tu compu menos uno)</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th colspan="9" style="text-align: center;">Tabla comparativa cuando la Tarea es muy breve</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td style="text-align: left;">SpinLocks / Counter</td>
+    <td style="text-align: center;">TAS</td>
+    <td style="text-align: center;">TTAS</td>
+    <td style="text-align: center;">Backoff</td>
+    <td style="text-align: center;">MCS</td>
+    <td style="text-align: center;">ALock</td>
+    <td style="text-align: center;">CLHLock</td>
+    <td style="text-align: center;">Reentrant</td>
+    <td style="text-align: left;">Counter Atomic</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;"><strong>Tiempo de ejecución:</strong> 400 tareas con <strong>4</strong> hilos</td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: left;"></td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;"><strong>Tiempo de ejecución:</strong> 1000 tareas con <strong>4</strong> hilos</td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: left;"></td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;"><strong>Tiempo de ejecución:</strong> 1000 tareas con <strong>max-1</strong> hilos</td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: left;"></td>
+    </tr>
+    </tbody>
+    </table></li>
+    <li><p>Modificación del método task(lock).</p>
+    <p>En lugar de incrementar un contador, modifica la función <span class="math inline">\(task(lock)\)</span> para que los hilos trabajen con una matriz compartida de tamaño <span class="math inline">\(n \times n\)</span>, donde <span class="math inline">\(n = 10\)</span>. Cada hilo deberá asignar valores a la matriz dentro de una sección crítica protegida por <span class="math inline">\(lock\)</span> y, una vez completada la asignación, imprimir su contenido. Implementa una función separada para la asignación y la impresión de la matriz.
+    Cada integrante del equipo debe completar la siguiente tabla:</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th colspan="8" style="text-align: center;">Tabla comparativa cuando la Tarea es más pesada</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td style="text-align: left;">SpinLocks / Counter</td>
+    <td style="text-align: center;">TAS</td>
+    <td style="text-align: center;">TTAS</td>
+    <td style="text-align: center;">Backoff</td>
+    <td style="text-align: center;">MCS</td>
+    <td style="text-align: center;">ALock</td>
+    <td style="text-align: center;">CLHLock</td>
+    <td style="text-align: center;">Reentrant</td>
+    </tr>
+    <tr class="even">
+    <td style="text-align: left;"><strong>Tiempo de ejecución:</strong> 100 tareas con <strong>4</strong> hilos</td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    </tr>
+    <tr class="odd">
+    <td style="text-align: left;"><strong>Tiempo de ejecución:</strong> 100 tareas con <strong>max-1</strong> hilos</td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    </tr>
+    </tbody>
+    </table></li>
+    <li><p>Escojan al integrante del equipo con mayor número de hilos. ¿Cuáles son las 2 implementaciones más rápidas del inciso <em>1</em>? ¿A qué crees se debe?</p></li>
+    <li><p>Escojan al integrante con mayor número de hilos. ¿Cuáles son las 2 implementaciones más rápidas del inciso <em>2</em>? ¿A qué crees se debe?</p></li>
+    <li><p>¿Cuáles son las implementaciones que satisfacen la propiedad de Justicia? (Por el momento ignora <em>ReentrantLock</em>). Argumenta como lo hacen.</p></li>
+    </ol>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

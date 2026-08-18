@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Exclusión mutua: locks y pools en Java · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 2" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Exclusión mutua: locks y pools en Java</h1>
+    <p class="practica-sub">Práctica 2</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica2.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P2" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p2.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>En el mundo de la programación concurrente surgen problemas cuando múltiples hilos tratan de modificar un recurso compartido. Un ejemplo claro de esto es el ejemplo del <em>ContadorNaive</em> en la práctica anterior, existen errores e inconsistencias en los resultados.</p>
+    <p>A continuación se definen dos términos para referirnos a este tipo de situaciones en el mundo concurrente:</p>
+    <ul>
+    <li><p>Condición de carrera (<em>race condition</em>): Ocurre cuando en una ejecución dos o más hilos acceden a un recurso compartido (por ejemplo, una variable) al mismo tiempo, y el resultado depende del orden de ejecución <span class="citation" data-cites="oaks2004java">(<a href="#ref-oaks2004java" role="doc-biblioref">Oaks y Wong 2004</a>)</span>.</p></li>
+    <li><p>Carrera por los datos (<em>data race</em>): Ocurre cuando dos o más hilos realizan una llamada a un método de un objeto compartido al mismo tiempo, y al menos una llamada es una escritura <span class="citation" data-cites="scottSharedMemory">(<a href="#ref-scottSharedMemory" role="doc-biblioref">Michael L. Scott 30 January 2024</a>)</span>.</p></li>
+    </ul>
+    <p>Por ejemplo, en el programa del <em>ContadorNaive</em> existe una <em>race condition</em> porque la variable <span class="math inline">\(counter\)</span> puede ser accedida por varios hilos al mismo tiempo y el resultado de <span class="math inline">\(counter\)</span> puede variar en distintas ejecuciones dependiendo del orden en el que se ejecutan los hilos.
+    También existe una <em>data race</em> porque la variable <span class="math inline">\(counter\)</span> puede ser leída y modificada con un método de escritura por al menos dos hilos al mismo tiempo.</p>
+    <p> <br />
+    El concepto de <strong>sección crítica</strong> nos permite evitar <em>data races</em> y <em>race conditions</em>. Una sección crítica es un bloque de código que solo puede ser ejecutado por un hilo a la vez.<br />
+    Java provee varias implementaciones de secciones críticas, en esta prática abordaremos:</p>
+    <p><span class="math inline">\(\diamond\)</span> la palabra reservada <em>synchronized</em> y</p>
+    <p><span class="math inline">\(\diamond\)</span> la interface <em>Lock</em>.<br />
+    En la clase teórica vimos que un objeto Candado es un objeto que resuelve el problema de exclusión mutua al permitir que solo un hilo lo obtenga a la vez. La palabra reservada <strong>synchronized</strong> funciona de forma similar a un candado, la diferencia es que no solo previene que dos o más hilos accedan a un bloque de código, además previene que dos o más hilos accedan a distintos métodos que modifican un mismo objeto al mismo tiempo. Cada objeto en Java tiene asociado un candado, es por eso que <strong>synchronized</strong> permite crear secciones críticas por objeto <span class="citation" data-cites="oaks2004java">(<a href="#ref-oaks2004java" role="doc-biblioref">Oaks y Wong 2004</a>)</span>.<br />
+    La clase <strong>Lock</strong> (<em>java.util.concurrent.locks</em>) nos permite crear secciones críticas de manera más flexible que al utilizar <em>syncrhonized</em>. La razón es que el <em>scope</em> (<em>alcance</em>) de <em>synchronized</em> comprende todos los métodos en los cuales se utilizó <em>synchronized</em>, en cambio, el <em>scope</em> de un objeto <em>Lock</em> solo comprende el bloque de código que se encuentra entre la llamada <em>lock()</em> (adquirir el candado) y <em>unlock()</em> (dejar el candado). La clase incluye otros métodos y existen varios tipos de objetos de tipo Lock: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/package-summary.html" class="uri">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/package-summary.html</a>.</p>
+    <p>La clase <strong>Semaphore</strong> es básicamente una generalización de un candado que incluye un contador. Es una generalización de un candado porque permite que un número <span class="math inline">\(n\)</span> (<span class="math inline">\(n \geq 1\)</span>) de hilos accedan a una sección crítica <a href="https://docs.oracle.com/javase%2F8%2Fdocs%2Fapi%2F%2F/java/util/concurrent/Semaphore.html" class="uri">https://docs.oracle.com/javase%2F8%2Fdocs%2Fapi%2F%2F/java/util/concurrent/Semaphore.html</a>.</p>
+    <p> <br />
+    </p>
+    <h3 id="pools-de-hilos">Pools de hilos</h3>
+    <p>A partir de Java (J2SE 5.0) se incorporaron las implementaciones de <em>pools de hilos</em>. El objetivo de una <em>pool</em> es crear un grupo de hilos en espera de tareas por ejecutar, una vez que existe una tarea,
+    uno de los hilos la toma, la ejecuta, finaliza y vuelve a esperar por otra.
+    Utilizamos <em>pools</em> para reusar hilos (mejorar el rendimiento) y mejorar el diseño del programa. No conviene utilizar <em>pools</em> si realizamos procesamiento secuencial (en <em>batch</em>) o si no importa la cantidad de hilos que ocupemos en un programa.</p>
+    <p>Para implementar una <em>pool</em> en Java utilizamos la interfaz <em>Executor</em> <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executor.html" class="uri">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executor.html</a>, la cual tiene un método <span class="math inline">\(execute()\)</span> que recibe como parámetro un objeto <em>Runnable</em>.</p>
+    <pre><code>[language = Java , frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+package java.util.concurrent;
+  public interface Executor {
+      public void execute(Runnable task);
+  }</code></pre>
+    <p>También provee una subinterface de Executor, llamada ExecutorService que implementa los siguientes métodos:</p>
+    <pre><code>[language = Java , frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+package java.util.concurrent;
+  public interface ExecutorService extends Executor {
+      void shutdown( );//termina las tareas que se hayan enviado al ejecutor, pero no realiza nuevas
+      List shutdownNow( );//trata de terminar todas las tareas, incluso las que se han enviado y regresa una lista de las que no se empezaron
+      boolean isShutdown( );
+      boolean isTerminated( );//es verdadero si el estado de la pool esta en &quot;terminado&quot;
+      boolean awaitTermination(long timeout, TimeUnit unit)
+              throws InterruptedException;//Podemos esperar a que termine una determinado intervalo de tiempo
+// Si mandamos una tarea via &quot;submit&quot; nos devuelven un objeto Future, nos sirve para checar si la tarea ha terminado
+      &lt;T&gt; Future&lt;T&gt; submit(Callable&lt;T&gt; task);
+      &lt;T&gt; Future&lt;T&gt; submit(Runnable task, T result);
+      Future&lt;?&gt; submit(Runnable task);
+      &lt;T&gt; List&lt;Future&lt;T&gt;&gt; invokeAll(Collection&lt;Callable&lt;T&gt;&gt; tasks)
+              throws InterruptedException;
+      &lt;T&gt; List&lt;Future&lt;T&gt;&gt; invokeAll(Collection&lt;Callable&lt;T&gt;&gt; tasks,
+                                    long timeout, TimeUnit unit)
+              throws InterruptedException;//Ejecuta todos los metodos en una coleccion
+      &lt;T&gt; T invokeAny(Collection&lt;Callable&lt;T&gt;&gt; tasks)
+              throws InterruptedException, ExecutionException;//ejecuta alguno y termina
+      &lt;T&gt; T invokeAny(Collection&lt;Callable&lt;T&gt;&gt; tasks,  long timeout, TimeUnit unit)
+              throws InterruptedException, ExecutionException, TimeoutException;
+}
+</code></pre>
+    <p>La clase Future se ve de la siguiente forma:</p>
+    <pre><code>[language = Java , frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+public interface Future&lt;V&gt; {
+      V get( ) throws InterruptedException, ExecutionException; //Devuelve el resultado del callable, espera de ser necesario
+      V get(long timeout, TimeUnit unit)
+          throws InterruptedException, ExecutionException, TimeoutException;//Se bloquea hasta que se devuelva el resultado o hasta que expire el timeout
+      boolean isDone( );//Devuelve verdadero si la tarea ya se realizo
+      boolean cancel(boolean mayInterruptIfRunning);
+      boolean isCancelled( );//
+}
+</code></pre>
+    <p>Si el método <em>cancel()</em> se llama, el objeto Callable, puede nunca empezar, pudo haber terminado y el método ya no tiene efecto o puede ser que se esté ejecutando y el hilo sea interrumpido aunque el objeto no cese por completo.</p>
+    <p>Java también tiene implementado una clase (<em>ThreadPoolExecutor</em>), la cual implementa la interface <em>ExecutorService</em>. La cual especifica el cómo ejecutar y terminar las tareas, permite especificar las características de la cola para las tareas. Sin embargo, lo abordaremos más adelante.</p>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P2" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P2</a></p>
+    <ul>
+    <li><p>Programa 1 (SynchronizedExample1): Utilización de synchronized, el método run es una sección critica, cada hilo lo ejecuta, y hasta que no termina de ejecutarlo lo deja.</p></li>
+    <li><p>Programa 2 (SynchronizedExample2): Utilización de synchronized, ejemplo de un problema con el alcance</p></li>
+    <li><p>Programa 3 (LockExample1): Ejemplo de un contador que utiliza un candado predefinido de Java</p></li>
+    <li><p>Programa 4 (ExampleExecutor): Ejemplo de una pool de hilos que ejecuta n tareas (runnables)</p></li>
+    <li><p>Programa 5 (CounterPool): Una pool de hilos que ejecuta un contador</p></li>
+    <li><p>Programa 6 (CounterPoolCallable): Una pool de hilos que ejecuta un contador, utiliza futures y callables</p></li>
+    <li><p>Programa 7 (ColaSecuencial): Implememtación de una cola secuencial, utiliza la clase Nodo</p></li>
+    <li><p>Programa 8 (Scheduler): Programa para completar, utiliza la clase Tarea</p></li>
+    </ul>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <p><strong>Instrucciones:</strong></p>
+    <ul>
+    <li><p>Entrega en un <strong>PDF</strong> las respuestas de los ejercicios que no requieran implementarse, en los ejercicios que requieran implementación añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Solo un integrante del equipo debe subir la práctica. Los demás integrantes deben marcar la tarea como entregada y escribir, en un comentario privado dentro de la práctica, el nombre completo de la persona que realizó la entrega. Todos los programas y el PDF deben ir dentro de un <strong>archivo ZIP</strong>. El archivo ZIP debe seguir el siguiente formato de nombre: <code>P#k_ApellidoPaternoNombre</code>, usando el apellido y nombre de la persona que entrega la práctica.</p></li>
+    <li><p>Cada ejercicio debe tener un programa que indique “Implementar” si aplica.</p></li>
+    <li><p>Recuerda que debes utilizar <strong>Java 21 LTS</strong>.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21 LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 2.5hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    <strong>Nota:</strong> En esta práctica <strong>no</strong> es necesario utilizar otros objetos de la biblioteca Concurrent de java que no hayan sido mencionados en el Contexto <a href="#secc: contexto" data-reference-type="ref" data-reference="secc: contexto">1</a> de esta práctica, por ejemplo: <em>getAndIncrement</em>, <em>ArrayBlockingQueue</em>, <em>ConcurrentLinkedQueue</em>. Muchos de estos objetos ya predefinidos en <em>java</em> son implementaciones <em>linealizables</em>: con consistencia, y en esta práctica no los necesitamos.</p>
+    <ol>
+    <li><p>El programa <em>ColaSecuencial</em> es una implementación de una cola secuencial. Implementa una Cola concurrente utilizando una pool de hilos (<em>ExecutorService</em>). No utilices candados ni <em>synchronized</em>.</p></li>
+    <li><p>Ejecuta varias veces tu implementación con diferentes secuencias de llamadas a métodos ¿Tu implementación funciona de acuerdo a lo que se espera de una cola o suceden <em>inconsistencias</em>?
+    Por ejemplo,</p>
+    <p>1) Se hace <span class="math inline">\(enq(a)\)</span>, <span class="math inline">\(enq(b)\)</span> y <span class="math inline">\(deq()\)</span> y al final ambos elementos <span class="math inline">\(a\)</span> y <span class="math inline">\(b\)</span> están en la cola.</p>
+    <p>2) Se realiza un <span class="math inline">\(enq(a)\)</span> y un <span class="math inline">\(enq(b)\)</span> y la cola solo contiene al elemento <span class="math inline">\(a\)</span> o <span class="math inline">\(b\)</span>.</p>
+    <p>3) Se desencola dos veces el mismo elemento.</p>
+    <p>Si existe una ejecución así toma una captura pantalla del resultado de tu programa que lo ejemplifique.</p>
+    <p><em>Hint: Para analizar si hay inconsistencias, utiliza la interfaz Future, solo ten cuidado con el método <span class="math inline">\(get()\)</span> ya que fuerza a que el resultado del future sea devuelto en ese momento</em>.</p>
+    <p><strong>Importante:</strong> El orden en el que se suben las tareas con submit y se guardan en los futures, no es el orden en el que se realizan, solo es el orden en el que se les asignan a los hilos. Nuestro sistema es <em>asíncrono</em>, es decir, cada hilo puede tardarse más o menos en ejecutar la tarea que se le asignó.</p></li>
+    <li><p>¿Existen <em>data races</em> o <em>race-conditions</em>? Explica en qué variables y porqué suceden.</p></li>
+    <li><p>Utiliza candados y/o <em>synchronized</em> en tu implementación de forma que los métodos <span class="math inline">\(enq()\)</span> y <span class="math inline">\(deq()\)</span> sean una sola sección crítica y contesta: ¿existen inconsistencias?</p>
+    <p><strong>Importante:</strong> El orden en el que se suben las tareas con submit y se guardan en los futures, no es el orden en el que se realizan, solo es el orden en el que se les asignan a los hilos. Nuestro sistema es <em>asíncrono</em>, es decir, cada hilo puede tardarse más o menos en ejecutar la tarea que se le asignó.</p></li>
+    <li><p>En una pool de hilos (ExecutorService), ¿si utilizamos más hilos equivale a un mayor <em>throughput</em>? Argumenta porqué.</p></li>
+    <li><p><strong>Problema.</strong>
+    Supón que perteneces a un equipo de trabajo en el cual estás a cargo de dar acceso a un servidor.
+    Seis personas te pueden mandar tareas para que las ejecutes en el servidor. Las tareas del hilo <span class="math inline">\(0\)</span> y <span class="math inline">\(2\)</span> tardan <span class="math inline">\(500ns\)</span>, las del hilo <span class="math inline">\(1\)</span> tardan <span class="math inline">\(2000ns\)</span> y las de los hilos <span class="math inline">\(3\)</span>, <span class="math inline">\(4\)</span> y <span class="math inline">\(5\)</span> tardan <span class="math inline">\(3000ns\)</span>.</p>
+    <p>Tienes la instrucción de no dar acceso a más de tres al mismo tiempo y de no aceptar al mismo tiempo las tareas del hilo <span class="math inline">\(0\)</span> y <span class="math inline">\(2\)</span>.
+    Diseña e implementa una solución.
+    <em>Hint: Apóyate del programa <em>Scheduler</em> y <em>Tarea</em></em>, el semáforo inicializado en 3 representa que solo pueden entrar 3 al mismo tiempo, decide como utilizarlo en el programa <strong>Tarea</strong> (colocando sus métodos <span class="math inline">\(adquire\)</span> y <span class="math inline">\(release\)</span>); además, decide como utilizar un candado, para restringir aceptar las tareas de los hilos <span class="math inline">\(0\)</span> y <span class="math inline">\(2\)</span> al mismo tiempo.</p>
+    <ul>
+    <li><p>¿Tu implementación cumple con Justicia?</p></li>
+    <li><p>Sino es así, describe cómo podrías garantizarla.</p></li>
+    </ul></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-scottSharedMemory" class="csl-entry" role="listitem">
+    Michael L. Scott, Trevor Brown. 30 January 2024. <em>Shared-Memory Synchronization</em>. Springer Cham.
+    </div>
+    <div id="ref-oaks2004java" class="csl-entry" role="listitem">
+    Oaks, S., y H. Wong. 2004. <em>Java Threads: Understanding and Mastering Concurrent Programming</em>. O’Reilly Media. <a href="https://books.google.com.mx/books?id=r8hhO7oGKrEC">https://books.google.com.mx/books?id=r8hhO7oGKrEC</a>.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

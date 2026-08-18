@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Monitores y consenso · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 6" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Monitores y consenso</h1>
+    <p class="practica-sub">Práctica 6</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica6.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P6" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p6.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>El curso se ha desarrollado en un modelo de memoria compartida, un claro ejemplo son las computadoras multicore, la concurrencia también existe en otro tipo de modelos, como el modelo de paso de mensajes, un ejemplo son los sistemas de blockchain.</p>
+    <p>En ambos modelos se han enfocado en resolver el consenso, de hecho, hay protocolos de consenso muy famosos (Bitcoin, Ethereum, Algorand, etc). Sin embargo, solo en el modelo de memoria compartida wait-free tenemos una jerarquía del objeto menos poderoso al más poderoso, en base al número de consenso.</p>
+    <p>También, hemos considerado que los hilos son asíncronos, es decir, que un hilo se puede detener y reanudar en cualquier momento sin una garantía estricta de tiempo.</p>
+    <p>En general existen sistemas síncronos, asíncronos y semisíncronos (o parcialmente síncronos) <span class="citation" data-cites="Lynch96">(<a href="#ref-Lynch96" role="doc-biblioref">Lynch 1996</a>)</span>.
+    En un sistema síncrono, existen límites conocidos para el tiempo de comunicación entre nodos y para la ejecución de cada proceso, lo cual garantiza un comportamiento predecible y facilita la coordinación. En contraste, un sistema asíncrono no tiene garantías de tiempo, por lo que la comunicación y la ejecución pueden experimentar retrasos indefinidos, esto implica que los algoritmos deben diseñarse para tolerar comportamientos impredecibles. Un ejemplo de un sistema asíncrono es Bitcoin <span class="citation" data-cites="10225481">(<a href="#ref-10225481" role="doc-biblioref">Saad et al. 2024</a>)</span>.</p>
+    <p>En un sistema parcialmente síncrono se establecen límites de tiempo, sin embargo, mientras no se cumplan el sistema funciona de forma asíncrona, un ejemplo de ello es Algorand <span class="citation" data-cites="Blum2023">(<a href="#ref-Blum2023" role="doc-biblioref">Blum et al. 2023</a>)</span> y Cardano <span class="citation" data-cites="10.1007/978-3-319-78375-8_3">(<a href="#ref-10.1007/978-3-319-78375-8_3" role="doc-biblioref">David et al. 2018</a>)</span>.<br />
+    En esta práctica vamos a simular un sistema que resuelve el consenso por rondas, de forma parcialmente síncrona (Programa en <a href="#p3" data-reference-type="ref" data-reference="p3">[p3]</a>).</p>
+    <p>La idea es que existen <span class="math inline">\(n\)</span> rondas, en cada ronda se crea una instancia de un objeto de consenso <span class="math inline">\(protocolCAS\)</span> (programa en <a href="#p1" data-reference-type="ref" data-reference="p1">[p1]</a>), los hilos ejecutan <span class="math inline">\(protocolCAS.decide(id)\)</span> en cada ronda, una vez que todos los hilos hayan terminado inicia una nueva ronda.</p>
+    <p>Al final se tiene a la lista de ganadores en cada ronda.</p>
+    <p>Es parcialmente síncrono porque los hilos tratan de ganar el consenso de forma asíncrona, pero esperan a que todos hayan terminado para iniciar una nueva ronda, así que hay un límite de tiempo.</p>
+    <p>Para simular las rondas utilizaremos un monitor, el objeto <em>CountDownLatch</em> en Java (Programa en <a href="#p2" data-reference-type="ref" data-reference="p2">[p2]</a>) permite coordinar la ejecución de hilos al hacer que uno o varios hilos esperen hasta que una serie de instrucciones hayan terminado. Funciona con un contador inicial que se reduce cada vez que se llama al método <em>countDown()</em>. Cuando el contador llega a cero, todos los hilos que estaban esperando en <em>await()</em> pueden continuar.</p>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P6/unam.fc.concurrent.practica6/src/unam/fc/concurrent/practica6" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P6/unam.fc.concurrent.practica6/src/unam/fc/concurrent/practica6</a></p>
+    <ol>
+    <li><p><span id="p1" label="p1"></span> Programa 1 (CASConsensus): Protocolo de consenso utilizando <em>compareAndSet()</em> y <em>get()</em></p></li>
+    <li><p><span id="p2" label="p2"></span> Programa 2 (CountDownLatch): Monitor CountDownLatch, cuenta con dos métodos, <em>await()</em> espera a que el contador sea 0, <em>countDown()</em> disminuye el contador en 1</p></li>
+    <li><p><span id="p3" label="p3"></span> Programa 3 (ExecConsenRounds): Sistema de <em>Semisíncrono</em> en el cual en cada ronda se resuelve el consenso, utiliza <em>CASConsensus</em> y <em>CountDownLatch</em></p></li>
+    <li><p><span id="p4" label="p4"></span> Programa 4 (FifoReadWriteLock): Monitor de los lectores/escritores justo, visto en clase</p></li>
+    <li><p><span id="p5" label="p5"></span> Programa 5 (ExecReadersWriters): Executor del monitor FifoReadWriteLock, utiliza dos runnables, uno para los lectores, otro para los escritores</p></li>
+    </ol>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <ul>
+    <li><p>Entrega en un pdf las respuestas de los ejercicios que no requieran implementarse y añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Los programas deben ir un zip. Debes realizar un programa en cada ejercicio que indique “Implementar”.</p></li>
+    <li><p>Recuerda que debes utilizar Java 21 LTS.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 2hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    </p>
+    <ol>
+    <li><p><strong>[20 min / 15 puntos]</strong> Modifica el <em>compareAndSet()</em> por un <em>testAndSet()</em> en el programa <span class="math inline">\(CASConsensus\)</span> (<a href="#p1" data-reference-type="ref" data-reference="p1">[p1]</a>). Argumenta si sigue resolviendo el consenso para 4 hilos, agrega una captura de pantalla de la ejecución que lo sustente. Justifica tu respuesta en no más de dos renglones.</p></li>
+    <li><p><strong>[45 min / 45 puntos]</strong> La implementación en <em>ExecConsenRounds</em> (<a href="#p3" data-reference-type="ref" data-reference="p3">[p3]</a>) permite que solo unos hilos ganen el consenso. Implementa una <em>técnica de ayuda</em> similar al de la <em>Construcción universal wait-free</em> para que todos los hilos ganen el consenso eventualmente en alguna ronda. <em>Hint: Unos hilos ayudan a otros, puedes proponer un arreglo <span class="math inline">\(announce\)</span> como en la construcción universal wait-free, y ayudar por % número de hilos</em>.</p></li>
+    <li><p><strong>[30 min / 30 puntos]</strong> Considera el monitor <em>FifoReadWriteLock</em>, actualmente cumple con:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica</p></li>
+    <li><p>Si un escritor está en su sección crítica, <strong>ningún escritor o lector</strong> puede entrar a su propia sección crítica</p></li>
+    </ol>
+    <p>Implementa el monitor modificando la propiedad (b) de forma que ahora se cumpla:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica</p></li>
+    <li><p>Si un escritor está en su sección crítica, <strong>ningún lector</strong> puede entrar a su propia sección crítica</p></li>
+    </ol>
+    <p>No es necesario que el protocolo sea justo.</p></li>
+    <li><p><strong>[10 min / 10 puntos]</strong> ¿Cómo proporcionarías justicia a tu implementación del inciso anterior? No es necesario que lo implementes.</p></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-Blum2023" class="csl-entry" role="listitem">
+    Blum, Erica, Derek Leung, Julian Loss, Jonathan Katz, y Tal Rabin. 2023. <span>«<span>Analyzing the Real-World Security of the Algorand Blockchain</span>»</span>, noviembre. <a href="https://doi.org/10.60882/cispa.25681101.v1">https://doi.org/10.60882/cispa.25681101.v1</a>.
+    </div>
+    <div id="ref-10.1007/978-3-319-78375-8_3" class="csl-entry" role="listitem">
+    David, Bernardo, Peter Gaži, Aggelos Kiayias, y Alexander Russell. 2018. <span>«Ouroboros Praos: An Adaptively-Secure, Semi-synchronous Proof-of-Stake Blockchain»</span>. En <em>Advances in Cryptology – EUROCRYPT 2018</em>, editado por Jesper Buus Nielsen y Vincent Rijmen, 66-98. Cham: Springer International Publishing.
+    </div>
+    <div id="ref-Lynch96" class="csl-entry" role="listitem">
+    Lynch, Nancy A. 1996. <em>Distributed Algorithms</em>. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc.
+    </div>
+    <div id="ref-10225481" class="csl-entry" role="listitem">
+    Saad, Muhammad, Afsah Anwar, Srivatsan Ravi, y David Mohaisen. 2024. <span>«Revisiting Nakamoto Consensus in Asynchronous Networks: A Comprehensive Analysis of Bitcoin Safety and Chain Quality»</span>. <em>IEEE/ACM Transactions on Networking</em> 32 (1): 844-58. <a href="https://doi.org/10.1109/TNET.2023.3302955">https://doi.org/10.1109/TNET.2023.3302955</a>.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+
+@article{M15,
+author = {McCaffrey, Caitie},
+title = {The Verification of a Distributed System: A practitioner’s guide to increasing confidence in system correctness},
+year = {2015},
+issue_date = {November-December 2015},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {13},
+number = {9},
+issn = {1542-7730},
+url = {https://doi.org/10.1145/2857274.2889274},
+doi = {10.1145/2857274.2889274},
+abstract = {Leslie Lamport, known for his seminal work in distributed systems, famously said, "A distributed system is one in which the failure of a computer you didn’t even know existed can render your own computer unusable." Given this bleak outlook and the large set of possible failures, how do you even begin to verify and validate that the distributed systems you build are doing the right thing?},
+journal = {Queue},
+month = dec,
+pages = {150–160},
+numpages = {11}
+}
+
+@article{vogels09,
+author = {Vogels, Werner},
+title = {Eventually consistent},
+year = {2009},
+issue_date = {January 2009},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {52},
+number = {1},
+issn = {0001-0782},
+url = {https://doi.org/10.1145/1435417.1435432},
+doi = {10.1145/1435417.1435432},
+abstract = {Building reliable distributed systems at a worldwide scale demands trade-offs between consistency and availability.},
+journal = {Commun. ACM},
+month = jan,
+pages = {40–44},
+numpages = {5}
+}
+
+@article{scalableCounters2019,
+author = {Almeida, Paulo S\'{e}rgio and Baquero, Carlos},
+title = {Scalable eventually consistent counters over unreliable networks},
+year = {2019},
+issue_date = {February  2019},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+volume = {32},
+number = {1},
+issn = {0178-2770},
+url = {https://doi.org/10.1007/s00446-017-0322-2},
+doi = {10.1007/s00446-017-0322-2},
+abstract = {Counters are an important abstraction in distributed computing, and play a central role in large scale geo-replicated systems, counting events such as web page impressions or social network "likes". Classic distributed counters, strongly consistent via linearisability or sequential consistency, cannot be made both available and partition-tolerant, due to the CAP Theorem, being unsuitable to large scale scenarios. This paper defines Eventually Consistent Distributed Counters (ECDCs) and presents an implementation of the concept, Handoff Counters, that is scalable and works over unreliable networks. By giving up the total operation ordering in classic distributed counters, ECDC implementations can be made AP in the CAP design space, while retaining the essence of counting. Handoff Counters are the first Conflict-free Replicated Data Type (CRDT) based mechanism that overcomes the identity explosion problem in naive CRDTs, such as G-Counters (where state size is linear in the number of independent actors that ever incremented the counter), by managing identities towards avoiding global propagation and garbage collecting temporary entries. The approach used in Handoff Counters is not restricted to counters, being more generally applicable to other data types with associative and commutative operations.},
+journal = {Distrib. Comput.},
+month = feb,
+pages = {69–89},
+numpages = {21},
+keywords = {Conflict-free Replicated Data Types, Distributed counters, Eventual consistency}
+}
+
+@article{Blum2023,
+author = "Erica Blum and Derek Leung and Julian Loss and Jonathan Katz and Tal Rabin",
+title = "{Analyzing the Real-World Security of the Algorand Blockchain}",
+year = "2023",
+month = "11",
+url = "https://publications.cispa.de/articles/conference_contribution/Analyzing_the_Real-World_Security_of_the_Algorand_Blockchain/25681101",
+doi = "10.60882/cispa.25681101.v1"
+}
+@InProceedings{10.1007/978-3-319-78375-8_3,
+author="David, Bernardo
+and Ga{\v{z}}i, Peter
+and Kiayias, Aggelos
+and Russell, Alexander",
+editor="Nielsen, Jesper Buus
+and Rijmen, Vincent",
+title="Ouroboros Praos: An Adaptively-Secure, Semi-synchronous Proof-of-Stake Blockchain",
+booktitle="Advances in Cryptology -- EUROCRYPT 2018 ",
+year="2018",
+publisher="Springer International Publishing",
+address="Cham",
+pages="66--98",
+abstract="We present ``Ouroboros Praos'', a proof-of-stake blockchain protocol that, for the first time, provides security against fully-adaptive corruption in the semi-synchronous setting: Specifically, the adversary can corrupt any participant of a dynamically evolving population of stakeholders at any moment as long the stakeholder distribution maintains an honest majority of stake; furthermore, the protocol tolerates an adversarially-controlled message delivery delay unknown to protocol participants.",
+isbn="978-3-319-78375-8"
+}
+
+@ARTICLE{10225481,
+  author={Saad, Muhammad and Anwar, Afsah and Ravi, Srivatsan and Mohaisen, David},
+  journal={IEEE/ACM Transactions on Networking}, 
+  title={Revisiting Nakamoto Consensus in Asynchronous Networks: A Comprehensive Analysis of Bitcoin Safety and Chain Quality}, 
+  year={2024},
+  volume={32},
+  number={1},
+  pages={844-858},
+  keywords={Bitcoin;Blockchains;Safety;Peer-to-peer computing;Propagation delay;Delays;Security;Nakamoto consensus;Bitcoin partitioning},
+  doi={10.1109/TNET.2023.3302955}}
+
+
+@book{Lynch96,
+author = {Lynch, Nancy A.},
+title = {Distributed Algorithms},
+year = {1996},
+isbn = {9780080504704},
+publisher = {Morgan Kaufmann Publishers Inc.},
+address = {San Francisco, CA, USA},
+abstract = {In Distributed Algorithms, Nancy Lynch provides a blueprint for designing, implementing, and analyzing distributed algorithms. She directs her book at a wide audience, including students, programmers, system designers, and researchers. Distributed Algorithms contains the most significant algorithms and impossibility results in the area, all in a simple automata-theoretic setting. The algorithms are proved correct, and their complexity is analyzed according to precisely defined complexity measures. The problems covered include resource allocation, communication, consensus among distributed processes, data consistency, deadlock detection, leader election, global snapshots, and many others. The material is organized according to the system model-first by the timing model and then by the interprocess communication mechanism. The material on system models is isolated in separate chapters for easy reference. The presentation is completely rigorous, yet is intuitive enough for immediate comprehension. This book familiarizes readers with important problems, algorithms, and impossibility results in the area: readers can then recognize the problems when they arise in practice, apply the algorithms to solve them, and use the impossibility results to determine whether problems are unsolvable. The book also provides readers with the basic mathematical tools for designing new algorithms and proving new impossibility results. In addition, it teaches readers how to reason carefully about distributed algorithms-to model them formally, devise precise specifications for their required behavior, prove their correctness, and evaluate their performance with realistic measures. Table of Contents 1 Introduction 2 Modelling I; Synchronous Network Model 3 Leader Election in a Synchronous Ring 4 Algorithms in General Synchronous Networks 5 Distributed Consensus with Link Failures 6 Distributed Consensus with Process Failures 7 More Consensus Problems 8 Modelling II: Asynchronous System Model 9 Modelling III: Asynchronous Shared Memory Model 10 Mutual Exclusion 11 Resource Allocation 12 Consensus 13 Atomic Objects 14 Modelling IV: Asynchronous Network Model 15 Basic Asynchronous Network Algorithms 16 Synchronizers 17 Shared Memory versus Networks 18 Logical Time 19 Global Snapshots and Stable Properties 20 Network Resource Allocation 21 Asynchronous Networks with Process Failures 22 Data Link Protocols 23 Partially Synchronous System Models 24 Mutual Exclusion with Partial Synchrony 25 Consensus with Partial Synchrony}
+}
+@article{ALS94,
+author = {Attiya, Hagit and Lynch, Nancy and Shavit, Nir},
+title = {Are wait-free algorithms fast?},
+year = {1994},
+issue_date = {July 1994},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {41},
+number = {4},
+issn = {0004-5411},
+url = {https://doi.org/10.1145/179812.179902},
+doi = {10.1145/179812.179902},
+abstract = {The time complexity of wait-free algorithms in “normal” executions, where no failures occur and processes operate at approximately the same speed, is considered. A lower bound of log n on the time complexity of any wait-free algorithm that achieves approximate agreement among n processes is proved. In contrast, there exists a non-wait-free algorithm that solves this problem in constant time. This implies an Ω(log n) time separation between the wait-free and non-wait-free computation models. On the positive side, we present an O(log n) time wait-free approximate agreement algorithm; the complexity of this algorithm is within a small constant of the lower bound.},
+journal = {J. ACM},
+month = jul,
+pages = {725–763},
+numpages = {39},
+keywords = {approximate agreement, fault-tolerance, wait-free}
+}
+
+@inproceedings{CR23,
+author = {Casta\~{n}eda, Armando and Rodr\'{\i}guez, Gilde Valeria},
+title = {Asynchronous Wait-Free Runtime Verification and Enforcement of Linearizability},
+year = {2023},
+isbn = {9798400701214},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3583668.3594563},
+doi = {10.1145/3583668.3594563},
+abstract = {This paper studies the problem of verifying linearizability at runtime, where one seeks for a concurrent algorithm for verifying that the current execution of a given concurrent shared object implementation is linearizable. It shows that it is impossible to runtime verify linearizability for some common sequential objects, regardless of the consensus power of base objects. Then, it argues that actually a stronger version of the problem can be solved, if linearizability is verified indirectly. Namely, it shows that (1) linearizability of a class of concurrent implementations can be strongly verified using only read/write base objects (i.e. without the need of consensus), and (2) any implementation can be transformed to its counterpart in the class (which implements the same object) using only read/write objects too. As far as we know, this is the first runtime verification algorithm for any correctness condition that is fully asynchronous and fault-tolerant. As a by-product, a simple and generic methodology for deriving self-enforced linearizable implementations is obtained. This type implementations produce outputs that are guaranteed linearizable, and are able to produce a certificate of it, which allows the design of concurrent systems in a modular manner with accountable and forensic guarantees. These results hold not only for linearizability but for a correctness condition that includes generalizations of it such as set-linearizability and interval-linearizability.},
+booktitle = {Proceedings of the 2023 ACM Symposium on Principles of Distributed Computing},
+pages = {90–101},
+numpages = {12},
+keywords = {wait-freedom, verification, shared memory, monitoring, lock-freedom, linearizability, fault-tolerance, enforcement, distributed runtime verification, concurrent algorithms},
+location = {Orlando, FL, USA},
+series = {PODC '23}
+}
+
+@article{BFRRT22,
+author = {Bonakdarpour, Borzoo and Fraigniaud, Pierre and Rajsbaum, Sergio and Rosenblueth, David and Travers, Corentin},
+title = {Decentralized Asynchronous Crash-resilient Runtime Verification},
+year = {2022},
+issue_date = {October 2022},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {69},
+number = {5},
+issn = {0004-5411},
+url = {https://doi.org/10.1145/3550483},
+doi = {10.1145/3550483},
+abstract = {Runtime verification is a lightweight method for monitoring the formal specification of a system during its execution. It has recently been shown that a given state predicate can be monitored consistently by a set of crash-prone asynchronous distributed monitors observing the system, only if each monitor can emit verdicts taken from a large enough finite set. We revisit this impossibility result in the concrete context of linear-time logic (ltl) semantics for runtime verification, that is, when the correctness of the system is specified by an ltl formula on its execution traces. First, we show that monitors synthesized based on the 4-valued semantics of ltl (rv-ltl) may result in inconsistent distributed monitoring, even for some simple ltl formulas. More generally, given any ltl formula&nbsp;φ, we relate the number of different verdicts required by the monitors for consistently monitoring&nbsp;φ, with a specific structural characteristic of&nbsp;φ called its alternation number. Specifically, we show that, for every k ≥ 0, there is an ltl formula&nbsp;φ with alternation number&nbsp;k that cannot be verified at runtime by distributed monitors emitting verdicts from a set of cardinality smaller than k + 1. On the positive side, we define a family of logics, called distributed ltl (abbreviated as dltl), parameterized by k ≥ 0, which refines rv-ltl by incorporating 2k + 4 truth values. Our main contribution is to show that, for every k ≥ 0, every ltl formula&nbsp;φ with alternation number&nbsp;k can be consistently monitored by distributed monitors, each running an automaton based on a (2 ⌈ k/2 ⌉ +4)-valued logic taken from the dltl family.},
+journal = {J. ACM},
+month = oct,
+articleno = {34},
+numpages = {31},
+keywords = {linear-time logic, temporal logic, model checking, distributed monitoring, wait-free tasks, fault-tolerant verification, distributed computing, Runtime verification}
+}
+
+@inproceedings{GRLS92,
+author = {Gawlick, Rainer and Lynch, Nancy and Shavit, Nir},
+title = {Concurrent timestamping made simple},
+year = {1992},
+isbn = {0387555536},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+booktitle = {Symposium Proceedings on Theory of Computing and Systems},
+pages = {171–183},
+numpages = {13},
+location = {Haifa, Israel},
+series = {ISTCS'92}
+}
+
+@article{AHR95,
+author = {Attiya, Hagit and Herlihy, Maurice and Rachman, Ophir},
+title = {Atomic snapshots using lattice agreement},
+year = {1995},
+publisher = {Springer},
+address = {New York, NY, USA},
+volume = {13},
+number = {9},
+issn = {1542-7730},
+url = {https://doi.org/10.1007/BF02242714},
+doi = {10.1007/BF02242714},
+abstract = {Thesnapshot object is an important tool for constructing wait-free asynchronous algorithms. We relate the snapshot object to thelattice agreement decision problem. It is shown that any algorithm for solving lattice agreement can be transformed into an implementation of a snapshot object. The overhead cost of this transformation is only a linear number of read and write operations on atomic single-writer multi-reader registers. The transformation uses an unbounded amount of shared memory. We present a deterministic algorithm for lattice agreement that usedO (log2n) operations on 2-processorTest & Set registers, plusO (n) operations on atomic single-writer multi-reader registers. The shared objects are used by the algorithm in adynamic mode, that is, the identity of the processors that access each of the shared objects is determined dynamically during the execution of the algorithm. By a randomized implementation of 2-processorsTest & Set registers from atomic registers, this algorithm implies a randomized algorthm for lattice agreement that uses an expected number ofO (n) operations on (dynamic) atomic single-writer multi-reader registers. Combined with our transformation this yields implementations of atomic snapshots with the same complexity.
+},
+journal = {Distributed Computing}
+}
+
+
+@InProceedings{10.1007/978-3-319-09581-3_5,
+author="Guerraoui, Rachid
+and Ruppert, Eric",
+editor="Noubir, Guevara
+and Raynal, Michel",
+title="Linearizability Is Not Always a Safety Property",
+booktitle="Networked Systems",
+year="2014",
+publisher="Springer International Publishing",
+address="Cham",
+pages="57--69",
+abstract="We show that, in contrast to the general belief in the distributed computing community, linearizability, the celebrated consistency property, is not always a safety property. More specifically, we give an object for which it is possible to have an infinite history that is not linearizable, even though every finite prefix of the history is linearizable. The object we consider as a counterexample has infinite nondeterminism. We show, however, that if we restrict attention to objects with finite nondeterminism, we can use K{\"o}nig's lemma to prove that linearizability is indeed a safety property. In the same vein, we show that the backward simulation technique, which is a classical technique to prove linearizability, is not sound for arbitrary types, but is sound for types with finite nondeterminism.",
+isbn="978-3-319-09581-3"
+}
+
+@inproceedings{10.1145/777412.777467,
+author = {Bingham, Jesse D. and Condon, Anne and Hu, Alan J.},
+title = {Toward a Decidable Notion of Sequential Consistency},
+year = {2003},
+isbn = {1581136617},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/777412.777467},
+doi = {10.1145/777412.777467},
+abstract = {A memory model specifies a correctness requirement for a distributed shared memory protocol. Sequential consistency (SC) is the most widely researched model; previous work citealur1996 has shown that, in general, the SC verification problem is undecidable. We identify two aspects of the formulation found in citealur1996 that we consider to be highly unnatural; we call these non-prefix-closedness and prophetic inheritance. We conjecture that preclusion of such behavior yields a decidable version of SC, which we call decisive sequential consistency (DSC). We also introduce a structure called a phview window (VW), which retains information about a protocol's history, and we define the notion of a phVW-bound, which essentially bounds the size of the VWs needed to maintain DSC. We prove that the class of DSC protocols with VW-bound k is decidable; left conjectured is the hypothesis that all DSC protocols have such a bound, and further that the bound is computable from the protocol description. This hypothesis is true for all real protocols known to us; we verify its truth for the Lazy Caching protocol citeafek1993.},
+booktitle = {Proceedings of the Fifteenth Annual ACM Symposium on Parallel Algorithms and Architectures},
+pages = {304–313},
+numpages = {10},
+keywords = {memory model, sequential consistency, shared memory systems},
+location = {San Diego, California, USA},
+series = {SPAA '03}
+}
+
+
+@article{GIBBONSKORACH97,
+title = {TESTING SHARED MEMORIES∗},
+journal = {SIAM journal on computing},
+volume = {26},
+pages = {1208–1244},
+year = {1997},
+%issn = {0890-5401},
+%doi = {https://doi.org/10.1016/j.ic.2018.02.014},
+url = {https://eds.b.ebscohost.com/eds/pdfviewer/pdfviewer?vid=9&sid=a09af8d2-63c2-43ac-974f-b9b5fbe25f05\%40pdc-v-sessmgr03},
+author = {PHILLIP B. GIBBONS AND EPHRAIM KORACH},
+abstract = {Sequential consistency is the most widely used correctness condition for multiprocessor memory systems. This paper studies the problem of testing shared-memory multiprocessors to
+determine if they are indeed providing a sequentially consistent memory. It presents the first formal
+study of this problem, which has applications to testing new memory system designs and realizations,
+providing run-time fault tolerance, and detecting bugs in parallel programs.
+A series of results are presented for testing an execution of a shared memory under various scenarios, comparing sequential consistency with linearizability, another well-known correctness condition.
+Linearizability imposes additional restrictions on the shared memory, beyond that of sequential consistency; these restrictions are shown to be useful in testing such memories.}
+}
+
+@book{10.5555/1734069,
+author = {Herlihy, Maurice and Shavit, Nir},
+title = {The Art of Multiprocessor Programming},
+year = {2008},
+isbn = {0123705916},
+publisher = {Morgan Kaufmann Publishers Inc.},
+address = {San Francisco, CA, USA},
+abstract = {This book is the first comprehensive presentation of the principles and tools available for programming multiprocessor machines. It is of immediate use to programmers working with the new architectures. For example, the next generation of computer game consoles will all be multiprocessor-based, and the game industry is currently struggling to understand how to address the programming challenges presented by these machines.This change in the industry is so fundamental that it is certain to require a significant response by universities, and courses on multicore programming will become a staple of computer science curriculums.The authors are well known and respected in this community and both teach and conduct research in this area. Prof. Maurice Herlihy is on the faculty of Brown University. He is the recipient of the 2003 Dijkstra Prize in distributed computing. Prof. Nir Shavit is on the faculty of Tel-Aviv University and a member of the technical staff at Sun Microsystems Laboratories. In 2004 they shared the Gdel Prize, the highest award in theoretical computer science. * THE book on multicore programming, the new paradigm of computer science* Written by the world's most revered experts in multiprocessor programming and performance* Includes examples, models, exercises, PowerPoint slides, and sample Java programs}
+}
+
+@article{10.1145/564585.564601,
+author = {Gilbert, Seth and Lynch, Nancy},
+title = {Brewer's conjecture and the feasibility of consistent, available, partition-tolerant web services},
+year = {2002},
+issue_date = {June 2002},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {33},
+number = {2},
+issn = {0163-5700},
+url = {https://doi.org/10.1145/564585.564601},
+doi = {10.1145/564585.564601},
+abstract = {When designing distributed web services, there are three properties that are commonly desired: consistency, availability, and partition tolerance. It is impossible to achieve all three. In this note, we prove this conjecture in the asynchronous network model, and then discuss solutions to this dilemma in the partially synchronous model.},
+journal = {SIGACT News},
+month = jun,
+pages = {51–59},
+numpages = {9}
+}
+
+
+@article{10.1145/1897852.1897873,
+author = {Shavit, Nir},
+title = {Data Structures in the Multicore Age},
+year = {2011},
+issue_date = {March 2011},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {54},
+number = {3},
+issn = {0001-0782},
+url = {https://doi-org.pbidi.unam.mx:2443/10.1145/1897852.1897873},
+doi = {10.1145/1897852.1897873},
+abstract = {The advent of multicore processors as the standard computing platform will force major changes in software design.},
+journal = {Commun. ACM},
+month = {mar},
+pages = {76–84},
+numpages = {9}
+}
+
+
+@inproceedings{10.1145/3465084.3467944,
+author = {Sela, Gal and Herlihy, Maurice and Petrank, Erez},
+title = {Brief Announcement: Linearizability: A Typo},
+year = {2021},
+isbn = {9781450385480},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3465084.3467944},
+doi = {10.1145/3465084.3467944},
+abstract = {Linearizability is the de facto consistency condition for concurrent objects, widely used in theory and practice. Loosely speaking, linearizability classifies concurrent executions as correct if operations on shared objects appear to take effect instantaneously during the operation execution time. This paper calls attention to a somewhat-neglected aspect of linearizability: restrictions on how pending invocations are handled, an issue that has become increasingly important for software running on systems with non-volatile main memory. Interestingly, the original published definition of linearizability includes a typo (a symbol is missing a prime) that concerns exactly this issue. In this paper we point out the typo and provide an amendment to make the definition complete. We believe that pointing this typo out rigorously and proposing a fix is important and timely.},
+booktitle = {Proceedings of the 2021 ACM Symposium on Principles of Distributed Computing},
+pages = {561–564},
+numpages = {4},
+keywords = {concurrent algorithms, linearizability, correctness, verification, concurrent data structures},
+location = {Virtual Event, Italy},
+series = {PODC'21}
+}
+
+@article{10.1145/359545.359563,
+author = {Lamport, Leslie},
+title = {Time, Clocks, and the Ordering of Events in a Distributed System},
+year = {1978},
+issue_date = {July 1978},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {21},
+number = {7},
+issn = {0001-0782},
+url = {https://doi.org/10.1145/359545.359563},
+doi = {10.1145/359545.359563},
+abstract = {The concept of one event happening before another in a distributed system is examined, and is shown to define a partial ordering of the events. A distributed algorithm is given for synchronizing a system of logical clocks which can be used to totally order the events. The use of the total ordering is illustrated with a method for solving synchronization problems. The algorithm is then specialized for synchronizing physical clocks, and a bound is derived on how far out of synchrony the clocks can become.},
+journal = {Commun. ACM},
+month = {jul},
+pages = {558–565},
+numpages = {8},
+keywords = {distributed systems, clock synchronization, computer networks, multiprocess systems}
+}
+
+@inproceedings{10.1145/3583668.3594563,
+author = {Casta\~{n}eda, Armando and Rodr\'{\i}guez, Gilde Valeria},
+title = {Asynchronous Wait-Free Runtime Verification and Enforcement of Linearizability},
+year = {2023},
+isbn = {9798400701214},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3583668.3594563},
+doi = {10.1145/3583668.3594563},
+abstract = {This paper studies the problem of verifying linearizability at runtime, where one seeks for a concurrent algorithm for verifying that the current execution of a given concurrent shared object implementation is linearizable. It shows that it is impossible to runtime verify linearizability for some common sequential objects, regardless of the consensus power of base objects. Then, it argues that actually a stronger version of the problem can be solved, if linearizability is verified indirectly. Namely, it shows that (1) linearizability of a class of concurrent implementations can be strongly verified using only read/write base objects (i.e. without the need of consensus), and (2) any implementation can be transformed to its counterpart in the class (which implements the same object) using only read/write objects too. As far as we know, this is the first runtime verification algorithm for any correctness condition that is fully asynchronous and fault-tolerant. As a by-product, a simple and generic methodology for deriving self-enforced linearizable implementations is obtained. This type implementations produce outputs that are guaranteed linearizable, and are able to produce a certificate of it, which allows the design of concurrent systems in a modular manner with accountable and forensic guarantees. These results hold not only for linearizability but for a correctness condition that includes generalizations of it such as set-linearizability and interval-linearizability.},
+booktitle = {Proceedings of the 2023 ACM Symposium on Principles of Distributed Computing},
+pages = {90–101},
+numpages = {12},
+keywords = {monitoring, concurrent algorithms, fault-tolerance, enforcement, lock-freedom, shared memory, wait-freedom, distributed runtime verification, verification, linearizability},
+location = {Orlando, FL, USA},
+series = {PODC '23}
+}
+
+@article{10.1145/3546826,
+author = {Casta\~{n}eda, Armando and Rajsbaum, Sergio and Raynal, Michel},
+title = {A Linearizability-Based Hierarchy for Concurrent Specifications},
+year = {2022},
+issue_date = {January 2023},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {66},
+number = {1},
+issn = {0001-0782},
+url = {https://doi.org/10.1145/3546826},
+doi = {10.1145/3546826},
+abstract = {Two linearizability-style correctness conditions that can be used to argue safety properties of progressively more concurrent behaviors of objects.},
+journal = {Commun. ACM},
+month = {dec},
+pages = {86–97},
+numpages = {12}
+}
+
+@article{10.1145/3406678.3406690,
+author = {Rajsbaum, Sergio and Raynal, Michel},
+title = {60 Years of Mastering Concurrent Computing through Sequential Thinking},
+year = {2020},
+issue_date = {June 2020},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {51},
+number = {2},
+issn = {0163-5700},
+url = {https://doi.org/10.1145/3406678.3406690},
+doi = {10.1145/3406678.3406690},
+abstract = {Modern computing systems are highly concurrent. Threads run concurrently in shared-memory multi-core systems, and programs run in different servers communicating by sending messages to each other. Concurrent programming is hard because it requires to cope with many possible, unpredictable behaviors of the processes, and the communication media. The article argues that right from the start in 1960's, the main way of dealing with concurrency has been by reduction to sequential reasoning. It traces this history, and illustrates it through several examples, from early ideas based on mutual exclusion (which was initially introduced to access shared physical resources), passing through consensus and concurrent objects (which are immaterial data), until today distributed ledgers. A discussion is also presented, which addresses the limits that this approach encounters, related to fault-tolerance, performance, and inherently concurrent problems.},
+journal = {SIGACT News},
+month = {jun},
+pages = {59–88},
+numpages = {30},
+keywords = {synchronization, progress condition, state machine replication, total order broadcast, read/write register, fault-tolerance, agreement, crash failure, ledger, asynchrony, sequential specification, linearizability, universal construction, atomicity, message-passing, concurrent object, mutual exclusion, consistency condition, consensus, sequential thinking}
+}
+
+@article{10.1145/114005.102808,
+author = {Herlihy, Maurice},
+title = {Wait-Free Synchronization},
+year = {1991},
+issue_date = {Jan. 1991},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {13},
+number = {1},
+issn = {0164-0925},
+url = {https://doi.org/10.1145/114005.102808},
+doi = {10.1145/114005.102808},
+abstract = {A wait-free implementation of a concurrent data object is one that guarantees that any process can complete any operation in a finite number of steps, regardless of the execution speeds of the other processes. The problem of constructing a wait-free implementation of one data object from another lies at the heart of much recent work in concurrent algorithms, concurrent data structures, and multiprocessor architectures. First, we introduce a simple and general technique, based on reduction to a concensus protocol, for proving statements of the form, “there is no wait-free implementation of X by Y.” We derive a hierarchy of objects such that no object at one level has a wait-free implementation in terms of objects at lower levels. In particular, we show that atomic read/write registers, which have been the focus of much recent attention, are at the bottom of the hierarchy: thay cannot be used to construct wait-free implementations of many simple and familiar data types. Moreover, classical synchronization primitives such astest\&set and fetch\&add, while more powerful than read and write, are also computationally weak, as are the standard message-passing primitives. Second, nevertheless, we show that there do exist simple universal objects from which one can construct a wait-free implementation of any sequential object.},
+journal = {ACM Trans. Program. Lang. Syst.},
+month = {jan},
+pages = {124–149},
+numpages = {26},
+keywords = {linearization, wait-free synchronization}
+}
+
+@INPROCEEDINGS{1530711,  author={Fich, F.E. and Hendler, D. and Shavit, N.},  booktitle={46th Annual IEEE Symposium on Foundations of Computer Science (FOCS'05)},   title={Linear lower bounds on real-world implementations of concurrent objects},   year={2005},  volume={},  number={},  pages={165-173},  doi={10.1109/SFCS.2005.47}}
+
+@book{10.5555/3238238,
+author = {Taubenfeld, Gadi and Raynal, Michel},
+title = {Distributed Computing Pearls},
+year = {2018},
+isbn = {168173348X},
+publisher = {Morgan \& Claypool Publishers},
+abstract = {Computers and computer networks are one of the most incredible inventions of the 20th century, having an ever-expanding role in our daily lives by enabling complex human activities in areas such as entertainment, education, and commerce. One of the most challenging problems in computer science for the 21st century is to improve the design of distributed systems where computing devices have to work together as a team to achieve common goals. In this book, I have tried to gently introduce the general reader to some of the most fundamental issues and classical results of computer science underlying the design of algorithms for distributed systems, so that the reader can get a feel of the nature of this exciting and fascinating field called distributed computing. The book will appeal to the educated layperson and requires no computer-related background. I strongly suspect that also most computer knowledgeable readers will be able to learn something new.}
+}
+
+@book{guerraoui2018algorithms,
+  title={Algorithms for Concurrent Systems},
+  author={Guerraoui, R. and Kuznetsov, P.},
+  isbn={9782889152834},
+  url={https://books.google.com.mx/books?id=DGM6vgEACAAJ},
+  year={2018},
+  publisher={EPFL Press}
+}
+
+@book{10.5555/2431405,
+author = {Raynal, Michel},
+title = {Concurrent Programming: Algorithms, Principles, and Foundations},
+year = {2012},
+isbn = {3642320260},
+publisher = {Springer Publishing Company, Incorporated},
+abstract = {The advent of new architectures and computing platforms means that synchronization and concurrent computing are among the most important topics in computing science. Concurrent programs are made up of cooperating entities -- processors, processes, agents, peers, sensors -- and synchronization is the set of concepts, rules and mechanisms that allow them to coordinate their local computations in order to realize a common task. This book is devoted to the most difficult part of concurrent programming, namely synchronization concepts, techniques and principles when the cooperating entities are asynchronous, communicate through a shared memory, and may experience failures. Synchronization is no longer a set of tricks but, due to research results in recent decades, it relies today on sane scientific foundations as explained in this book. In this book the author explains synchronization and the implementation of concurrent objects, presenting in a uniform and comprehensive way the major theoretical and practical results of the past 30 years. Among the key features of the book are a new look at lock-based synchronization (mutual exclusion, semaphores, monitors, path expressions); an introduction to the atomicity consistency criterion and its properties and a specific chapter on transactional memory; an introduction to mutex-freedom and associated progress conditions such as obstruction-freedom and wait-freedom; a presentation of Lamport's hierarchy of safe, regular and atomic registers and associated wait-free constructions; a description of numerous wait-free constructions of concurrent objects (queues, stacks, weak counters, snapshot objects, renaming objects, etc.); a presentation of the computability power of concurrent objects including the notions of universal construction, consensus number and the associated Herlihy's hierarchy; and a survey of failure detector-based constructions of consensus objects. The book is suitable for advanced undergraduate students and graduate students in computer science or computer engineering, graduate students in mathematics interested in the foundations of process synchronization, and practitioners and engineers who need to produce correct concurrent software. The reader should have a basic knowledge of algorithms and operating systems.}
+}
+
+@article{10.1145/1047659.1040336,
+author = {Manson, Jeremy and Pugh, William and Adve, Sarita V.},
+title = {The Java memory model},
+year = {2005},
+issue_date = {January 2005},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1047659.1040336},
+doi = {10.1145/1047659.1040336},
+abstract = {This paper describes the new Java memory model, which has been revised as part of Java 5.0. The model specifies the legal behaviors for a multithreaded program; it defines the semantics of multithreaded Java programs and partially determines legal implementations of Java virtual machines and compilers.The new Java model provides a simple interface for correctly synchronized programs -- it guarantees sequential consistency to data-race-free programs. Its novel contribution is requiring that the behavior of incorrectly synchronized programs be bounded by a well defined notion of causality. The causality requirement is strong enough to respect the safety and security properties of Java and weak enough to allow standard compiler and hardware optimizations. To our knowledge, other models are either too weak because they do not provide for sufficient safety/security, or are too strong because they rely on a strong notion of data and control dependences that precludes some standard compiler transformations.Although the majority of what is currently done in compilers is legal, the new model introduces significant differences, and clearly defines the boundaries of legal transformations. For example, the commonly accepted definition for control dependence is incorrect for Java, and transformations based on it may be invalid.In addition to providing the official memory model for Java, we believe the model described here could prove to be a useful basis for other programming languages that currently lack well-defined models, such as C++ and C#.},
+journal = {SIGPLAN Not.},
+month = {jan},
+pages = {378–391},
+numpages = {14},
+keywords = {multithreading, memory model, concurrency, Java}
+}
+
+@inproceedings{MPA05,
+author = {Manson, Jeremy and Pugh, William and Adve, Sarita V.},
+title = {The Java memory model},
+year = {2005},
+isbn = {158113830X},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1040305.1040336},
+doi = {10.1145/1040305.1040336},
+abstract = {This paper describes the new Java memory model, which has been revised as part of Java 5.0. The model specifies the legal behaviors for a multithreaded program; it defines the semantics of multithreaded Java programs and partially determines legal implementations of Java virtual machines and compilers.The new Java model provides a simple interface for correctly synchronized programs -- it guarantees sequential consistency to data-race-free programs. Its novel contribution is requiring that the behavior of incorrectly synchronized programs be bounded by a well defined notion of causality. The causality requirement is strong enough to respect the safety and security properties of Java and weak enough to allow standard compiler and hardware optimizations. To our knowledge, other models are either too weak because they do not provide for sufficient safety/security, or are too strong because they rely on a strong notion of data and control dependences that precludes some standard compiler transformations.Although the majority of what is currently done in compilers is legal, the new model introduces significant differences, and clearly defines the boundaries of legal transformations. For example, the commonly accepted definition for control dependence is incorrect for Java, and transformations based on it may be invalid.In addition to providing the official memory model for Java, we believe the model described here could prove to be a useful basis for other programming languages that currently lack well-defined models, such as C++ and C#.},
+booktitle = {Proceedings of the 32nd ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {378–391},
+numpages = {14},
+keywords = {multithreading, memory model, concurrency, Java},
+location = {Long Beach, California, USA},
+series = {POPL '05}
+}
+
+
+
+@book{rust,
+  title     = "Rust Atomics and Locks",
+  author    = "Bos, Mara",
+  year      = 2023,
+  publisher = "O'Reilly Media, Inc.",
+  address   = "US"
+}
+
+@article{10.1145/3376902,
+author = {Attiya, Hagit and Rajsbaum, Sergio},
+title = {Indistinguishability},
+year = {2020},
+issue_date = {May 2020},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {63},
+number = {5},
+issn = {0001-0782},
+url = {https://doi-org.pbidi.unam.mx:2443/10.1145/3376902},
+doi = {10.1145/3376902},
+abstract = {Diverse examples depict how indistinguishability plays a central role in computer science.},
+journal = {Commun. ACM},
+month = {apr},
+pages = {90–99},
+numpages = {10}
+}
+
+@book{scottSharedMemory,
+    author = {Michael L. Scott, Trevor Brown},
+    title = {Shared-Memory Synchronization},
+    publisher = {Springer Cham},
+    year = {30 January 2024}
+}
+
+@book{tullsenMultithreading,
+    author = {Mario Nemirovsky, Dean M. Tullsen},
+    title = {Multithreading Architecture},
+    publisher = {Springer Cham},
+    year = {17 January 2013}
+}
+
+@book{benmammarJava,
+    author = {Badr Benmammar},
+    title = {Concurrent, Real-Time and Distributed Programming in Java: Threads, RTSJ and RMI},
+    publisher = {ISTE Ltd and John Wiley & Sons Inc},
+    year = {2018}
+}
+
+@book{OriginHansen,
+    author = {Per Brinch Hansen},
+    title = {The Origin of Concurrent Programming},
+    publisher = {Springer New York, NY},
+    year = {31 May 2002}
+}
+
+@book{distributedGarg,
+
+publisher = {John Wiley & Sons, Ltd},
+author ={Vijay K. Garg},
+isbn = {9780471721277},
+title = {Concurrent and Distributed Computing in Java},
+year = {2004},
+keywords = {critical regions, mutual exclusion problem, Peterson's algorithm, Lamport's bakery algorithm},
+abstract = {Summary This Chapter includes the following topics: Introduction Peterson's Algorithm Lamport's Bakery Algorithm Hardware Solutions Problems Bibliographic Remarks}
+}
+
+@book{oaks2004java,
+  title={Java Threads: Understanding and Mastering Concurrent Programming},
+  author={Oaks, S. and Wong, H.},
+  isbn={9781449366667},
+  url={https://books.google.com.mx/books?id=r8hhO7oGKrEC},
+  year={2004},
+  publisher={O'Reilly Media}
+}
+
+@article{HW90,
+author = {Herlihy, Maurice P. and Wing, Jeannette M.},
+title = {Linearizability: a correctness condition for concurrent objects},
+year = {1990},
+issue_date = {July 1990},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {12},
+number = {3},
+issn = {0164-0925},
+url = {https://doi.org/10.1145/78969.78972},
+doi = {10.1145/78969.78972},
+abstract = {A concurrent object is a data object shared by concurrent processes. Linearizability is a correctness condition for concurrent objects that exploits the semantics of abstract data types. It permits a high degree of concurrency, yet it permits programmers to specify and reason about concurrent objects using known techniques from the sequential domain. Linearizability provides the illusion that each operation applied by concurrent processes takes effect instantaneously at some point between its invocation and its response, implying that the meaning of a concurrent object's operations can be given by pre- and post-conditions. This paper defines linearizability, compares it to other correctness conditions, presents and demonstrates a method for proving the correctness of implementations, and shows how to reason about concurrent objects, given they are linearizable.},
+journal = {ACM Trans. Program. Lang. Syst.},
+month = jul,
+pages = {463–492},
+numpages = {30}
+}
+
+@ARTICLE{L79,
+  author={Lamport},
+  journal={IEEE Transactions on Computers}, 
+  title={How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs}, 
+  year={1979},
+  volume={C-28},
+  number={9},
+  pages={690-691},
+  keywords={Memory modules;Computers;Protocols;Memory management;Freeports;Logic;Array signal processing;Welding;Semiconductor memory;Programmable logic arrays;Computer design;concurrent computing;hardware correctness;multiprocessing;parallel processing},
+  doi={10.1109/TC.1979.1675439}}
+
+
+%%%%%%%%%%%%% Online
+
+@MISC{youtubeJVMAnatomy,
+        title = {JVM Anatomy 101},
+        date = {2023},
+        organization = {Youtube},
+        author = {Nikita Lipsky},
+        howpublished = {\url{https://youtu.be/BeMi8K0AFAc?si=X56D_vzpp-u7iNH9}}
+}
+
+@MISC{Hyperth,
+  title        = {What Is Hyper-Threading?},
+  author       = {Intel},
+  year         = 2024,
+  howpublished         = {\url{https://www.intel.com/content/www/us/en/gaming/resources/hyper-threading.html#:~:text=Intel®%20Hyper%2DThreading%20Technology%20is%20a%20hardware%20innovation%20that,can%20be%20done%20in%20parallel.]}
+}}
+

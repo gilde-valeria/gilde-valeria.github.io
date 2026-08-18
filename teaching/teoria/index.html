@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notas de teoría · Cómputo Concurrente</title>
+<meta name="description" content="Notas de teoría del curso de Cómputo Concurrente: concurrencia, exclusión mutua y nociones de corrección." />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+</head>
+<body>
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente</p>
+    <h1>Notas de teoría</h1>
+    <p class="practica-sub">Conceptos, intuiciones y rutas para estudiar</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="/teaching/practicas/">Ir a las prácticas</a>
+      <a class="btn" href="/teaching/practicas/referencias.html">Bibliografía</a>
+      <a class="btn btn-ghost" href="/teaching/">Volver a Teaching</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout" style="grid-template-columns:1fr">
+  <article class="practica-body">
+    <p class="muted" style="margin-top:0">
+      Estas notas siguen el orden del curso. Se escriben en Org y se publican
+      automáticamente a HTML en cada <em>push</em> al repositorio.
+    </p>
+
+    <div class="practica-grid">
+
+      <div class="practica-card">
+        <p class="num">Nota 1</p>
+        <h3>¿Qué es la concurrencia? Origen, propósito y definición</h3>
+        <p class="desc">Coordinar agentes en presencia de adversarios: de dónde viene la idea,
+          para qué sirve y cómo se define con precisión.</p>
+        <div class="links"><a href="1-intro-que-porque-paraque.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Nota 2</p>
+        <h3>La fábula de las banderas: el ABC de la exclusión mutua</h3>
+        <p class="desc">Alice, Bob, un gato y un perro. El problema de exclusión mutua
+          contado con protocolos de banderas.</p>
+        <div class="links"><a href="2-historias-con-moraleja.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Nota 3</p>
+        <h3>Distintos sabores de corrección</h3>
+        <p class="desc">Linealizabilidad, consistencia secuencial, quiescente y eventual:
+          qué exige cada una y cuánto cuesta.</p>
+        <div class="links">
+          <a href="nocionesDcorrecion.html">Leer</a>
+          <a href="/teaching/practicas/p7-contadores.html">Práctica relacionada</a>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="back-link"><a href="/teaching/">← Volver a Teaching</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+</body>
+</html>

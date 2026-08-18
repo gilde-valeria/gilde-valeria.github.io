@@ -1,0 +1,236 @@
+/* Estilos para páginas de prácticas y notas — Cómputo Concurrente */
+
+.practica-hero {
+  background: var(--bg);
+  color: #FEFEFE;
+  padding: 3rem 1.5rem 2.5rem;
+  text-align: left;
+  display: block;
+}
+.practica-hero-inner { max-width: 1100px; margin: 0 auto; }
+.practica-hero .eyebrow {
+  margin: 0 0 .35rem;
+  font-size: .85rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent-green);
+}
+.practica-hero h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #FEFEFE;
+  border: none;
+}
+.practica-sub {
+  margin: .5rem 0 0;
+  color: var(--accent-pink);
+  font-size: 1.05rem;
+}
+
+.practica-actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .6rem; }
+.btn {
+  display: inline-block;
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  border: 1.5px solid var(--accent-green);
+  color: var(--accent-green);
+  background: transparent;
+  transition: background .15s, color .15s;
+}
+.btn:hover { background: var(--accent-green); color: var(--bg); }
+.btn-primary { background: var(--accent-green); color: var(--bg); }
+.btn-primary:hover { background: var(--accent-pink); border-color: var(--accent-pink); }
+.btn-ghost { border-color: #6b6b6b; color: #cfcfcf; }
+.btn-ghost:hover { background: #6b6b6b; color: #fff; }
+
+/* --- Layout con tabla de contenido --- */
+.practica-layout {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+.practica-toc {
+  position: sticky;
+  top: 4.5rem;
+  background: var(--card-bg);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  font-size: .9rem;
+  max-height: 80vh;
+  overflow: auto;
+}
+.toc-title {
+  margin: 0 0 .5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .75rem;
+  color: var(--muted);
+}
+.practica-toc ul { list-style: none; padding-left: .8rem; margin: 0; }
+.practica-toc > ul { padding-left: 0; }
+.practica-toc li { margin: .3rem 0; }
+.practica-toc a { text-decoration: none; color: var(--text); }
+.practica-toc a:hover { color: var(--purplue); text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .practica-layout { grid-template-columns: 1fr; gap: 1.25rem; }
+  .practica-toc { position: static; max-height: none; }
+  .practica-hero h1 { font-size: 1.6rem; }
+}
+
+/* --- Cuerpo del documento --- */
+.practica-body {
+  background: var(--card-bg);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 2rem 2.2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  min-width: 0;
+}
+.practica-body h1, .practica-body h2 {
+  border-bottom: 3px solid var(--accent-pink);
+  padding-bottom: .3rem;
+  margin-top: 2.2rem;
+  font-size: 1.5rem;
+  color: var(--bg);
+}
+.practica-body h1:first-child, .practica-body h2:first-child { margin-top: 0; }
+.practica-body h3 { margin-top: 1.8rem; font-size: 1.15rem; color: var(--purplue); }
+.practica-body h4 { margin-top: 1.4rem; font-size: 1rem; }
+.practica-body p { margin: .9rem 0; }
+.practica-body ul, .practica-body ol { padding-left: 1.4rem; margin: .9rem 0; }
+.practica-body li { margin: .4rem 0; }
+
+.practica-body figure { margin: 2rem 0; text-align: center; }
+.practica-body img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 0 auto; }
+.practica-body figcaption {
+  font-size: .88rem; color: #555; margin-top: .6rem; font-style: italic;
+}
+
+.practica-body table {
+  width: 100%; border-collapse: collapse; margin: 1.8rem 0; font-size: .93rem;
+  display: block; overflow-x: auto;
+}
+.practica-body th {
+  background: var(--muted); color: #fff; text-align: left; padding: .6rem .8rem;
+}
+.practica-body td { padding: .6rem .8rem; border-bottom: 1px solid #eee; }
+.practica-body tr:nth-child(even) td { background: #fafafa; }
+
+/* --- Código --- */
+.code-wrap { position: relative; margin: 1.5rem 0; }
+.practica-body pre {
+  background: #1e222a; color: #d7dae0; padding: 1.2rem 1.1rem;
+  border-radius: 10px; overflow-x: auto; font-size: .87rem; line-height: 1.5;
+  margin: 0;
+}
+.practica-body pre code { background: none; color: inherit; padding: 0; }
+.practica-body code {
+  background: #f3f0fa; color: #6a2fb5; padding: .12rem .35rem;
+  border-radius: 4px; font-size: .9em;
+}
+.copy-btn {
+  position: absolute; top: .55rem; right: .6rem; z-index: 2;
+  background: rgba(255,255,255,.12); color: #d7dae0;
+  border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
+  padding: .18rem .55rem; font-size: .75rem; cursor: pointer;
+  font-family: inherit;
+}
+.copy-btn:hover { background: var(--accent-green); color: #1e222a; border-color: var(--accent-green); }
+
+/* --- Referencias --- */
+.csl-bib-body { font-size: .92rem; margin-top: 1rem; }
+.csl-entry { margin: .7rem 0; padding-left: 1.6rem; text-indent: -1.6rem; }
+.practica-body .references { border-top: 2px solid #eee; padding-top: 1rem; }
+a.citation, span.citation { color: var(--purplue); }
+
+.back-link { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid #eee; font-size: .92rem; }
+
+/* --- Índice de prácticas --- */
+.practica-grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.practica-card {
+  background: var(--card-bg); border: 1px solid #e5e7eb; border-radius: 14px;
+  padding: 1.2rem 1.3rem; box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  display: flex; flex-direction: column;
+}
+.practica-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.09); }
+.practica-card .num {
+  font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 .3rem;
+}
+.practica-card h3 { margin: 0 0 .5rem; font-size: 1.1rem; color: var(--bg); }
+.practica-card p.desc { margin: 0 0 1rem; font-size: .92rem; color: #555; flex: 1; }
+.practica-card .links { display: flex; flex-wrap: wrap; gap: .45rem; }
+.practica-card .links a {
+  font-size: .82rem; font-weight: 600; text-decoration: none;
+  padding: .28rem .7rem; border-radius: 999px;
+  border: 1.5px solid var(--purplue); color: var(--purplue);
+}
+.practica-card .links a:hover { background: var(--purplue); color: #fff; }
+.badge {
+  display: inline-block; font-size: .7rem; font-weight: 700; padding: .15rem .5rem;
+  border-radius: 999px; background: var(--accent-yellow); color: var(--bg);
+  margin-left: .4rem; vertical-align: middle;
+}
+.badge-archivo { background: #ddd; color: #555; }
+
+/* --- Páginas de códigos --- */
+.codigos-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin: 2rem 0 1rem; flex-wrap: wrap;
+}
+.codigos-head .btn { border-color: var(--purplue); color: var(--purplue); }
+.codigos-head .btn:hover { background: var(--purplue); color: #fff; }
+
+details.code-file {
+  border: 1px solid #e5e7eb; border-radius: 10px; margin: .6rem 0;
+  background: #fcfcfd; overflow: hidden;
+}
+details.code-file[open] { border-color: var(--accent-green); }
+details.code-file summary {
+  cursor: pointer; padding: .7rem 1rem; font-weight: 600;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  list-style: none;
+}
+details.code-file summary::-webkit-details-marker { display: none; }
+details.code-file summary::before {
+  content: "▸"; color: var(--purplue); margin-right: .5rem; transition: transform .15s;
+}
+details.code-file[open] summary::before { content: "▾"; }
+details.code-file summary:hover { background: #f5f2fb; }
+details.code-file .fname { margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .95rem; }
+details.code-file .fmeta { font-size: .78rem; color: #888; font-weight: 400; white-space: nowrap; }
+details.code-file .fpath { margin: 0 1rem; font-size: .78rem; }
+details.code-file .fpath a { color: #888; text-decoration: none; word-break: break-all; }
+details.code-file .fpath a:hover { color: var(--purplue); text-decoration: underline; }
+details.code-file .code-wrap { margin: .6rem 1rem 1rem; }
+details.code-file pre { max-height: 32rem; }
+
+/* --- Bibliografía --- */
+.ref-usos { margin: .35rem 0 0; font-size: .8rem; color: #777; text-indent: 0; }
+.ref-chip {
+  display: inline-block; margin-left: .3rem; padding: .1rem .55rem;
+  border-radius: 999px; background: #f3f0fa; color: var(--purplue);
+  text-decoration: none; font-weight: 600; font-size: .75rem;
+}
+.ref-chip:hover { background: var(--purplue); color: #fff; }
+
+/* --- Índice: secciones --- */
+.seccion-titulo {
+  margin: 2.5rem 0 1rem; font-size: 1.35rem; color: var(--bg);
+  border-bottom: 3px solid var(--accent-pink); padding-bottom: .3rem;
+}
+.seccion-titulo:first-of-type { margin-top: 0; }
+.seccion-intro { margin: -.5rem 0 1.2rem; color: #555; font-size: .95rem; }

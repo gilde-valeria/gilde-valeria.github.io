@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>$pagetitle$ · Cómputo Concurrente</title>
+<meta name="description" content="$subtitle$" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+$highlighting-css$
+</style>$if(math)$
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$$','$$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+$endif$
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">$course$</p>
+    <h1>$pagetitle$</h1>
+    <p class="practica-sub">$subtitle$</p>
+    <div class="practica-actions">
+      $if(pdf)$<a class="btn btn-primary" href="$pdf$">Descargar PDF</a>$endif$
+      $if(codigos)$<a class="btn" href="$codigos$" target="_blank" rel="noopener">Códigos en GitHub</a>$endif$
+      $if(codigospage)$<a class="btn" href="$codigospage$">Ver códigos aquí</a>$endif$
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+  $if(toc)$
+  <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    $table-of-contents$
+  </aside>
+  $endif$
+  <article class="practica-body">
+    $body$
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

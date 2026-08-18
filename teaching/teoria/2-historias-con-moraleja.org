@@ -14,7 +14,6 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 2. No pueden gritarse (están lejos).
 3. **Solo hay banderas:** Cada uno tiene una bandera en su ventana que el otro puede ver. Esto representa **bits en memoria compartida**.
 
-[[file:../../images/pets_fable.png]]
 
 * 2. El Protocolo de Banderas
 ¿Cómo evitar que choquen usando solo banderas? Aquí está el primer intento de algoritmo:
@@ -72,4 +71,4 @@ Este es el nivel más básico de coordinación en hardware. En las siguientes no
 # Notas Relacionadas:
 - [[file:1-intro-que-porque-paraque.md][¿Qué es la computación concurrente?]]
 - [[file:2-historias-con-moraleja.md][Alice y Bob: El problema de la interferencia]]
-- [[file:3-linearizabilidad-vs-sc.md][Linearizabilidad: ¿Cómo evitar el choque de mascotas?]]
+- [[file:nocionesDcorrecion.org][Distintos sabores de corrección: ¿cómo evitar el choque de mascotas?]]

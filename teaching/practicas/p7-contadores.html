@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Implementaciones de contadores: balance entre corrección y eficiencia · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 7" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    background-color: #232629;
+    color: #7a7c7d;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+div.sourceCode
+  { color: #cfcfc2; background-color: #232629; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #cfcfc2; } /* Normal */
+code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+code span.an { color: #3f8058; } /* Annotation */
+code span.at { color: #2980b9; } /* Attribute */
+code span.bn { color: #f67400; } /* BaseN */
+code span.bu { color: #7f8c8d; } /* BuiltIn */
+code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #3daee9; } /* Char */
+code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+code span.co { color: #7a7c7d; } /* Comment */
+code span.cv { color: #7f8c8d; } /* CommentVar */
+code span.do { color: #a43340; } /* Documentation */
+code span.dt { color: #2980b9; } /* DataType */
+code span.dv { color: #f67400; } /* DecVal */
+code span.er { color: #da4453; text-decoration: underline; } /* Error */
+code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+code span.fl { color: #f67400; } /* Float */
+code span.fu { color: #8e44ad; } /* Function */
+code span.im { color: #27ae60; } /* Import */
+code span.in { color: #c45b00; } /* Information */
+code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+code span.op { color: #cfcfc2; } /* Operator */
+code span.ot { color: #27ae60; } /* Other */
+code span.pp { color: #27ae60; } /* Preprocessor */
+code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #da4453; } /* SpecialString */
+code span.st { color: #f44f4f; } /* String */
+code span.va { color: #27aeae; } /* Variable */
+code span.vs { color: #da4453; } /* VerbatimString */
+code span.wa { color: #da4453; } /* Warning */
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Implementaciones de contadores: balance entre corrección y eficiencia</h1>
+    <p class="practica-sub">Práctica 7</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practicaContadores.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente" target="_blank" rel="noopener">Códigos en GitHub</a>
+      
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#distintos-sabores-de-contadores" id="toc-distintos-sabores-de-contadores">Distintos Sabores de Contadores</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>Razonar sobre la corrección de un algoritmo concurrente es un desafío. Existen nociones de corrección que definen lo que es un comportamiento válido a partir de transformar una historia concurrente (con hilos ejecutándose al mismo tiempo) en una historia secuencial (como si ocurrieran uno tras otro) para analizar si el resultado tiene sentido.</p>
+    <p>Esta transformación sigue reglas que van de más a menos estrictas:</p>
+    <ul>
+    <li><p><strong>Linealizabilidad (Linearizability <span class="citation" data-cites="HW90">(<a href="#ref-HW90" role="doc-biblioref">M. P. Herlihy y Wing 1990</a>)</span>):</strong> Es el modelo más fuerte. Cada operación parece tener efecto de forma instantánea y atómica en un punto único en el <em>tiempo real</em>, ubicado estrictamente entre su invocación y su respuesta.</p></li>
+    <li><p><strong>Consistencia Secuencial (Sequential Consistency <span class="citation" data-cites="L79">(<a href="#ref-L79" role="doc-biblioref">Lamport 1979</a>)</span>):</strong> Relaja el tiempo real. Exige que exista un orden global único de todas las operaciones que respete el <em>orden de programa</em> de cada hilo de forma individual.</p></li>
+    <li><p><strong>Consistencia en la Inactividad (Quiescent Consistency <span class="citation" data-cites="10.5555/1734069">(<a href="#ref-10.5555/1734069" role="doc-biblioref">M. Herlihy y Shavit 2008</a>)</span>):</strong> No impone un orden estricto entre operaciones concurrentes superpuestas. Solo garantiza el orden a través de los periodos de inactividad: si la operación A termina antes de que la operación B comience (separadas por un instante donde nadie hace nada), A precederá a B.</p></li>
+    <li><p><strong>Consistencia Eventual (Eventual Consistency <span class="citation" data-cites="vogels09">(<a href="#ref-vogels09" role="doc-biblioref">Vogels 2009</a>)</span>):</strong> El modelo más relajado. Si cesan las actualizaciones, todas las réplicas del sistema convergerán <em>eventualmente</em> al mismo estado. Tolera que diferentes hilos vean estados distintos temporalmente.</p></li>
+    </ul>
+    <p>Los algoritmos concurrentes que garantizan linealizabilidad suelen imponer un <strong>cuello de botella único</strong> (como un candado global o una variable fuertemente sincronizada). Esto destruye la escalabilidad a medida que aumenta el número de hilos.</p>
+    <p>La solución propuesta en la literatura <span class="citation" data-cites="10.1145/1897852.1897873">(<a href="#ref-10.1145/1897852.1897873" role="doc-biblioref">Shavit 2011</a>)</span> para alcanzar el máximo rendimiento es <strong>relajar nuestras exigencias de corrección</strong>. Al pasar de estructuras linealizables a estructuras con consistencia quiescente o eventual, permitimos que las operaciones se "dispersen" en el espacio de memoria, evitando que los hilos choquen entre sí y maximizando la eficiencia.</p>
+    <p>En los sistemas distribuidos masivos, la consistencia fuerte no solo es ineficiente,
+    sino matemáticamente imposible frente a particiones de red
+    (Teorema CAP <span class="citation" data-cites="10.1145/564585.564601">(<a href="#ref-10.1145/564585.564601" role="doc-biblioref">Gilbert y Lynch 2002</a>)</span>). Por ejemplo, en contadores escalables
+    a nivel global, los mensajes se atrasan, se pierden o se reordenan.
+    Exigir linealizabilidad requeriría detener internet por cada incremento.
+    Por ello, se adopta la <strong>Consistencia Eventual</strong>: un cliente puede incrementar
+    su contador local inmediatamente, y el protocolo se encarga de reconciliar estos
+    valores en segundo plano para que, eventualmente, el total sea preciso <span class="citation" data-cites="scalableCounters2019">(<a href="#ref-scalableCounters2019" role="doc-biblioref">Almeida y Baquero 2019</a>)</span>.</p>
+    <h2 id="distintos-sabores-de-contadores">Distintos Sabores de Contadores</h2>
+    <p>A continuación, analizaremos tres implementaciones de contadores, desde la más estricta y lenta, hasta las más relajadas y rápidas.</p>
+    <h3 id="contador-linealizable"> Contador Linealizable</h3>
+    <p>El enfoque clásico y seguro. Al delegar la operación al hardware subyacente mediante <code>incrementAndGet()</code>, garantizamos el nivel de corrección más alto.</p>
+    <div class="sourceCode" id="cb1" data-language="Java" data-caption="LinearizableCounter."><pre class="sourceCode java"><code class="language-java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">atomic</span><span class="op">.</span><span class="im">AtomicLong</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> LinearizableCounter <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">AtomicLong</span> count <span class="op">=</span> <span class="kw">new</span> <span class="bu">AtomicLong</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        count<span class="op">.</span><span class="fu">incrementAndGet</span><span class="op">();</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">fetch</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p><strong>¿Por qué es Linealizable?</strong><br />
+    Porque la instrucción <code>incrementAndGet()</code> se ejecuta a nivel de procesador como una operación indivisible. Si el Hilo A y el Hilo B llaman al método al mismo tiempo, el hardware formará una fila instantánea en tiempo real.</p>
+    <p><em>Ejemplo de ejecución:</em> Si A llama al método a las 10:00:01 y B a las 10:00:02, es matemáticamente imposible que B no vea el incremento de A. Al cumplir con el tiempo real, cumple automáticamente con todas las consistencias inferiores (Secuencial, Quiescente, etc.). El costo de esto es la alta contención: si 1,000 hilos llaman a <code>incrementAndGet()</code>, 999 tendrán que esperar su turno.</p>
+    <p>—</p>
+    <h3 id="sloppy-counter-consistencia-eventual">Sloppy Counter (Consistencia Eventual)</h3>
+    <p>Este contador asigna memoria privada a cada hilo (<code>ThreadLocal</code>) y solo vuelca los datos a la variable global cuando supera un umbral. Es ultrarrápido, pero sacrifica la frescura de los datos.</p>
+    <div class="sourceCode" id="cb2" data-language="Java" data-caption="SloppyCounter."><pre class="sourceCode java"><code class="language-java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> SloppyCounter <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">AtomicLong</span> globalCount <span class="op">=</span> <span class="kw">new</span> <span class="bu">AtomicLong</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span> threshold <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">ThreadLocal</span><span class="op">&lt;</span><span class="bu">Long</span><span class="op">&gt;</span> localCount <span class="op">=</span> <span class="bu">ThreadLocal</span><span class="op">.</span><span class="fu">withInitial</span><span class="op">(()</span> <span class="op">-&gt;</span> <span class="dv">0L</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> current <span class="op">=</span> localCount<span class="op">.</span><span class="fu">get</span><span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>current <span class="op">&gt;=</span> threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            globalCount<span class="op">.</span><span class="fu">addAndGet</span><span class="op">(</span>current<span class="op">);</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            localCount<span class="op">.</span><span class="fu">set</span><span class="op">(</span><span class="dv">0L</span><span class="op">);</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            localCount<span class="op">.</span><span class="fu">set</span><span class="op">(</span>current<span class="op">);</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">fetch</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> globalCount<span class="op">.</span><span class="fu">get</span><span class="op">();</span> <span class="co">// Lectura aproximada (eventual)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p><strong>¿Por qué es Consistente Eventualmente?</strong><br />
+    Porque si todos los hilos dejaran de incrementar y forzaran un volcado de sus variables locales, todos verían el mismo valor final correcto.</p>
+    <p><strong>¿Por qué NO alcanza la Consistencia Secuencial?</strong><br />
+    Para ser secuencialmente consistente, el sistema global debe respetar el <em>orden de programa</em> de cada hilo.</p>
+    <p><em>Ejemplo de ejecución que falla:</em></p>
+    <ol>
+    <li><p>El Hilo A realiza 50 incrementos. (Su código local avanza).</p></li>
+    <li><p>El Hilo A cambia una variable compartida: <code>bandera = true</code>.</p></li>
+    <li><p>El Hilo B espera a ver la bandera. Ve <code>bandera == true</code> y procede a llamar a <code>fetch()</code>.</p></li>
+    <li><p>El Hilo B lee <strong>0</strong> (porque A no alcanzó el umbral de 100 para volcar).</p></li>
+    </ol>
+    <p>En una historia secuencial válida, si el Hilo B actuó <em>después</em> de ver la bandera del Hilo A, obligatoriamente debió ver los incrementos que A hizo <em>antes</em> de levantar la bandera. Como lee 0, se rompe el orden lógico.</p>
+    <p>—</p>
+    <h3 id="árbol-de-difracción-consistencia-quiescente">Árbol de Difracción (Consistencia Quiescente)</h3>
+    <p>Inspirado en Shavit, los hilos atraviesan un árbol binario mediante balanceadores, dividiendo el tráfico hasta llegar a múltiples hojas contadoras. Para leer el total, el método <code>fetch</code> recorre y suma todas las hojas.</p>
+    <div class="sourceCode" id="cb3" data-language="Java" data-caption="Estructura base del ShavitTreeCounter."><pre class="sourceCode java"><code class="language-java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">atomic</span><span class="op">.</span><span class="im">AtomicInteger</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">atomic</span><span class="op">.</span><span class="im">AtomicLong</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ShavitTreeCounter <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Nodo interno (Balanceador) o Nodo Hoja (Contador)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="kw">class</span> <span class="bu">Node</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">boolean</span> isLeaf<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Node</span> left<span class="op">,</span> right<span class="op">;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">AtomicInteger</span> balancer <span class="op">=</span> <span class="kw">new</span> <span class="bu">AtomicInteger</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span> <span class="co">// Prisma de difraccion</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">AtomicLong</span> count <span class="op">=</span> <span class="kw">new</span> <span class="bu">AtomicLong</span><span class="op">(</span><span class="dv">0</span><span class="op">);</span> <span class="co">// Contador real</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Node</span><span class="op">()</span> <span class="op">{</span> <span class="kw">this</span><span class="op">.</span><span class="fu">isLeaf</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Node</span><span class="op">(</span><span class="bu">Node</span> left<span class="op">,</span> <span class="bu">Node</span> right<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">isLeaf</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">left</span> <span class="op">=</span> left<span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">right</span> <span class="op">=</span> right<span class="op">;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="bu">Node</span> root<span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">ShavitTreeCounter</span><span class="op">(</span><span class="dt">int</span> depth<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">root</span> <span class="op">=</span> <span class="fu">buildTree</span><span class="op">(</span>depth<span class="op">);</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">Node</span> <span class="fu">buildTree</span><span class="op">(</span><span class="dt">int</span> depth<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>depth <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="cf">return</span> <span class="kw">new</span> <span class="bu">Node</span><span class="op">();</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">new</span> <span class="bu">Node</span><span class="op">(</span><span class="fu">buildTree</span><span class="op">(</span>depth <span class="op">-</span> <span class="dv">1</span><span class="op">),</span> <span class="fu">buildTree</span><span class="op">(</span>depth <span class="op">-</span> <span class="dv">1</span><span class="op">));</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Node</span> current <span class="op">=</span> root<span class="op">;</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="op">(!</span>current<span class="op">.</span><span class="fu">isLeaf</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> route <span class="op">=</span> current<span class="op">.</span><span class="fu">balancer</span><span class="op">.</span><span class="fu">getAndIncrement</span><span class="op">();</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> <span class="op">(</span>route <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">?</span> current<span class="op">.</span><span class="fu">left</span> <span class="op">:</span> current<span class="op">.</span><span class="fu">right</span><span class="op">;</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        current<span class="op">.</span><span class="fu">count</span><span class="op">.</span><span class="fu">incrementAndGet</span><span class="op">();</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">fetch</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fu">sumLeaves</span><span class="op">(</span>root<span class="op">);</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">long</span> <span class="fu">sumLeaves</span><span class="op">(</span><span class="bu">Node</span> node<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>node<span class="op">.</span><span class="fu">isLeaf</span><span class="op">)</span> <span class="cf">return</span> node<span class="op">.</span><span class="fu">count</span><span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fu">sumLeaves</span><span class="op">(</span>node<span class="op">.</span><span class="fu">left</span><span class="op">)</span> <span class="op">+</span> <span class="fu">sumLeaves</span><span class="op">(</span>node<span class="op">.</span><span class="fu">right</span><span class="op">);</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p><strong>¿Por qué garantiza Consistencia Quiescente?</strong><br />
+    Porque el contador solo garantiza devolver el valor exacto si <em>todas las operaciones de incremento se detienen por completo</em> (quiescence) antes de invocar el <code>fetch</code>.<br />
+    <em>Analogía del estadio:</em> Es como una multitud entrando por 16 puertas distintas. Mientras la gente entra, es imposible contarlos exactamente sin detener el flujo. Solo cuando todos se sientan (inactividad/quiescence), cuentas y el número cuadra perfecto.</p>
+    <p><strong>¿Por qué NO alcanza la Consistencia Secuencial?</strong><br />
+    Porque la lectura (<code>fetch</code>) no es atómica; viaja hoja por hoja mientras otros hilos siguen modificando el árbol.</p>
+    <p><em>Ejemplo de ejecución que falla (Ver el futuro y perderse el pasado):</em></p>
+    <ol>
+    <li><p>Imagina un árbol con dos hojas: Izquierda(0) y Derecha(0).</p></li>
+    <li><p>Un Hilo Lector comienza a sumar y lee la hoja Izquierda (Valor: <strong>0</strong>).</p></li>
+    <li><p>Un Hilo Escritor entra, incrementa la Izquierda (+1) y luego incrementa la Derecha (+1). (Ambas quedan en 1).</p></li>
+    <li><p>El Hilo Lector avanza a la hoja Derecha, lee su valor (Valor: <strong>1</strong>) y reporta un Total de <strong>1</strong>.</p></li>
+    </ol>
+    <p>El Lector vio el evento "futuro" (el incremento en la Derecha) pero se perdió el evento "pasado" (el incremento en la Izquierda). En una historia secuencial, si ves el paso 2 de un hilo, estás obligado a haber visto su paso 1. Aquí no ocurre, rompiendo la consistencia secuencial.</p>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <p><strong>Instrucciones:</strong></p>
+    <ul>
+    <li><p>Entrega en un <strong>PDF</strong> las respuestas de los ejercicios teóricos. Para los que requieran código, añade una breve descripción de los programas entregados.</p></li>
+    <li><p>Solo un integrante del equipo debe subir la práctica. Los demás deben marcar la tarea como entregada y escribir un comentario privado con el nombre de quien entregó.</p></li>
+    <li><p>Todos los programas y el PDF deben ir en un <strong>archivo ZIP</strong> nombrado: <code>P5_ApellidoPaternoNombre</code>.</p></li>
+    <li><p>Utilizar <strong>Java 21 LTS</strong>. Se penalizará si no compila en esta versión.</p></li>
+    </ul>
+    <p><strong>Tiempo estimado:</strong> <span class="math inline">\(\approx\)</span> 1.5 hr<br />
+    <strong>Puntaje total:</strong> 100</p>
+    <ol>
+    <li><p><strong>Ejercicio 1: El Sloppy Counter Modificado</strong><br />
+    Se sugiere hacer una pequeña modificación al <code>SloppyCounter</code> para "mejorar" su consistencia. Propone que siempre que un hilo llame al método <code>fetch()</code>, el código primero <strong>obligue a ese mismo hilo</strong> a volcar su <code>localCount</code> actual al <code>globalCount</code>, y recién entonces retorne el valor global.</p>
+    <div class="sourceCode" id="cb4" data-language="Java" data-caption="Modificación a fetch()"><pre class="sourceCode java"><code class="language-java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">long</span> <span class="fu">fetch</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> currentLocal <span class="op">=</span> localCount<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>currentLocal <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>            globalCount<span class="op">.</span><span class="fu">addAndGet</span><span class="op">(</span>currentLocal<span class="op">);</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            localCount<span class="op">.</span><span class="fu">set</span><span class="op">(</span><span class="dv">0L</span><span class="op">);</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> globalCount<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+    <p>Analiza este escenario con múltiples hilos trabajando. ¿Esta modificación hace que la estructura sea Linealizable, Secuencialmente Consistente o se mantiene Eventualmente Consistente? Argumenta tu respuesta detallando qué sucede con el estado local de los <em>otros</em> hilos que no llamaron a <code>fetch()</code>.</p></li>
+    <li><p><strong>Ejercicio 2: Lectura Libre de Obstrucciones en el Árbol</strong><br />
+    Como hemos visto, el <code>ShavitTreeCounter</code> original ofrece un método <code>fetch</code> que únicamente garantiza <em>Consistencia Quiescente</em>. Si intentamos volverlo Linealizable utilizando candados (<em>locks</em>), reintroducimos un cuello de botella masivo.</p>
+    <p>Para este inciso, implementarás una solución que recupere la linealizabilidad sin utilizar mecanismos de exclusión mutua.</p>
+    <ol>
+    <li><p><strong>Diseña e implementa</strong> una modificación del método <code>fetch</code> utilizando la técnica de <strong>Double-Collect</strong> (Doble Recolección) detallada en la Sección 4 del libro <span class="citation" data-cites="10.5555/1734069">(<a href="#ref-10.5555/1734069" role="doc-biblioref">M. Herlihy y Shavit 2008</a>)</span>. Tu implementación debe garantizar que el método sea simultáneamente <strong>obstruction-free</strong> y <strong>linealizable</strong>.</p></li>
+    <li><p><strong>Describe tu código</strong> explicando paso a paso cómo tu algoritmo maneja la recolección del estado sin detener a los hilos escritores.</p></li>
+    <li><p><strong>Argumenta teóricamente</strong>:</p>
+    <ul>
+    <li><p>¿Por qué tu implementación cumple con la propiedad de progreso <em>obstruction-free</em>? (Explica por qué no alcanza a ser <em>wait-free</em>).</p></li>
+    <li><p>¿Por qué el valor retornado es estrictamente <em>linealizable</em>? (Identifica claramente el punto de linealización de tu lectura).</p></li>
+    </ul></li>
+    </ol></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-scalableCounters2019" class="csl-entry" role="listitem">
+    Almeida, Paulo Sérgio, y Carlos Baquero. 2019. <span>«Scalable eventually consistent counters over unreliable networks»</span>. <em>Distrib. Comput.</em> 32 (1): 69-89. <a href="https://doi.org/10.1007/s00446-017-0322-2">https://doi.org/10.1007/s00446-017-0322-2</a>.
+    </div>
+    <div id="ref-10.1145/564585.564601" class="csl-entry" role="listitem">
+    Gilbert, Seth, y Nancy Lynch. 2002. <span>«Brewer’s conjecture and the feasibility of consistent, available, partition-tolerant web services»</span>. <em>SIGACT News</em> 33 (2): 51-59. <a href="https://doi.org/10.1145/564585.564601">https://doi.org/10.1145/564585.564601</a>.
+    </div>
+    <div id="ref-HW90" class="csl-entry" role="listitem">
+    Herlihy, Maurice P., y Jeannette M. Wing. 1990. <span>«Linearizability: a correctness condition for concurrent objects»</span>. <em>ACM Trans. Program. Lang. Syst.</em> 12 (3): 463-92. <a href="https://doi.org/10.1145/78969.78972">https://doi.org/10.1145/78969.78972</a>.
+    </div>
+    <div id="ref-10.5555/1734069" class="csl-entry" role="listitem">
+    Herlihy, Maurice, y Nir Shavit. 2008. <em>The Art of Multiprocessor Programming</em>. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc.
+    </div>
+    <div id="ref-L79" class="csl-entry" role="listitem">
+    Lamport. 1979. <span>«How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs»</span>. <em>IEEE Transactions on Computers</em> C-28 (9): 690-91. <a href="https://doi.org/10.1109/TC.1979.1675439">https://doi.org/10.1109/TC.1979.1675439</a>.
+    </div>
+    <div id="ref-10.1145/1897852.1897873" class="csl-entry" role="listitem">
+    Shavit, Nir. 2011. <span>«Data Structures in the Multicore Age»</span>. <em>Commun. ACM</em> 54 (3): 76-84. <a href="https://doi.org/10.1145/1897852.1897873">https://doi.org/10.1145/1897852.1897873</a>.
+    </div>
+    <div id="ref-vogels09" class="csl-entry" role="listitem">
+    Vogels, Werner. 2009. <span>«Eventually consistent»</span>. <em>Commun. ACM</em> 52 (1): 40-44. <a href="https://doi.org/10.1145/1435417.1435432">https://doi.org/10.1145/1435417.1435432</a>.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

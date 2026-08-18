@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guía de concurrencia: Java → Clojure · Cómputo Concurrente</title>
+<meta name="description" content="Guía de apoyo · Práctica 8" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style></head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Guía de concurrencia: Java → Clojure</h1>
+    <p class="practica-sub">Guía de apoyo · Práctica 8</p>
+    <div class="practica-actions">
+      
+      
+      
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#por-qué-clojure" id="toc-por-qué-clojure">1. ¿Por qué Clojure?</a></li>
+    <li><a href="#instalación" id="toc-instalación">2. Instalación</a></li>
+    <li><a href="#software-transactional-memory-stm" id="toc-software-transactional-memory-stm">3. Software Transactional Memory (STM)</a></li>
+    <li><a href="#atom-operaciones-atómicas-sobre-una-sola-variable" id="toc-atom-operaciones-atómicas-sobre-una-sola-variable">4. <code>atom</code>: operaciones atómicas sobre una sola variable</a></li>
+    <li><a href="#ejemplo-aplicado-transferencias-bancarias" id="toc-ejemplo-aplicado-transferencias-bancarias">5. Ejemplo aplicado: transferencias bancarias</a></li>
+    <li><a href="#la-limitación-del-stm-bloqueo-condicional" id="toc-la-limitación-del-stm-bloqueo-condicional">6. La limitación del STM: bloqueo condicional</a></li>
+    <li><a href="#resumen-de-tipos-de-referencia-en-clojure" id="toc-resumen-de-tipos-de-referencia-en-clojure">7. Resumen de tipos de referencia en Clojure</a></li>
+    <li><a href="#para-ejecutar-los-ejemplos" id="toc-para-ejecutar-los-ejemplos">8. Para ejecutar los ejemplos</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <hr />
+    <h2 id="por-qué-clojure">1. ¿Por qué Clojure?</h2>
+    <p>Si Rust resuelve las data races obligando al compilador a verificar que solo
+    un dueño modifica cada dato, Clojure toma un camino opuesto: <strong>elimina el estado
+    mutable casi por completo</strong>. Si los datos no cambian, no puede haber conflicto
+    en accederlos.</p>
+    <p>Clojure corre sobre la JVM, por lo que hereda el heap, los stacks y el
+    recolector de basura de Java. Lo que cambia radicalmente es la filosofía:
+    en lugar de proteger el acceso a la memoria con candados, Clojure separa
+    dos conceptos que en Java van siempre juntos:</p>
+    <ul>
+    <li><strong>Identidad</strong>: la referencia que persiste en el tiempo (<code>ref</code>, <code>atom</code>).</li>
+    <li><strong>Estado</strong>: el valor que tiene esa referencia en un momento dado (siempre inmutable).</li>
+    </ul>
+    <p>Cambiar una "cuenta bancaria" en Clojure no modifica ningún objeto existente;
+    crea un nuevo valor y apunta la identidad hacia él. Esto hace segura la lectura
+    concurrente: leer un valor inmutable nunca produce un resultado inconsistente.</p>
+    <h3 id="correspondencia-rápida-java-clojure">Correspondencia rápida Java → Clojure</h3>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Java</strong></th>
+    <th><strong>Clojure</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td><code>new Thread(r).start()</code></td>
+    <td><code>(future ...)</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>thread.join()</code></td>
+    <td><code>@future</code></td>
+    </tr>
+    <tr class="odd">
+    <td><code>synchronized</code> + múltiples vars</td>
+    <td><code>(dosync ...)</code> con <code>ref</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>AtomicInteger</code> (una variable)</td>
+    <td><code>atom</code> con <code>swap!</code></td>
+    </tr>
+    <tr class="odd">
+    <td><code>volatile</code> (visibilidad)</td>
+    <td><code>atom</code> (visibilidad inmediata)</td>
+    </tr>
+    <tr class="even">
+    <td><code>wait()</code> / <code>notify()</code></td>
+    <td><code>core.async</code> (canales)</td>
+    </tr>
+    </tbody>
+    </table>
+    <hr />
+    <h2 id="instalación">2. Instalación</h2>
+    <p>Clojure requiere Java instalado (Java 21 LTS funciona perfectamente).</p>
+    <h3 id="linux">Linux</h3>
+    <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="language-bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-O</span> https://download.clojure.org/install/linux-install-1.11.1.1413.sh</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x linux-install-1.11.1.1413.sh</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ./linux-install-1.11.1.1413.sh</span></code></pre></div>
+    <h3 id="macos">macOS</h3>
+    <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="language-bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">brew</span> install clojure/tools/clojure</span></code></pre></div>
+    <h3 id="windows">Windows</h3>
+    <p>Consultar la <a href="https://clojure.org/guides/install_windows">guía oficial</a>.
+    La forma más sencilla es con el script de PowerShell que se indica ahí.</p>
+    <h3 id="alternativa-sin-instalación">Alternativa sin instalación</h3>
+    <p>Para los ejercicios básicos de esta guía puede usarse el REPL en línea:
+    <a href="https://tryclojure.org">https://tryclojure.org</a></p>
+    <h3 id="verificación-y-ejecución">Verificación y ejecución</h3>
+    <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="language-bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">clj</span> <span class="at">--version</span>          <span class="co"># verificar instalación</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">clj</span>                    <span class="co"># inicia el REPL interactivo</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">clojure</span> <span class="at">-M</span> script.clj  <span class="co"># ejecuta un archivo</span></span></code></pre></div>
+    <p>El REPL (Read-Eval-Print Loop) permite evaluar expresiones una por una,
+    lo que es muy útil para explorar los ejemplos de esta guía de forma interactiva.</p>
+    <hr />
+    <h2 id="software-transactional-memory-stm">3. Software Transactional Memory (STM)</h2>
+    <h3 id="qué-es-el-stm">¿Qué es el STM?</h3>
+    <p>El STM de Clojure traslada la abstracción de las transacciones de base de datos
+    al acceso a memoria en RAM. En lugar de usar candados explícitos, el programador
+    declara un bloque transaccional con <code>dosync</code>. El runtime de Clojure se encarga
+    de garantizar que el bloque se ejecuta atómicamente.</p>
+    <p>El mecanismo interno es MVCC (Multi-Version Concurrency Control), el mismo
+    algoritmo que usan bases de datos como PostgreSQL:</p>
+    <ol>
+    <li>Cada hilo trabaja sobre su <strong>propia copia local</strong> de los valores de los <code>ref</code>.</li>
+    <li>Al final del <code>dosync</code>, el runtime verifica si algún otro hilo modificó los
+    mismos <code>ref</code> durante la ejecución.</li>
+    <li>Si hubo conflicto, <strong>descarta la copia local y reintenta</strong> desde el principio.</li>
+    <li>Si no hubo conflicto, aplica todos los cambios de forma atómica.</li>
+    </ol>
+    <p>Las propiedades que garantiza son análogas a las propiedades ACID de una
+    base de datos, pero en memoria:</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Propiedad</strong></th>
+    <th><strong>Significado en STM</strong></th>
+    <th><strong>Equivalente en el curso</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td>Atomicidad</td>
+    <td>Todos los cambios del bloque ocurren o ninguno</td>
+    <td>Punto de linearización único</td>
+    </tr>
+    <tr class="even">
+    <td>Consistencia</td>
+    <td>El estado resultante respeta los invariantes</td>
+    <td>Objeto correcto</td>
+    </tr>
+    <tr class="odd">
+    <td>Aislamiento</td>
+    <td>Transacciones concurrentes no se ven entre sí</td>
+    <td>Operaciones no superpuestas</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>La propiedad más importante para el curso: el STM de Clojure garantiza que
+    <strong>es imposible un deadlock causado por el orden de adquisición de candados</strong>,
+    porque no existen candados explícitos.</p>
+    <h3 id="ejemplo-contador-con-stm">Ejemplo: contador con STM</h3>
+    <div class="sourceCode" id="cb4"><pre class="sourceCode clojure"><code class="language-clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">;; &#39;ref&#39; crea una identidad coordinable vía STM, inicializada en 0.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> contador </span>(<span class="kw">ref</span> <span class="dv">0</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> incrementar! </span>[]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">;; dosync abre la transacción STM.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">;; Toda mutación de un ref DEBE ocurrir dentro de dosync.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dosync</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">;; &#39;alter&#39; aplica una función (aquí &#39;inc&#39;) al valor actual del ref.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">;; Si hay conflicto con otro hilo, dosync se reintenta automáticamente.</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">alter</span> contador <span class="kw">inc</span>)))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">;; Lanzamos 10 hilos concurrentes con &#39;future&#39;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> tareas</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">doall</span> (<span class="kw">repeatedly</span> <span class="dv">10</span> #(<span class="kw">future</span> (incrementar!)))))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">;; @future espera que el futuro termine — análogo a thread.join() en Java</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>(<span class="kw">doseq</span> [t tareas] <span class="at">@t</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">;; @ (deref) lee el valor actual del ref</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Resultado:&quot;</span> <span class="at">@contador</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">;; Resultado esperado: 10 (siempre correcto)</span></span></code></pre></div>
+    <h3 id="restricción-importante-funciones-puras-dentro-de-dosync">Restricción importante: funciones puras dentro de <code>dosync</code></h3>
+    <p>Las funciones pasadas a <code>alter</code> deben ser <strong>puras</strong> (sin efectos secundarios),
+    porque el STM puede ejecutarlas múltiples veces si reintenta la transacción.
+    Si pones un <code>println</code> dentro de un <code>dosync</code>, puede imprimirse más veces de
+    las esperadas — una por cada reintento. Para I/O dentro de transacciones,
+    usa <code>io!</code>, que lanza una excepción si se llama dentro de <code>dosync</code>:</p>
+    <div class="sourceCode" id="cb5"><pre class="sourceCode clojure"><code class="language-clojure"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">;; Esto imprime más veces de lo esperado bajo contención:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">dosync</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">&quot;ejecutando...&quot;</span>)    <span class="co">; MAL: efecto secundario en transacción</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">alter</span> contador <span class="kw">inc</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">;; Esto falla explícitamente, que es mejor que el comportamiento silencioso:</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>(<span class="kw">dosync</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">io!</span> (<span class="kw">println</span> <span class="st">&quot;ejecutando...&quot;</span>))  <span class="co">; lanza excepción si hay reintento</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">alter</span> contador <span class="kw">inc</span>))</span></code></pre></div>
+    <hr />
+    <h2 id="atom-operaciones-atómicas-sobre-una-sola-variable">4. <code>atom</code>: operaciones atómicas sobre una sola variable</h2>
+    <p>El STM (<code>ref</code> + <code>dosync</code>) está diseñado para coordinar cambios en <strong>múltiples</strong>
+    variables a la vez. Cuando solo necesitas cambiar <strong>una</strong> variable de forma
+    atómica e independiente, el <code>atom</code> es más apropiado y más eficiente.</p>
+    <p>El <code>atom</code> usa internamente operaciones CAS (Compare-And-Swap) de la JVM,
+    exactamente como <code>AtomicInteger</code> en Java. Garantiza visibilidad inmediata
+    entre hilos, de forma análoga a <code>volatile</code>.</p>
+    <div class="sourceCode" id="cb6"><pre class="sourceCode clojure"><code class="language-clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">;; Creamos un atom inicializado en 0</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> total </span>(<span class="kw">atom</span> <span class="dv">0</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">;; swap! aplica una función al valor actual usando CAS.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">;; Si el valor cambió entre la lectura y la escritura, reintenta.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> incrementar-atom! </span>[]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dotimes</span> [_ <span class="dv">100</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">future</span> (<span class="kw">swap!</span> total <span class="kw">inc</span>))))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>(incrementar-atom!)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>(Thread/sleep <span class="dv">100</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Resultado:&quot;</span> <span class="at">@total</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">;; Resultado esperado: 100</span></span></code></pre></div>
+    <h3 id="ref-vs-atom-cuándo-usar-cada-uno"><code>ref</code> vs <code>atom</code>: cuándo usar cada uno</h3>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Situación</strong></th>
+    <th><strong>Usar</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td>Cambiar una sola variable de forma atómica</td>
+    <td><code>atom</code></td>
+    </tr>
+    <tr class="even">
+    <td>Cambiar múltiples variables de forma coordinada</td>
+    <td><code>ref</code></td>
+    </tr>
+    <tr class="odd">
+    <td>Transferir dinero entre dos cuentas (A disminuye,</td>
+    <td></td>
+    </tr>
+    <tr class="even">
+    <td>B aumenta, las dos deben cambiar juntas)</td>
+    <td><code>ref</code></td>
+    </tr>
+    <tr class="odd">
+    <td>Contador de métricas independiente de otros estados</td>
+    <td><code>atom</code></td>
+    </tr>
+    </tbody>
+    </table>
+    <p>La regla práctica: si la operación necesita leer el estado de otras variables
+    para decidir cómo actualizar la suya, usa <code>ref</code>. Si la operación es autónoma,
+    usa <code>atom</code>.</p>
+    <hr />
+    <h2 id="ejemplo-aplicado-transferencias-bancarias">5. Ejemplo aplicado: transferencias bancarias</h2>
+    <p>Este es el caso donde el STM brilla más claramente. En Java, transferir dinero
+    entre dos cuentas requiere adquirir dos candados en el orden correcto —
+    adquirirlos en orden inverso desde dos hilos distintos causa deadlock. Con STM:</p>
+    <div class="sourceCode" id="cb7"><pre class="sourceCode clojure"><code class="language-clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-alice </span>(<span class="kw">ref</span> <span class="dv">1000</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cuenta-bob   </span>(<span class="kw">ref</span>  <span class="dv">500</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> transferir! </span>[origen destino cantidad]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">dosync</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let</span> [saldo <span class="at">@origen</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">if</span> (<span class="kw">&gt;=</span> saldo cantidad)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">do</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">alter</span> origen  <span class="kw">-</span> cantidad)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">alter</span> destino <span class="kw">+</span> cantidad)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">:ok</span>)                          <span class="co">; retorna :ok si la transferencia fue exitosa</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">:fondos-insuficientes</span>))))       <span class="co">; retorna :fondos-insuficientes si no</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">;; 100 transferencias concurrentes de 5 pesos cada una</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> futuros</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">doall</span> (<span class="kw">repeatedly</span> <span class="dv">100</span> #(<span class="kw">future</span> (transferir! cuenta-alice cuenta-bob <span class="dv">5</span>)))))</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>(<span class="kw">doseq</span> [f futuros] <span class="at">@f</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Alice:&quot;</span> <span class="at">@cuenta-alice</span>)   <span class="co">; Esperado: 500 (si todas pasaron)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Bob:&quot;</span>   <span class="at">@cuenta-bob</span>)     <span class="co">; Esperado: 1000</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Total:&quot;</span> (<span class="kw">+</span> <span class="at">@cuenta-alice</span> <span class="at">@cuenta-bob</span>))  <span class="co">; Siempre 1500</span></span></code></pre></div>
+    <p>El invariante <code>Total = 1500</code> se mantiene siempre porque <code>dosync</code> garantiza
+    que las dos operaciones <code>alter</code> dentro de la transacción ocurren juntas o
+    no ocurren. No es posible que Alice pierda 5 pesos sin que Bob gane 5 pesos.</p>
+    <hr />
+    <h2 id="la-limitación-del-stm-bloqueo-condicional">6. La limitación del STM: bloqueo condicional</h2>
+    <p>Al implementar una cola de prioridad concurrente, en Java usamos <code>wait()</code>
+    y <code>notify()</code> para que un hilo consumidor espere si la cola está vacía.
+    <strong>El STM puro de Clojure no admite este patrón.</strong></p>
+    <p>Las transacciones <code>dosync</code> deben ser puras y no bloqueantes porque pueden
+    reintentarse. Si un hilo entra a un <code>dosync</code>, ve la cola vacía, y decide
+    bloquearse ahí, estaría bloqueando el hilo dentro de una transacción que
+    el runtime podría necesitar revertir.</p>
+    <h3 id="cómo-se-resuelve-en-la-práctica">¿Cómo se resuelve en la práctica?</h3>
+    <p>La solución estándar en Clojure moderno es <code>core.async</code>, una biblioteca de
+    <strong>canales</strong> que adopta el modelo CSP (Communicating Sequential Processes),
+    el mismo que usa Go:</p>
+    <div class="sourceCode" id="cb8"><pre class="sourceCode clojure"><code class="language-clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">;; Requiere [org.clojure/core.async &quot;1.6.681&quot;] en las dependencias</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">require</span> &#39;[clojure.core.async <span class="at">:refer</span> [chan &gt;!! &lt;!! close!]])</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> canal </span>(chan <span class="dv">10</span>))  <span class="co">; canal con buffer de 10 elementos</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">;; Productor: se bloquea si el canal está lleno</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>(<span class="kw">future</span> (&gt;!! canal <span class="st">&quot;mensaje-1&quot;</span>))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>(<span class="kw">future</span> (&gt;!! canal <span class="st">&quot;mensaje-2&quot;</span>))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">;; Consumidor: se bloquea si el canal está vacío</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Recibido:&quot;</span> (&lt;!! canal))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">&quot;Recibido:&quot;</span> (&lt;!! canal))</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>(close! canal)</span></code></pre></div>
+    <p>Esta limitación del STM es importante para el Ejercicio 4 de la práctica:
+    implementar el bloqueo condicional requiere salir del modelo STM y adoptar
+    paso de mensajes.</p>
+    <hr />
+    <h2 id="resumen-de-tipos-de-referencia-en-clojure">7. Resumen de tipos de referencia en Clojure</h2>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Tipo</strong></th>
+    <th><strong>Coordinación</strong></th>
+    <th><strong>Cuándo usarlo</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td><code>ref</code></td>
+    <td>STM (<code>dosync</code>)</td>
+    <td>Múltiples variables que cambian juntas</td>
+    </tr>
+    <tr class="even">
+    <td><code>atom</code></td>
+    <td>CAS (lock-free)</td>
+    <td>Una variable independiente</td>
+    </tr>
+    <tr class="odd">
+    <td><code>agent</code></td>
+    <td>Cola de mensajes</td>
+    <td>Actualizaciones asíncronas no coordinadas</td>
+    </tr>
+    <tr class="even">
+    <td><code>var</code></td>
+    <td>Sin sincronización</td>
+    <td>Estado por hilo (análogo a <code>ThreadLocal</code>)</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Para esta práctica trabajamos principalmente con <code>ref</code> y <code>atom</code>.
+    <code>agent</code> y <code>var</code> quedan fuera del alcance del curso.</p>
+    <hr />
+    <h2 id="para-ejecutar-los-ejemplos">8. Para ejecutar los ejemplos</h2>
+    <div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="language-bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Guardar cualquier ejemplo en un archivo, por ejemplo banco.clj, y ejecutar:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">clojure</span> <span class="at">-M</span> banco.clj</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># O en el REPL (más cómodo para experimentar):</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">clj</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Luego pegar el código directamente</span></span></code></pre></div>
+    <p>Si usas el REPL en línea en <a href="https://tryclojure.org">https://tryclojure.org</a>, pega cada bloque de
+    código por separado. Los <code>future</code> pueden necesitar un <code>(Thread/sleep 200)</code> al
+    final para que los hilos terminen antes de que el REPL imprima el resultado.</p>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

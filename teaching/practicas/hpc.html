@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paralelismo con OpenMP: memoria compartida, corrección y escalabilidad · Cómputo Concurrente</title>
+<meta name="description" content="Cómputo Concurrente 2026" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Paralelismo con OpenMP: memoria compartida, corrección y escalabilidad</h1>
+    <p class="practica-sub">Cómputo Concurrente 2026</p>
+    <div class="practica-actions">
+      
+      
+      
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#contexto-openmp-vs-mpi" id="toc-contexto-openmp-vs-mpi">1. Contexto: OpenMP vs MPI</a></li>
+    <li><a href="#conceptos-clave-de-openmp" id="toc-conceptos-clave-de-openmp">2. Conceptos Clave de OpenMP</a></li>
+    <li><a href="#ejemplo-guía-el-contador-en-tres-versiones" id="toc-ejemplo-guía-el-contador-en-tres-versiones">3. Ejemplo Guía: El Contador en Tres Versiones</a></li>
+    <li><a href="#contexto-avanzado-memoria-desagregada-y-cxl" id="toc-contexto-avanzado-memoria-desagregada-y-cxl">4. Contexto Avanzado: Memoria Desagregada y CXL</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">5. Ejercicios</a></li>
+    <li><a href="#referencias" id="toc-referencias">Referencias</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <hr />
+    <h2 id="contexto-openmp-vs-mpi">1. Contexto: OpenMP vs MPI</h2>
+    <p>Las prácticas anteriores exploraron la concurrencia dentro de una sola JVM (Práctica 1) y las
+    propiedades formales de corrección de estructuras compartidas (Práctica 5). Ahora damos un paso
+    hacia el <em>cómputo de alto rendimiento</em> (HPC) en C, donde el programador elige explícitamente el
+    modelo de paralelismo. Los dos estándares dominantes son <strong>OpenMP</strong> y <strong>MPI</strong>, y su diferencia
+    fundamental radica en <em>dónde vive la memoria</em>.</p>
+    <h3 id="modelo-de-memoria-compartida-openmp">1.1. Modelo de memoria compartida — OpenMP</h3>
+    <p>OpenMP (Open Multi-Processing) opera sobre un modelo de <strong>memoria compartida</strong>: todos los hilos
+    pertenecen al mismo proceso y ven el mismo espacio de direcciones. El paralelismo se expresa
+    añadiendo <em>directivas de compilador</em> (pragmas) al código secuencial existente; el runtime de
+    OpenMP se encarga de crear y destruir los hilos automáticamente. Esto lo hace conceptualmente
+    análogo a lo que ya conocen de Java: múltiples hilos accediendo a un heap compartido.</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Java (P1 y P5)</strong></th>
+    <th><strong>OpenMP (esta práctica)</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td><code class="verbatim">new Thread(r).start()</code></td>
+    <td><code class="verbatim">#pragma omp parallel</code></td>
+    </tr>
+    <tr class="even">
+    <td><code class="verbatim">synchronized</code> / <code class="verbatim">AtomicLong</code></td>
+    <td><code class="verbatim">#pragma omp atomic</code> / <code class="verbatim">critical</code></td>
+    </tr>
+    <tr class="odd">
+    <td><code class="verbatim">ThreadLocal&lt;Long&gt;</code></td>
+    <td><code class="verbatim">firstprivate</code> / <code class="verbatim">reduction</code></td>
+    </tr>
+    <tr class="even">
+    <td><code class="verbatim">thread.join()</code></td>
+    <td>barrera implícita al salir del bloque</td>
+    </tr>
+    <tr class="odd">
+    <td>N hilos, 1 JVM, 1 máquina</td>
+    <td>N hilos, 1 proceso, 1 nodo</td>
+    </tr>
+    </tbody>
+    </table>
+    <h3 id="modelo-de-memoria-distribuida-mpi">1.2. Modelo de memoria distribuida — MPI</h3>
+    <p>MPI (Message Passing Interface) opera sobre <strong>memoria distribuida</strong>: cada proceso tiene su propio
+    espacio de memoria privado e independiente. Para intercambiar información, los procesos deben
+    enviar y recibir mensajes explícitamente (<code class="verbatim">MPI_Send</code>, <code class="verbatim">MPI_Recv</code>, <code class="verbatim">MPI_Bcast</code>, etc.). Esto
+    permite escalar a miles de nodos en una supercomputadora, pero el programador asume toda la
+    responsabilidad de la comunicación.</p>
+    <h3 id="la-diferencia-clave-corrección-en-memoria-compartida">1.3. La diferencia clave: corrección en memoria compartida</h3>
+    <p>Dado que en OpenMP todos los hilos comparten el mismo espacio de memoria, las propiedades de
+    corrección que estudiaron en la Práctica 5 aplican directamente:</p>
+    <ul>
+    <li><strong>Linealizabilidad:</strong> <code class="verbatim">#pragma omp atomic</code> garantiza que cada operación sea indivisible,
+    equivalente a <code class="verbatim">AtomicLong.incrementAndGet()</code> en Java.</li>
+    <li><strong>Consistencia Eventual:</strong> Acumular en variables privadas (<code class="verbatim">reduction</code> o <code class="verbatim">firstprivate</code>) y
+    volcar al final, análogo al <code class="verbatim">SloppyCounter</code>.</li>
+    <li><strong>Race Condition (sin corrección):</strong> Acceder a una variable compartida sin sincronización,
+    equivalente al contador sin <code class="verbatim">synchronized</code> de la Práctica 1.</li>
+    </ul>
+    <p>En MPI, en cambio, no existe memoria compartida: cada proceso trabaja con su propia copia de los
+    datos. Por esta razón, las <em>race conditions</em> dentro de un proceso son imposibles por diseño — el
+    problema de corrección se desplaza hacia la consistencia de los mensajes entre procesos.</p>
+    <hr />
+    <h2 id="conceptos-clave-de-openmp">2. Conceptos Clave de OpenMP</h2>
+    <h3 id="directivas-fundamentales">2.1. Directivas fundamentales</h3>
+    <ul>
+    <li><code class="verbatim">#pragma omp parallel</code> — Crea una región paralela: el bloque se ejecuta simultáneamente en
+    <em>N</em> hilos.</li>
+    <li><code class="verbatim">num_threads(N)</code> — Especifica cuántos hilos lanzar.</li>
+    <li><code class="verbatim">#pragma omp atomic</code> — La siguiente operación de lectura-modificación-escritura es atómica
+    (linealizable).</li>
+    <li><code class="verbatim">#pragma omp critical</code> — Sección crítica: solo un hilo a la vez (análogo a <code class="verbatim">synchronized</code>).</li>
+    <li><code class="verbatim">#pragma omp parallel for</code> — Paraleliza un bucle <code class="verbatim">for</code> distribuyendo iteraciones entre hilos.</li>
+    <li><code class="verbatim">reduction(op:var)</code> — Cada hilo tiene su copia local de <code class="verbatim">var</code>; al terminar se combinan con
+    el operador <code class="verbatim">op</code> (Sloppy automático).</li>
+    <li><code class="verbatim">private(x)</code> / <code class="verbatim">firstprivate(x)</code> — <code class="verbatim">x</code> es privada por hilo.</li>
+    <li><code class="verbatim">omp_get_thread_num()</code> — ID del hilo actual (0 … N-1).</li>
+    <li><code class="verbatim">omp_get_wtime()</code> — Temporizador de alta resolución (análogo a <code class="verbatim">System.nanoTime()</code>).</li>
+    </ul>
+    <h3 id="modelo-fork-join">2.2. Modelo fork-join</h3>
+    <p>OpenMP utiliza el modelo <strong>fork-join</strong>: el hilo maestro (hilo 0) ejecuta el código secuencial y
+    al encontrar un <code class="verbatim">#pragma omp parallel</code> crea (<em>fork</em>) un equipo de hilos. Al final del bloque,
+    los hilos se sincronizan en una barrera implícita y el control regresa al hilo maestro (<em>join</em>).
+    Este comportamiento es equivalente a lanzar varios <code class="verbatim">Thread.start()</code> y esperar con <code class="verbatim">join()</code> al
+    final de la Práctica 1.</p>
+    <hr />
+    <h2 id="ejemplo-guía-el-contador-en-tres-versiones">3. Ejemplo Guía: El Contador en Tres Versiones</h2>
+    <p>El siguiente programa demuestra las tres versiones del contador estudiadas en la Práctica 5,
+    ahora implementadas en C con OpenMP.</p>
+    <p>Para compilar y ejecutar:</p>
+    <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="language-bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-O2</span> <span class="at">-fopenmp</span> <span class="at">-o</span> contador contador_openmp.c</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./contador</span></span></code></pre></div>
+    <h3 id="versión-1-race-condition-sin-sincronización-análogo-p1">Versión 1 — Race Condition (sin sincronización, análogo P1)</h3>
+    <div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="language-c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Race Condition: read-modify-write NO atómica */</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> contador_race<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> total <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">#pragma omp parallel num_threads(N_HILOS)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> INCREMENTOS <span class="op">/</span> N_HILOS<span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            total<span class="op">++;</span>      <span class="co">/* ← resultado INCORRECTO e impredecible */</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total<span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <h3 id="versión-2-linealizable-pragma-omp-atomic">Versión 2 — Linealizable (<code class="verbatim">#pragma omp atomic</code>)</h3>
+    <div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="language-c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Linealizable: operación atómica de hardware */</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> contador_linealizable<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> total <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">#pragma omp parallel num_threads(N_HILOS)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> INCREMENTOS <span class="op">/</span> N_HILOS<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="pp">#pragma omp atomic</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            total<span class="op">++;</span>      <span class="co">/* ← SIEMPRE correcto, alta contención */</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total<span class="op">;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <h3 id="versión-3-consistencia-eventual-reduction-análogo-sloppycounter">Versión 3 — Consistencia Eventual (<code class="verbatim">reduction</code>, análogo SloppyCounter)</h3>
+    <div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="language-c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Consistencia Eventual: volcado al final de la región paralela */</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> contador_eventual<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> total <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">#pragma omp parallel reduction(+:total) num_threads(N_HILOS)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> local <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> INCREMENTOS <span class="op">/</span> N_HILOS<span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            local<span class="op">++;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> local<span class="op">;</span>   <span class="co">/* volcado al final, un único atomic implícito */</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total<span class="op">;</span>         <span class="co">/* correcto DESPUÉS de la barrera */</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p>La versión con <code class="verbatim">reduction</code> es equivalente al <code class="verbatim">SloppyCounter</code> con un umbral infinito (vuelca
+    todo al final). Es correcta, pero un <code class="verbatim">fetch()</code> durante la ejecución devolvería un valor
+    desactualizado — el mismo comportamiento analizado en el Ejercicio 1 de la Práctica 5.</p>
+    <hr />
+    <h2 id="contexto-avanzado-memoria-desagregada-y-cxl">4. Contexto Avanzado: Memoria Desagregada y CXL</h2>
+    <p>El modelo que hemos estudiado —OpenMP para memoria compartida dentro de un nodo, MPI para
+    comunicación entre nodos— asume una frontera clara: o la memoria es local (nanosegundos) o está
+    en otra máquina (microsegundos a través de red). Una tecnología emergente, <strong>CXL (Compute Express
+    Link)</strong>, está redibujando esa frontera y tiene implicaciones directas sobre el tipo de corrección
+    analizado en este curso.</p>
+    <h3 id="qué-es-la-memoria-desagregada">4.1. ¿Qué es la memoria desagregada?</h3>
+    <p>La <strong>memoria desagregada</strong> separa físicamente los módulos de memoria de los procesadores y los
+    conecta a través de un bus de alta velocidad. En lugar de que cada nodo tenga su propio banco
+    de RAM soldado a la placa madre, un pool de memoria externa puede ser accedido por múltiples
+    nodos. CXL es el estándar abierto que hace esto posible: construido sobre la capa física de
+    PCIe, añade protocolos de coherencia de caché (<code class="verbatim">CXL.cache</code>, <code class="verbatim">CXL.mem</code>) que permiten acceder
+    a esa memoria con instrucciones normales de <code class="verbatim">load=/=store</code>, sin modificar el código existente
+    [CXL-W].</p>
+    <h3 id="el-costo-latencia-más-alta">4.2. El costo: latencia más alta</h3>
+    <p>El acceso a memoria CXL no es gratuito. Mediciones en hardware real reportan que mientras un
+    acceso a DRAM local tarda alrededor de 100 ns, un acceso a un dispositivo CXL moderno (ASIC)
+    cae en el rango de 200–300 ns, y prototipos tempranos basados en FPGA han registrado hasta
+    ~400 ns [SIGARCH25; SupMario24]. Esto es considerablemente mejor que acceder a la memoria
+    de otro nodo a través de red (RDMA: ~1.5–3 µs), pero introduce una asimetría importante que
+    los algoritmos de memoria compartida típicamente no consideran [Rcmp24].</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Tipo de acceso</strong></th>
+    <th><strong>Latencia típica</strong></th>
+    <th><strong>Relevancia para el curso</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td>DRAM local (L3 miss)</td>
+    <td>~100 ns</td>
+    <td>Base de OpenMP en un nodo</td>
+    </tr>
+    <tr class="even">
+    <td>Memoria CXL (ASIC moderno)</td>
+    <td>~200–300 ns</td>
+    <td>Memoria compartida entre nodos</td>
+    </tr>
+    <tr class="odd">
+    <td>NUMA remoto (mismo servidor)</td>
+    <td>~140–410 ns</td>
+    <td>Comparable a CXL en la práctica</td>
+    </tr>
+    <tr class="even">
+    <td>RDMA sobre red</td>
+    <td>~1,500–3,000 ns</td>
+    <td>Base de MPI entre nodos</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Fuentes: [SIGARCH25], [Rcmp24], [SupMario24].</p>
+    <h3 id="relación-con-openmp-coherencia-garantizada-rendimiento-asimétrico">4.3. Relación con OpenMP: coherencia garantizada, rendimiento asimétrico</h3>
+    <p>CXL mantiene coherencia de caché entre el procesador y la memoria externa mediante sus
+    protocolos <code class="verbatim">CXL.cache</code> y <code class="verbatim">CXL.mem</code> [CXL-W]. Esto significa que un programa OpenMP existente
+    puede usar memoria CXL con las mismas garantías de corrección que ya conocen: los
+    <code class="verbatim">#pragma omp atomic</code> siguen funcionando correctamente, y las race conditions siguen siendo
+    race conditions. Lo que cambia es el rendimiento: las operaciones atómicas sobre memoria CXL
+    incurren en el overhead adicional del bus PCIe. El benchmark STREAM, implementado con hilos
+    OpenMP y usado para medir ancho de banda en sistemas HPC, ha sido aplicado explícitamente
+    para evaluar este impacto en sistemas con memoria CXL desagregada [Fri23].</p>
+    <h3 id="relación-con-mpi-un-territorio-intermedio">4.4. Relación con MPI: un territorio intermedio</h3>
+    <p>CXL 3.0 introduce soporte para que múltiples nodos accedan al mismo segmento de memoria CXL
+    simultáneamente — <em>memory sharing</em>, no solo memory pooling [CXL-W]. Esto crea un espacio
+    intermedio que antes no existía: dos máquinas físicamente separadas pueden compartir una
+    dirección de memoria. El proyecto <strong>cMPI</strong> (SC'25) explota este mecanismo para reemplazar las
+    copias de buffer en <code class="verbatim">MPI_Send=/=MPI_Recv</code> por accesos directos a memoria CXL compartida,
+    reportando mejoras de hasta 49× sobre TCP/Ethernet en ciertos patrones de comunicación [Wan25].</p>
+    <p>El problema de corrección que esto introduce es exactamente el que han estudiado: si dos
+    procesos MPI pueden ahora leer y escribir en la misma dirección de memoria, regresan las race
+    conditions que MPI había eliminado por diseño. La responsabilidad de sincronización recae de
+    nuevo en el programador, ahora con operaciones atómicas CXL en lugar de mensajes MPI.</p>
+    <hr />
+    <h2 id="ejercicios">5. Ejercicios</h2>
+    <h3 id="instrucciones">Instrucciones</h3>
+    <ul>
+    <li>Entrega en un PDF las respuestas de los ejercicios teóricos. Para los que requieran código,
+    añade una breve descripción del programa entregado.</li>
+    <li>Solo un integrante del equipo debe subir la práctica. Los demás deben marcar la tarea como
+    entregada y escribir un comentario privado con el nombre de quien entregó.</li>
+    <li>Todos los programas y el PDF deben ir en un archivo ZIP nombrado: <code class="verbatim">P6_ApellidoPaternoNombre</code>.</li>
+    <li>Utilizar <strong>gcc con soporte OpenMP</strong>. Se penalizará si no compila.</li>
+    <li>Tiempo estimado: ≈ 1.5 hr — Puntaje total: <strong>100</strong></li>
+    </ul>
+    <hr />
+    <h3 id="ejercicio-1-ley-de-amdahl-en-openmp-20-pts">Ejercicio 1: Ley de Amdahl en OpenMP (20 pts)</h3>
+    <p>En la Práctica 1 aplicaste la Ley de Amdahl entre una versión secuencial y una con dos hilos
+    en Java. Ahora realizarás el mismo análisis para OpenMP.</p>
+    <p><strong><strong>(a)</strong></strong> Implementa el programa <code class="verbatim">suma_vectores.c</code> que sume dos arreglos de tamaño
+    <code class="verbatim">N = 100,000,000</code> elemento a elemento. Proporciona tres versiones:</p>
+    <ol>
+    <li>Secuencial (sin OpenMP).</li>
+    </ol>
+    <p>ii. Paralela con 2 hilos (<code class="verbatim">#pragma omp parallel for num_threads(2)</code>).
+    iii. Paralela con el número máximo de hilos disponibles en tu máquina.</p>
+    <p><strong><strong>(b)</strong></strong> Mide el tiempo de cada versión con <code class="verbatim">omp_get_wtime()</code> y calcula el <em>speedup</em> de las
+    versiones paralelas respecto a la secuencial.</p>
+    <p><strong><strong>(c)</strong></strong> ¿El speedup obtenido coincide con el predicho por la Ley de Amdahl? Argumenta en
+    máximo 4 líneas por qué el speedup real puede ser menor al teórico.</p>
+    <hr />
+    <h3 id="ejercicio-2-race-condition-y-su-corrección-25-pts">Ejercicio 2: Race Condition y su Corrección (25 pts)</h3>
+    <p>En la Práctica 1 observaste que un contador compartido sin sincronización produce resultados
+    incorrectos. Aquí formalizarás esa observación con OpenMP.</p>
+    <p><strong><strong>(a)</strong></strong> Implementa <code class="verbatim">contador_hilos.c</code> con las tres versiones del ejemplo guía. Ejecuta cada
+    una con <code class="verbatim">N_HILOS = 4</code> e <code class="verbatim">INCREMENTOS = 10,000,000</code> y registra los valores obtenidos y los
+    tiempos.</p>
+    <p><strong><strong>(b)</strong></strong> La versión con race condition de la Práctica 1 (Java) y la del ejemplo guía (OpenMP)
+    comparten el mismo problema de fondo. Sin embargo, sus tiempos de ejecución pueden diferir
+    notablemente. ¿A qué se debe esto? Menciona al menos dos razones relacionadas con las
+    diferencias entre la JVM y la ejecución nativa de C.</p>
+    <p><strong><strong>(c)</strong></strong> Aplica los conceptos de la Práctica 5: clasifica cada versión (Race Condition, Atomic,
+    Reduction) según el modelo de consistencia que garantiza (Linealizable, Secuencialmente
+    Consistente, Quiescente o Eventual) y argumenta brevemente por qué.</p>
+    <hr />
+    <h3 id="ejercicio-3-sloppy-counter-con-umbral-en-openmp-30-pts">Ejercicio 3: Sloppy Counter con Umbral en OpenMP (30 pts)</h3>
+    <p>El <code class="verbatim">SloppyCounter</code> de la Práctica 5 vuelca el contador local al global cada vez que supera un
+    <em>umbral</em>. La versión de <code class="verbatim">reduction</code> del ejemplo guía equivale a un umbral infinito. Este
+    ejercicio explora el impacto del umbral en la corrección y el rendimiento.</p>
+    <p><strong><strong>(a)</strong></strong> Implementa <code class="verbatim">sloppy_openmp.c</code> con el mismo mecanismo del <code class="verbatim">SloppyCounter</code> de la
+    Práctica 5, pero en C con OpenMP. Cada hilo debe tener una variable local privada
+    (<code class="verbatim">private</code>) y volcar al contador global con <code class="verbatim">#pragma omp atomic</code> cuando supere el umbral.
+    Prueba con umbrales: 10, 100, 1000 y 10000.</p>
+    <p>Esqueleto sugerido:</p>
+    <div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="language-c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">long</span> global <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#pragma omp parallel num_threads(N_HILOS) private(local)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> local <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> INCREMENTOS <span class="op">/</span> N_HILOS<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        local<span class="op">++;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>local <span class="op">&gt;=</span> UMBRAL<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="pp">#pragma omp atomic</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            global <span class="op">+=</span> local<span class="op">;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            local <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* flush final aquí */</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p><strong><strong>(b)</strong></strong> Construye una tabla con los resultados (valor obtenido, tiempo) para cada umbral y
+    para la versión <code class="verbatim">reduction</code>. ¿Qué relación observas entre el tamaño del umbral y el tiempo
+    de ejecución?</p>
+    <p><strong><strong>(c)</strong></strong> Durante la ejecución paralela (no al final), si un hilo leyera el valor global, ¿qué
+    modelo de consistencia observa? Conecta tu respuesta con el Ejercicio 1 de la Práctica 5
+    (modificación al <code class="verbatim">fetch()</code>).</p>
+    <hr />
+    <h3 id="ejercicio-4-árbol-de-difracción-en-openmp-25-pts">Ejercicio 4: Árbol de Difracción en OpenMP (25 pts)</h3>
+    <p>El <code class="verbatim">ShavitTreeCounter</code> de la Práctica 5 distribuye los incrementos en hojas de un árbol
+    binario para reducir la contención. Ahora implementarás una versión simplificada en C con
+    OpenMP.</p>
+    <p><strong><strong>(a)</strong></strong> Implementa <code class="verbatim">tree_counter_openmp.c</code>: crea un arreglo de <span class="math inline">\(2^D\)</span> contadores hoja (donde
+    D es la profundidad del árbol). Cada hilo elige su hoja mediante
+    <code class="verbatim">omp_get_thread_num() % num_hojas</code> e incrementa atómicamente solo esa hoja. La función
+    <code class="verbatim">fetch()</code> suma todas las hojas.</p>
+    <p><strong><strong>(b)</strong></strong> Mide y compara el tiempo de <code class="verbatim">tree_counter_openmp.c</code> contra la versión <code class="verbatim">atomic</code> con
+    N = 4, 8 y 16 hilos. ¿Cuándo el árbol supera en rendimiento al atomic global?</p>
+    <p><strong><strong>(c)</strong></strong> El <code class="verbatim">ShavitTreeCounter</code> garantiza Consistencia Quiescente. ¿Tu implementación en
+    OpenMP hereda esta garantía? Argumenta si hay algún escenario donde <code class="verbatim">fetch()</code> pueda devolver
+    un valor incorrecto incluso después de que todos los hilos hayan terminado de incrementar.</p>
+    <hr />
+    <h2 id="referencias">Referencias</h2>
+    <ul>
+    <li>[Cha08] Barbara Chapman, Gabriele Jost, and Ruud Van Der Pas. <em>Using OpenMP: Portable
+    Shared Memory Parallel Programming</em>. MIT Press, 2008.</li>
+    <li>[HS08] Maurice Herlihy and Nir Shavit. <em>The Art of Multiprocessor Programming</em>.
+    Morgan Kaufmann, 2008.</li>
+    <li>[Gro99] William Gropp, Ewing Lusk, and Anthony Skjellum. <em>Using MPI: Portable Parallel
+    Programming with the Message-Passing Interface</em>. MIT Press, 1999.</li>
+    <li>[Sha11] Nir Shavit. Data structures in the multicore age. <em>Commun. ACM</em>, 54(3):76–84, 2011.</li>
+    <li>[OMP] OpenMP Architecture Review Board. OpenMP API Specification v5.2, 2021.
+    <a href="https://www.openmp.org/specifications/">https://www.openmp.org/specifications/</a></li>
+    <li>[Fri23] Yehonatan Fridman et al. CXL Memory as Persistent Memory for Disaggregated HPC:
+    A Practical Approach. <em>SC'23 Workshops</em>, pp. 983–994, 2023.</li>
+    <li>[Wan25] Shucheng Wang et al. cMPI: Using CXL Memory Sharing for MPI One-Sided and
+    Two-Sided Inter-Node Communications. <em>SC'25</em>, ACM, 2025.
+    <a href="https://arxiv.org/abs/2510.05476">https://arxiv.org/abs/2510.05476</a></li>
+    <li>[SupMario24] Dissecting CXL Memory Performance at Scale: Analysis, Modeling, and
+    Optimization. arXiv:2409.14317, 2024. <a href="https://arxiv.org/abs/2409.14317">https://arxiv.org/abs/2409.14317</a></li>
+    <li>[Rcmp24] Donghyun Gouk et al. Rcmp: Reconstructing RDMA-Based Memory Disaggregation
+    via CXL. <em>ACM Trans. Archit. Code Optim.</em>, 2024.
+    <a href="https://dl.acm.org/doi/10.1145/3634916">https://dl.acm.org/doi/10.1145/3634916</a></li>
+    <li>[SIGARCH25] The Hitchhiker's Guide to Coherent Fabrics: 5 Programming Rules for CXL,
+    NVLink, and InfinityFabric. SIGARCH Blog, 2025.
+    <a href="https://www.sigarch.org/the-hitchhikers-guide-to-coherent-fabrics-5-programming-rules-for-cxl-nvlink-and-infinityfabric/">https://www.sigarch.org/the-hitchhikers-guide-to-coherent-fabrics-5-programming-rules-for-cxl-nvlink-and-infinityfabric/</a></li>
+    <li>[CXL-W] Compute Express Link. Wikipedia.
+    <a href="https://en.wikipedia.org/wiki/Compute_Express_Link">https://en.wikipedia.org/wiki/Compute_Express_Link</a></li>
+    </ul>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

@@ -1,68 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
+<<<<<<< HEAD
 <!-- 2026-05-11 Mon 19:07 -->
+=======
+<!-- 2026-08-18 Tue 03:55 -->
+>>>>>>> d0a067f (formato de practicas)
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>¿Qué es la Concurrencia? Origen, Propósito y Definición</title>
 <meta name="generator" content="Org Mode" />
-<link rel='stylesheet' href='../../styles.css'>
-                         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
-                         <style>
-                           body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
-                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
-                           
-                           /* IMÁGENES RESPONSIVAS */
-                           img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; }
-
-                           /* TABLAS ESTILO ACADÉMICO */
-                           table {
-                             width: 100%;
-                             border-collapse: collapse;
-                             margin: 2rem 0;
-                             font-size: 0.95rem;
-                             border-radius: 8px;
-                             overflow: hidden;
-                             box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-                           }
-                           th { background-color: var(--miPink, #ff4b82); color: white; text-align: left; padding: 12px 15px; }
-                           td { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; }
-                           tr:nth-of-type(even) { background-color: #f9f9f9; }
-                           tr:last-of-type { border-bottom: 2px solid var(--miPink, #ff4b82); }
-
-                           /* MODO CELULAR: Las tablas se vuelven verticales */
-                           @media screen and (max-width: 600px) {
-                             table, thead, tbody, th, td, tr { display: block; }
-                             thead tr { position: absolute; top: -9999px; left: -9999px; }
-                             tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
-                             td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 50%; text-align: right; }
-                             td:before { 
-                               position: absolute; top: 12px; left: 15px; width: 45%; 
-                               padding-right: 10px; white-space: nowrap; font-weight: bold;
-                               content: attr(data-th); /* Requiere un pequeño hack en el exportador */
-                               text-align: left;
-                             }
-                           }
-
-                           pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
-                           .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
-                         </style>
+<link href='https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='/styles.css'>
+<link rel='stylesheet' href='/teaching/practicas/practica.css'>
+<link rel='stylesheet' href='/teaching/teoria/notas.css'>
 </head>
 <body>
-<div id="org-div-home-and-up">
- <a accesskey="h" href="../"> UP </a>
- |
- <a accesskey="H" href="/"> HOME </a>
-</div><header id="top" class="status">
+<div id="top" class="status">
 <div id='site-navbar'></div>
+<header class='practica-hero'>
+  <div class='practica-hero-inner'>
+    <p class='eyebrow'>Cómputo Concurrente 2026 · Notas de teoría</p>
+    <h1>¿Qué es la Concurrencia? Origen, Propósito y Definición</h1>
+    <div class='practica-actions'>
+      <a class='btn btn-primary' href='/teaching/teoria/'>Todas las notas</a>
+      <a class='btn' href='/teaching/practicas/'>Prácticas</a>
+      <a class='btn btn-ghost' href='/teaching/'>Volver a Teaching</a>
+    </div>
+  </div>
 </header>
+</div>
 <main id="content" class="content">
 <header>
 <h1 class="title">¿Qué es la Concurrencia? Origen, Propósito y Definición</h1>
 </header><nav id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
+<h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
+<<<<<<< HEAD
 <li><a href="#org635c159">1. ¿Qué es la Concurrencia?</a></li>
 <li><a href="#org78fa7cc">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
 <ul>
@@ -74,15 +49,34 @@
 <li><a href="#orgba3b566">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
 <ul>
 <li><a href="#org3fa962f">La Diferencia de Enfoque</a></li>
+=======
+<li><a href="#orgebe4935">1. ¿Qué es la Concurrencia?</a></li>
+<li><a href="#orga7b1462">2. Un Poco de Historia: De la Necesidad a la Disciplina</a>
+<ul>
+<li><a href="#orgff08d6b">El Origen (1961 - Atlas Computer)</a></li>
+<li><a href="#orgaf77ae8">La Evolución Forzada (El fin de la fiesta del silicio)</a></li>
+<li><a href="#orge95b19b">¿Multicore, Multiprocesador y Multihilo?</a></li>
+</ul>
+</li>
+<li><a href="#org299df7e">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</a>
+<ul>
+<li><a href="#org442bb49">La Diferencia de Enfoque</a></li>
+>>>>>>> d0a067f (formato de practicas)
 </ul>
 </li>
 </ul>
 </div>
 </nav>
 
+<<<<<<< HEAD
 <section id="outline-container-org635c159" class="outline-2">
 <h2 id="org635c159">1. ¿Qué es la Concurrencia?</h2>
 <div class="outline-text-2" id="text-org635c159">
+=======
+<section id="outline-container-orgebe4935" class="outline-2">
+<h2 id="orgebe4935">1. ¿Qué es la Concurrencia?</h2>
+<div class="outline-text-2" id="text-orgebe4935">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Coordinar agentes en presencia de adversarios.
 </p>
@@ -102,6 +96,7 @@ Coordinar agentes en presencia de adversarios.
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org78fa7cc" class="outline-2">
 <h2 id="org78fa7cc">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
 <div class="outline-text-2" id="text-org78fa7cc">
@@ -109,6 +104,15 @@ Coordinar agentes en presencia de adversarios.
 <div id="outline-container-org673b848" class="outline-3">
 <h3 id="org673b848">El Origen (1961 - Atlas Computer)</h3>
 <div class="outline-text-3" id="text-org673b848">
+=======
+<section id="outline-container-orga7b1462" class="outline-2">
+<h2 id="orga7b1462">2. Un Poco de Historia: De la Necesidad a la Disciplina</h2>
+<div class="outline-text-2" id="text-orga7b1462">
+</div>
+<div id="outline-container-orgff08d6b" class="outline-3">
+<h3 id="orgff08d6b">El Origen (1961 - Atlas Computer)</h3>
+<div class="outline-text-3" id="text-orgff08d6b">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computadora Atlas en Manchester. En aquel entonces, "Distribuido" y "Concurrente" eran términos intercambiables.
 </p>
@@ -118,7 +122,11 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </ul>
 
 
+<<<<<<< HEAD
 <figure id="org3b05176">
+=======
+<figure id="org21688e2">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/STvsMT_CPU.png" alt="STvsMT_CPU.png">
 
 </figure>
@@ -127,9 +135,15 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 
 
 
+<<<<<<< HEAD
 <div id="outline-container-org2f1b838" class="outline-3">
 <h3 id="org2f1b838">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
 <div class="outline-text-3" id="text-org2f1b838">
+=======
+<div id="outline-container-orgaf77ae8" class="outline-3">
+<h3 id="orgaf77ae8">La Evolución Forzada (El fin de la fiesta del silicio)</h3>
+<div class="outline-text-3" id="text-orgaf77ae8">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 ¿Por qué hoy todos los programadores deben saber concurrencia? Porque chocamos contra tres muros físicos:
 </p>
@@ -141,9 +155,15 @@ La concurrencia nació bajo el nombre de <b>Multiprogramming</b> en la computado
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org6e49a6e" class="outline-3">
 <h3 id="org6e49a6e">¿Multicore, Multiprocesador y Multihilo?</h3>
 <div class="outline-text-3" id="text-org6e49a6e">
+=======
+<div id="outline-container-orge95b19b" class="outline-3">
+<h3 id="orge95b19b">¿Multicore, Multiprocesador y Multihilo?</h3>
+<div class="outline-text-3" id="text-orge95b19b">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Aunque a menudo se confunden, representan distintos niveles de integración y formas de gestionar los recursos del hardware.
 </p>
@@ -167,7 +187,11 @@ Ejemplo: Denelcor HEP (1982) y más tarde el Tera MTA (1990).
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org215fd05">
+=======
+<figure id="org73c13a6">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/MultithreadComparison.png" alt="MultithreadComparison.png">
 
 </figure>
@@ -206,7 +230,11 @@ Ejemplo: IBM Power4 (2001), el primer procesador de doble núcleo en un solo chi
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org2d91d8e">
+=======
+<figure id="org6bbc268">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/MulticoreVsMultiprocessor.png" alt="MulticoreVsMultiprocessor.png">
 
 </figure>
@@ -225,7 +253,7 @@ Diferencia clave: Mientras que en el Multicore la comunicación entre núcleos e
 </p>
 
 <table class="responsive-table">
-<caption class="t-above"><span class="table-number">Table 1:</span> Evolución de las Arquitecturas de Cómputo</caption>
+<caption class="t-above"><span class="table-number">Tabla 1</span> Evolución de las Arquitecturas de Cómputo</caption>
 
 <colgroup>
 <col  class="org-left">
@@ -335,9 +363,15 @@ Cachés: A medida que avanzamos, la caché se vuelve más compleja. En multicore
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-orgba3b566" class="outline-2">
 <h2 id="orgba3b566">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
 <div class="outline-text-2" id="text-orgba3b566">
+=======
+<section id="outline-container-org299df7e" class="outline-2">
+<h2 id="org299df7e">3. La relación entre el Cómputo Concurrente, Paralelo y Distribuido</h2>
+<div class="outline-text-2" id="text-org299df7e">
+>>>>>>> d0a067f (formato de practicas)
 <blockquote>
 <p>
 A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable.
@@ -350,9 +384,15 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 </p>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org3fa962f" class="outline-3">
 <h3 id="org3fa962f">La Diferencia de Enfoque</h3>
 <div class="outline-text-3" id="text-org3fa962f">
+=======
+<div id="outline-container-org442bb49" class="outline-3">
+<h3 id="org442bb49">La Diferencia de Enfoque</h3>
+<div class="outline-text-3" id="text-org442bb49">
+>>>>>>> d0a067f (formato de practicas)
 <ul class="org-ul">
 <li><b><b>Cómputo Paralelo:</b></b> Busca <b><b>Eficiencia</b></b>. Es un entorno "amigable" donde dividimos una tarea para terminar antes (ej. multiplicar matrices).</li>
 <li><b><b>Cómputo Distribuido:</b></b> Busca <b><b>Coordinación</b></b>. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.</li>
@@ -360,7 +400,11 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 
 
 
+<<<<<<< HEAD
 <figure id="orgd75f0d8">
+=======
+<figure id="org99caa34">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/procesador_atomic.png" alt="procesador_atomic.png">
 
 </figure>
@@ -371,15 +415,16 @@ Sin embargo, <b><b>Sergio Rajsbaum y Michel Raynal</b></b> argumentan que el té
 
 <ul class="org-ul">
 <li><a href="2-historias-con-moraleja.html">Historias y el modelo de interleaving de Raynal</a></li>
-<li><a href="teaching/teoria/3-linearizabilidad-vs-sc.html">Linealizabilidad: ¿Cómo probar la corrección?</a></li>
+<li><a href="nocionesDcorrecion.html">Distintos sabores de corrección: ¿cómo probar que un algoritmo es correcto?</a></li>
 </ul>
 </div>
 </div>
 </section>
 </main>
-<footer id="postamble" class="status">
+<div id="postamble" class="status">
+<p class='back-link'><a href='/teaching/teoria/'>← Volver a las notas de teoría</a></p>
 <div id='site-footer'></div>
-                              <script type='module' src='/scripts/include-teaching.js'></script>
-</footer>
+<script type='module' src='/scripts/include-teaching.js'></script>
+</div>
 </body>
 </html>

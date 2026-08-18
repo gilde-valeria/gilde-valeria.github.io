@@ -1,6 +1,6 @@
 #+TITLE: Monitores y Variables de Condición — Ejemplos Java
 #+AUTHOR: Profa. Gilde Valeria Rodríguez
-#+DATE: Cómputo Concurrente 2026-2
+#+DATE: Cómputo Concurrente 2026
 #+OPTIONS: toc:2 num:t ^:nil
 #+PROPERTY: header-args:java :results output :exports both
 

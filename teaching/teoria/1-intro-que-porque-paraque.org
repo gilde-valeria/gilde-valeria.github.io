@@ -114,4 +114,4 @@ Sin embargo, **Sergio Rajsbaum y Michel Raynal** argumentan que el término de c
 ---
 # Notas Relacionadas:
 - [[file:2-historias-con-moraleja.org][Historias y el modelo de interleaving de Raynal]]
-- [[file:teaching/teoria/3-linearizabilidad-vs-sc.org][Linealizabilidad: ¿Cómo probar la corrección?]]
+- [[file:nocionesDcorrecion.org][Distintos sabores de corrección: ¿cómo probar que un algoritmo es correcto?]]

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Códigos · Práctica 1 — Repaso de Java y multihilos</title>
+<meta name="description" content="Código fuente en Java de la Práctica 1 — Repaso de Java y multihilos del curso de Cómputo Concurrente." />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    background-color: #232629;
+    color: #7a7c7d;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+div.sourceCode
+  { color: #cfcfc2; background-color: #232629; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #cfcfc2; } /* Normal */
+code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+code span.an { color: #3f8058; } /* Annotation */
+code span.at { color: #2980b9; } /* Attribute */
+code span.bn { color: #f67400; } /* BaseN */
+code span.bu { color: #7f8c8d; } /* BuiltIn */
+code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #3daee9; } /* Char */
+code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+code span.co { color: #7a7c7d; } /* Comment */
+code span.cv { color: #7f8c8d; } /* CommentVar */
+code span.do { color: #a43340; } /* Documentation */
+code span.dt { color: #2980b9; } /* DataType */
+code span.dv { color: #f67400; } /* DecVal */
+code span.er { color: #da4453; text-decoration: underline; } /* Error */
+code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+code span.fl { color: #f67400; } /* Float */
+code span.fu { color: #8e44ad; } /* Function */
+code span.im { color: #27ae60; } /* Import */
+code span.in { color: #c45b00; } /* Information */
+code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+code span.op { color: #cfcfc2; } /* Operator */
+code span.ot { color: #27ae60; } /* Other */
+code span.pp { color: #27ae60; } /* Preprocessor */
+code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #da4453; } /* SpecialString */
+code span.st { color: #f44f4f; } /* String */
+code span.va { color: #27aeae; } /* Variable */
+code span.vs { color: #da4453; } /* VerbatimString */
+code span.wa { color: #da4453; } /* Warning */
+</style>
+</head>
+<body>
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Códigos del curso</p>
+    <h1>Práctica 1 — Repaso de Java y multihilos</h1>
+    <p class="practica-sub">14 archivos Java · haz clic en cada uno para desplegarlo</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P1" target="_blank" rel="noopener">Ver en GitHub</a>
+      <a class="btn" href="/teaching/practicas/p1-multihilos.html">Ver el enunciado</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout" style="grid-template-columns:1fr">
+  <article class="practica-body">
+    <p class="muted" style="margin-top:0">
+      Estos son los mismos archivos que están en el repositorio
+      <a href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P1" target="_blank" rel="noopener">FC_CConcurrente</a>.
+      Puedes copiarlos desde aquí o clonar el repo completo:
+    </p>
+    <div class="code-wrap"><pre><code>git clone https://github.com/gilde-valeria/FC_CConcurrente.git</code></pre></div>
+    <div class="codigos-head"><h2 style="margin:0;border:none">Archivos</h2><button id="expand-all" class="btn" type="button">Expandir todo</button></div>
+    <details class="code-file">
+      <summary><span class="fname">module-info.java</span><span class="fmeta">8 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/module-info.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/module-info.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>module unam<span class="op">.</span><span class="fu">fc</span><span class="op">.</span><span class="fu">concurrent</span><span class="op">.</span><span class="fu">practica1</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">AlwaysDesignToStop.java</span><span class="fmeta">53 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/AlwaysDesignToStop.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/AlwaysDesignToStop.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 5: Ejemplo de un contador que termina solo si el hilo principal lo detiene</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//      El hilo principal es el que corre el programa en JVM.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//      El hilo A va a ejecutarse mientras done = true</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//      </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AlwaysDesignToStop <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        StopCounter counter <span class="op">=</span> <span class="kw">new</span> <span class="fu">StopCounter</span><span class="op">();</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadA <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">1500</span><span class="op">);</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="co">//threadA.join();</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread: &quot;</span> <span class="op">+</span> threadName<span class="op">);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        counter<span class="op">.</span><span class="fu">stopcount</span><span class="op">();</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> StopCounter  <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> count<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span> done <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        count<span class="op">++;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">stopcount</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">done</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">(</span><span class="kw">this</span><span class="op">.</span><span class="fu">done</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">500</span><span class="op">);</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread: &quot;</span> <span class="op">+</span> threadName <span class="op">+</span> <span class="st">&quot; increment to: &quot;</span> <span class="op">+</span> <span class="fu">increment</span><span class="op">());</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">CounterNaive.java</span><span class="fmeta">13 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/CounterNaive.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/CounterNaive.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> CounterNaive <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> count<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">count</span><span class="op">++;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getValue</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">count</span><span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">DeterminanteConcurrente.java</span><span class="fmeta">60 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/DeterminanteConcurrente.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/DeterminanteConcurrente.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">/*  Programa 10: Programa para obtener el determinante de una matriz de 3x3</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"> *  Es más paralelizable, pero nos benefician en el tiempo de ejecucon utilizar hilos?</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">*/</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> DeterminanteConcurrente <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> determinante<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> n_prueba <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> matriz_prueba<span class="op">[][]</span> <span class="op">=</span> <span class="op">{</span> <span class="op">{</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">2</span> <span class="op">},</span> <span class="op">{</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="op">-</span><span class="dv">2</span> <span class="op">},</span> <span class="op">{</span> <span class="dv">3</span><span class="op">,</span> <span class="op">-</span><span class="dv">1</span><span class="op">,</span> <span class="dv">1</span> <span class="op">}};</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> num1<span class="op">,</span> num2<span class="op">,</span> num3<span class="op">,</span> partial<span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span><span class="dt">int</span> num1<span class="op">,</span> <span class="dt">int</span> num2<span class="op">,</span> <span class="dt">int</span> num3<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">num1</span> <span class="op">=</span> num1<span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">num2</span> <span class="op">=</span> num2<span class="op">;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">num3</span> <span class="op">=</span> num3<span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> <span class="fu">determinanteMatriz3x3</span><span class="op">(</span><span class="dt">int</span> matriz<span class="op">[][],</span> <span class="dt">int</span> n_prueba<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> result <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr3 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr4 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr5 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        DeterminanteConcurrente thr6 <span class="op">=</span> <span class="kw">new</span> <span class="fu">DeterminanteConcurrente</span><span class="op">(</span>matriz<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> matriz<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">2</span><span class="op">]);</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        thr1<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        thr2<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        thr3<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        thr4<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        thr5<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        thr6<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            thr1<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            thr2<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            thr3<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            thr4<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            thr5<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            thr6<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> thr1<span class="op">.</span><span class="fu">partial</span> <span class="op">+</span> thr2<span class="op">.</span><span class="fu">partial</span> <span class="op">+</span> thr3<span class="op">.</span><span class="fu">partial</span> <span class="op">-</span> thr4<span class="op">.</span><span class="fu">partial</span> <span class="op">-</span> thr5<span class="op">.</span><span class="fu">partial</span> <span class="op">-</span> thr6<span class="op">.</span><span class="fu">partial</span><span class="op">;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>       </span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">(){</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">partial</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">num1</span> <span class="op">*</span> <span class="kw">this</span><span class="op">.</span><span class="fu">num2</span> <span class="op">*</span> <span class="kw">this</span><span class="op">.</span><span class="fu">num3</span><span class="op">;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> startTime <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">nanoTime</span><span class="op">();</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        determinante <span class="op">=</span> <span class="fu">determinanteMatriz3x3</span><span class="op">(</span>matriz_prueba<span class="op">,</span> n_prueba<span class="op">);</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="dt">long</span> endTime <span class="op">=</span> <span class="bu">System</span><span class="op">.</span><span class="fu">nanoTime</span><span class="op">();</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Program took &quot;</span> <span class="op">+</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>                <span class="op">(</span>endTime <span class="op">-</span> startTime<span class="op">)</span> <span class="op">+</span> <span class="st">&quot;ns, result: &quot;</span> <span class="op">+</span> determinante<span class="op">)</span> <span class="op">;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExampleMultipleExtends.java</span><span class="fmeta">32 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleExtends.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleExtends.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 2: Ejemplo de un contador extendiendo la clase Thread</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//      Acaban en distintos tiempos</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//      Cada hilo crea su propia variable count porque son 3 objetos ThreadExtend1 distintos</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExampleMultipleExtends <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        ThreadExtend1 threadA <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend1</span><span class="op">();</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        ThreadExtend1 threadB <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend1</span><span class="op">();</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        ThreadExtend1 threadC <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend1</span><span class="op">();</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        threadC<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ThreadExtend1  <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> count<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        count<span class="op">++;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread &quot;</span> <span class="op">+</span> threadName <span class="op">+</span> <span class="st">&quot; increment to: &quot;</span> <span class="op">+</span> <span class="fu">increment</span><span class="op">());</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExampleMultipleExtends2.java</span><span class="fmeta">57 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleExtends2.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleExtends2.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 7: Ejemplo de un contador extendiendo la clase Thread</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Se crea un solo contador y se comparte a ThreadExtend2, asi que el contador es un objeto compartido</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Utilizamos join() para que se devuelva la cuenta final en la linea 23. </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">// </span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Practica 2: Existe una condicion de carrera (race condition)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Tiene una consistencia baja el contador</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExampleMultipleExtends2 <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        CounterNaive counter <span class="op">=</span> <span class="kw">new</span> <span class="fu">CounterNaive</span><span class="op">();</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        ThreadExtend2 threadA <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend2</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        ThreadExtend2 threadB <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend2</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        ThreadExtend2 threadC <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend2</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        ThreadExtend2 threadD <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtend2</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        threadC<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        threadD<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            threadA<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            threadB<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            threadC<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            threadD<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Total &quot;</span> <span class="op">+</span> counter<span class="op">.</span><span class="fu">getValue</span><span class="op">());</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ThreadExtend2  <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> CounterNaive counter <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ThreadExtend2</span><span class="op">(){}</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ThreadExtend2</span><span class="op">(</span>CounterNaive counter<span class="op">){</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">counter</span> <span class="op">=</span> counter<span class="op">;</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co">//      String threadName = Thread.currentThread().getName();//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">//while(this.counter.getValue() &lt; 10) {</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">counter</span><span class="op">.</span><span class="fu">increment</span><span class="op">();</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">100</span><span class="op">);</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>            <span class="co">//System.out.println(&quot;Running Thread &quot; + threadName + &quot; increment to: &quot; + this.counter.increment());</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">//System.out.println(&quot;Running Thread &quot; + threadName + &quot; increment to: &quot; + this.counter.increment());</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExampleMultipleRunnable.java</span><span class="fmeta">38 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleRunnable.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleRunnable.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 3: Ejemplo de un contador implementando la interfaz Runnable</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   Acaban en distintos tiempos</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   Se crea un solo objeto Runnable y se comparte, count es una variable compartida</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExampleMultipleRunnable <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        ThreadRunnable1 myRunnable <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadRunnable1</span><span class="op">();</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadA <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadB <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadC <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        threadC<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ThreadRunnable1  <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> count<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">++;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">getCount</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread Runnable &quot;</span> <span class="op">+</span> threadName <span class="op">+</span> <span class="st">&quot; increment to: &quot;</span> <span class="op">+</span> <span class="fu">increment</span><span class="op">());</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExampleMultipleRunnable2.java</span><span class="fmeta">34 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleRunnable2.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleMultipleRunnable2.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 8: Ejemplo de un contador implementando Runnable</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Se crea un solo contador y se comparte a ThreadExtend2, asi que el contador es un objeto compartido</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//Los hilos se ejecutan en desorden y el resultado no es siempre: 1, 2, 3</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExampleMultipleRunnable2 <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        CounterNaive counter <span class="op">=</span> <span class="kw">new</span> <span class="fu">CounterNaive</span><span class="op">();</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        ThreadRunnable2 myRunnable <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadRunnable2</span><span class="op">(</span>counter<span class="op">);</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadA <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadB <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadC <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span>myRunnable<span class="op">);</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        threadC<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ThreadRunnable2  <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    CounterNaive counter<span class="op">=</span><span class="kw">null</span><span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ThreadRunnable2</span><span class="op">(){}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ThreadRunnable2</span><span class="op">(</span>CounterNaive counter<span class="op">){</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">counter</span> <span class="op">=</span> counter<span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread Runnable &quot;</span> <span class="op">+</span> threadName <span class="op">+</span> <span class="st">&quot; increment to: &quot;</span> <span class="op">+</span> <span class="kw">this</span><span class="op">.</span><span class="fu">counter</span><span class="op">.</span><span class="fu">increment</span><span class="op">());</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExampleThreads.java</span><span class="fmeta">20 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleThreads.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ExampleThreads.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">.</span><span class="im">ThreadExtends</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">.</span><span class="im">ThreadRunnable</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 1: Creacion de un hilo</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   Dos formas: Forma de creacion del Hilo A o forma de creacion del hilo B</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   Utiliza las clases: ThreadExtends y ThreadRunnable</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExampleThreads<span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">//threadA es un hilo que extiende la clase Thread</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        ThreadExtends threadC <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtends</span><span class="op">();</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        ThreadExtends threadA<span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadExtends</span><span class="op">();</span> </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">//threadB es un hilo Thread al cual se le pasa una instancia de Runnable</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadB<span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span><span class="kw">new</span> <span class="fu">ThreadRunnable</span><span class="op">());</span> </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        threadC<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">FibonacciThreads.java</span><span class="fmeta">41 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/FibonacciThreads.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/FibonacciThreads.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">/*  Programa 9: Fibonacci</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Programa no muy paralelizable porque es recursivo, ademas de que crear muchos hilos hace un &quot;overhead&quot; en la memoria</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">*/</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> FibonacciThreads <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">FibonacciThreads</span><span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">n</span> <span class="op">=</span> n<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">((</span>n<span class="op">==</span><span class="dv">0</span><span class="op">)||(</span>n<span class="op">==</span><span class="dv">1</span><span class="op">))</span> result <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            FibonacciThreads thr1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">FibonacciThreads</span><span class="op">(</span>n<span class="op">-</span><span class="dv">1</span><span class="op">);</span> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            FibonacciThreads thr2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">FibonacciThreads</span><span class="op">(</span>n<span class="op">-</span><span class="dv">2</span><span class="op">);</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            thr1<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            thr2<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                thr1<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                thr2<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="kw">this</span><span class="op">.</span><span class="fu">result</span> <span class="op">=</span> thr1<span class="op">.</span><span class="fu">result</span> <span class="op">+</span> thr2<span class="op">.</span><span class="fu">result</span><span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            <span class="co">//System.out.println(this.result);</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> num <span class="op">=</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        FibonacciThreads thr0 <span class="op">=</span> <span class="kw">new</span> <span class="fu">FibonacciThreads</span><span class="op">(</span>num<span class="op">);</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        thr0<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            <span class="co">//threadA.join();</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            thr0<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The &quot;</span><span class="op">+</span> num <span class="op">+</span> <span class="st">&quot;th number of the fibonacci series is: &quot;</span><span class="op">+</span> thr0<span class="op">.</span><span class="fu">result</span><span class="op">);</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">MainThread.java</span><span class="fmeta">50 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/MainThread.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/MainThread.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 4: Ejemplo de un contador que no termina</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//  El hilo principal es el que corre el programa en JVM.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//  El metodo run() no tiene fin, el hilo A nunca termina, entonces el programa no termina</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">//  El programa puede terminar si descomentas la linea 14, porque el hilo A se vuelve daemon</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> MainThread <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Thread</span> threadA <span class="op">=</span> <span class="kw">new</span> <span class="bu">Thread</span><span class="op">(</span><span class="kw">new</span> <span class="fu">InfiniteCounter</span><span class="op">());</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">//threadA.setDaemon(true);</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">1500</span><span class="op">);</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="co">//threadA.join();</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread: &quot;</span> <span class="op">+</span> threadName<span class="op">);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> InfiniteCounter  <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> count<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="fu">increment</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        count<span class="op">++;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count<span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">500</span><span class="op">);</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread: &quot;</span> <span class="op">+</span> threadName <span class="op">+</span> <span class="st">&quot; increment to: &quot;</span> <span class="op">+</span> <span class="fu">increment</span><span class="op">());</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ThreadExtends.java</span><span class="fmeta">9 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ThreadExtends.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ThreadExtends.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ThreadExtends  <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread that extends Thread class: &quot;</span> <span class="op">+</span> threadName<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ThreadRunnable.java</span><span class="fmeta">10 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ThreadRunnable.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/ThreadRunnable.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">//Clase que implementa la interfaz Runnable</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ThreadRunnable <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running Thread that implements Runnable interface: &quot;</span> <span class="op">+</span> threadName<span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">UseJoin.java</span><span class="fmeta">45 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/UseJoin.java" target="_blank" rel="noopener">Programas_P1/unam.fc.concurrent.practica1/src/unam/fc/concurrent/practica1/UseJoin.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica1</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//Programa 6: Uso de join()</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//      Si comentamos la lineas 34-49 el resultado es 0</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//      Si solo comentamos la linea 35 el resultado es 01</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">//      Si solo comentamos la linea 36 el resultado es 11</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">//      El metodo A.join() permite que todo se congele hasta que termine el hilo A</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> UseJoin <span class="kw">extends</span> <span class="bu">Thread</span><span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> rounds<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">UseJoin</span><span class="op">(</span><span class="dt">int</span> rounds<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">rounds</span> <span class="op">=</span> rounds<span class="op">;</span> </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> threadName <span class="op">=</span> <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">getName</span><span class="op">();</span><span class="co">//Obtenemos el nombre del hilo</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i<span class="op">&lt;</span><span class="kw">this</span><span class="op">.</span><span class="fu">rounds</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span><span class="dv">200</span><span class="op">);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Running round: &quot;</span><span class="op">+</span>i<span class="op">+</span><span class="st">&quot; Thread &quot;</span><span class="op">+</span> threadName<span class="op">);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                <span class="co">//threadA.join();</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">result</span><span class="op">=</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// </span><span class="al">TODO</span><span class="co"> Auto-generated method stub</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        UseJoin threadA <span class="op">=</span> <span class="kw">new</span> <span class="fu">UseJoin</span><span class="op">(</span><span class="dv">4</span><span class="op">);</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        UseJoin threadB <span class="op">=</span> <span class="kw">new</span> <span class="fu">UseJoin</span><span class="op">(</span><span class="dv">2</span><span class="op">);</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        threadA<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        threadB<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="co">//threadA.join();</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            threadB<span class="op">.</span><span class="fu">join</span><span class="op">();</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span><span class="cf">catch</span><span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Result: &quot;</span><span class="op">+</span> threadA<span class="op">.</span><span class="fu">result</span> <span class="op">+</span> threadB<span class="op">.</span><span class="fu">result</span><span class="op">);</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn'; b.type = 'button'; b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b); wrap.appendChild(pre);
+});
+document.getElementById('expand-all').addEventListener('click', function () {
+  var abrir = this.dataset.state !== 'open';
+  document.querySelectorAll('details').forEach(function (d) { d.open = abrir; });
+  this.dataset.state = abrir ? 'open' : 'closed';
+  this.textContent = abrir ? 'Contraer todo' : 'Expandir todo';
+});
+</script>
+</body>
+</html>

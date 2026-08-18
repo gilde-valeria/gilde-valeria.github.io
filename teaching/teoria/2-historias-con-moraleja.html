@@ -1,68 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
+<<<<<<< HEAD
 <!-- 2026-05-11 Mon 19:07 -->
+=======
+<!-- 2026-08-18 Tue 03:55 -->
+>>>>>>> d0a067f (formato de practicas)
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>La Fábula de las Banderas: El ABC de la Exclusión Mutua</title>
 <meta name="generator" content="Org Mode" />
-<link rel='stylesheet' href='../../styles.css'>
-                         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
-                         <style>
-                           body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
-                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
-                           
-                           /* IMÁGENES RESPONSIVAS */
-                           img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; }
-
-                           /* TABLAS ESTILO ACADÉMICO */
-                           table {
-                             width: 100%;
-                             border-collapse: collapse;
-                             margin: 2rem 0;
-                             font-size: 0.95rem;
-                             border-radius: 8px;
-                             overflow: hidden;
-                             box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-                           }
-                           th { background-color: var(--miPink, #ff4b82); color: white; text-align: left; padding: 12px 15px; }
-                           td { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; }
-                           tr:nth-of-type(even) { background-color: #f9f9f9; }
-                           tr:last-of-type { border-bottom: 2px solid var(--miPink, #ff4b82); }
-
-                           /* MODO CELULAR: Las tablas se vuelven verticales */
-                           @media screen and (max-width: 600px) {
-                             table, thead, tbody, th, td, tr { display: block; }
-                             thead tr { position: absolute; top: -9999px; left: -9999px; }
-                             tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
-                             td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 50%; text-align: right; }
-                             td:before { 
-                               position: absolute; top: 12px; left: 15px; width: 45%; 
-                               padding-right: 10px; white-space: nowrap; font-weight: bold;
-                               content: attr(data-th); /* Requiere un pequeño hack en el exportador */
-                               text-align: left;
-                             }
-                           }
-
-                           pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
-                           .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
-                         </style>
+<link href='https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='/styles.css'>
+<link rel='stylesheet' href='/teaching/practicas/practica.css'>
+<link rel='stylesheet' href='/teaching/teoria/notas.css'>
 </head>
 <body>
-<div id="org-div-home-and-up">
- <a accesskey="h" href="../"> UP </a>
- |
- <a accesskey="H" href="/"> HOME </a>
-</div><header id="top" class="status">
+<div id="top" class="status">
 <div id='site-navbar'></div>
+<header class='practica-hero'>
+  <div class='practica-hero-inner'>
+    <p class='eyebrow'>Cómputo Concurrente 2026 · Notas de teoría</p>
+    <h1>La Fábula de las Banderas: El ABC de la Exclusión Mutua</h1>
+    <div class='practica-actions'>
+      <a class='btn btn-primary' href='/teaching/teoria/'>Todas las notas</a>
+      <a class='btn' href='/teaching/practicas/'>Prácticas</a>
+      <a class='btn btn-ghost' href='/teaching/'>Volver a Teaching</a>
+    </div>
+  </div>
 </header>
+</div>
 <main id="content" class="content">
 <header>
 <h1 class="title">La Fábula de las Banderas: El ABC de la Exclusión Mutua</h1>
 </header><nav id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
+<h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
+<<<<<<< HEAD
 <li><a href="#orgf1ca30d">1. El Problema: El Patio, el Gato y el Perro</a>
 <ul>
 <li><a href="#org920f760">Las Reglas del Juego (Restricciones de Comunicación)</a></li>
@@ -87,13 +62,45 @@
 </ul>
 </li>
 <li><a href="#orga7b51d9">5. Conclusión: El Modelo SWMR</a></li>
+=======
+<li><a href="#org590acc8">1. El Problema: El Patio, el Gato y el Perro</a>
+<ul>
+<li><a href="#org5350d6c">Las Reglas del Juego (Restricciones de Comunicación)</a></li>
+</ul>
+</li>
+<li><a href="#orgedc6db3">2. El Protocolo de Banderas</a>
+<ul>
+<li><a href="#orgd1a3598">El Protocolo de Alice (El Gato)</a></li>
+<li><a href="#org30a5c92">El Protocolo de Bob (El Perro)</a></li>
+</ul>
+</li>
+<li><a href="#orgdbae1cc">3. Análisis de Seguridad (Safety)</a>
+<ul>
+<li><a href="#org9ec9a87">Teorema: Exclusión Mutua</a></li>
+</ul>
+</li>
+<li><a href="#org9f52240">4. Análisis de Viveza (Liveness)</a>
+<ul>
+<li><a href="#org95f1b72">¿Hay Deadlock? (Punto muerto)</a></li>
+<li><a href="#orgbc6e51b">¿Hay Starvation? (Inanición)</a></li>
+<li><a href="#org8604f3b">El talón de Aquiles: Tolerancia a Fallos</a></li>
+</ul>
+</li>
+<li><a href="#orgb63dd25">5. Conclusión: El Modelo SWMR</a></li>
+>>>>>>> d0a067f (formato de practicas)
 </ul>
 </div>
 </nav>
 
+<<<<<<< HEAD
 <section id="outline-container-orgf1ca30d" class="outline-2">
 <h2 id="orgf1ca30d">1. El Problema: El Patio, el Gato y el Perro</h2>
 <div class="outline-text-2" id="text-orgf1ca30d">
+=======
+<section id="outline-container-org590acc8" class="outline-2">
+<h2 id="org590acc8">1. El Problema: El Patio, el Gato y el Perro</h2>
+<div class="outline-text-2" id="text-org590acc8">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Para entender cómo se coordinan dos procesos, imaginemos a dos vecinos, <b>Alice</b> y <b>Bob</b>, que comparten un patio. El problema es sencillo pero crítico:
 </p>
@@ -104,9 +111,15 @@ Para entender cómo se coordinan dos procesos, imaginemos a dos vecinos, <b>Alic
 </ul>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org920f760" class="outline-3">
 <h3 id="org920f760">Las Reglas del Juego (Restricciones de Comunicación)</h3>
 <div class="outline-text-3" id="text-org920f760">
+=======
+<div id="outline-container-org5350d6c" class="outline-3">
+<h3 id="org5350d6c">Las Reglas del Juego (Restricciones de Comunicación)</h3>
+<div class="outline-text-3" id="text-org5350d6c">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Para que esto sea un problema de computación real, añadimos restricciones:
 </p>
@@ -115,27 +128,43 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 <li>No pueden gritarse (están lejos).</li>
 <li><b><b>Solo hay banderas:</b></b> Cada uno tiene una bandera en su ventana que el otro puede ver. Esto representa <b><b>bits en memoria compartida</b></b>.</li>
 </ol>
+<<<<<<< HEAD
 
 
 <figure id="org516d085">
 <img src="../../images/pets_fable.png" alt="pets_fable.png">
 
 </figure>
+=======
+>>>>>>> d0a067f (formato de practicas)
 </div>
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org61e5d96" class="outline-2">
 <h2 id="org61e5d96">2. El Protocolo de Banderas</h2>
 <div class="outline-text-2" id="text-org61e5d96">
+=======
+
+<section id="outline-container-orgedc6db3" class="outline-2">
+<h2 id="orgedc6db3">2. El Protocolo de Banderas</h2>
+<div class="outline-text-2" id="text-orgedc6db3">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 ¿Cómo evitar que choquen usando solo banderas? Aquí está el primer intento de algoritmo:
 </p>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-orgfe269e2" class="outline-3">
 <h3 id="orgfe269e2">El Protocolo de Alice (El Gato)</h3>
 <div class="outline-text-3" id="text-orgfe269e2">
+=======
+<div id="outline-container-orgd1a3598" class="outline-3">
+<h3 id="orgd1a3598">El Protocolo de Alice (El Gato)</h3>
+<div class="outline-text-3" id="text-orgd1a3598">
+>>>>>>> d0a067f (formato de practicas)
 <ol class="org-ol">
 <li>Levanto mi bandera.</li>
 <li>Miro la ventana de Bob. Si su bandera está <b><b>abajo</b></b>, dejo salir al gato.</li>
@@ -144,9 +173,15 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org8d486c3" class="outline-3">
 <h3 id="org8d486c3">El Protocolo de Bob (El Perro)</h3>
 <div class="outline-text-3" id="text-org8d486c3">
+=======
+<div id="outline-container-org30a5c92" class="outline-3">
+<h3 id="org30a5c92">El Protocolo de Bob (El Perro)</h3>
+<div class="outline-text-3" id="text-org30a5c92">
+>>>>>>> d0a067f (formato de practicas)
 <ol class="org-ol">
 <li>Levanto mi bandera.</li>
 <li>Miro la ventana de Alice. Si su bandera está <b><b>arriba</b></b>:
@@ -162,17 +197,29 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org1d166b1" class="outline-2">
 <h2 id="org1d166b1">3. Análisis de Seguridad (Safety)</h2>
 <div class="outline-text-2" id="text-org1d166b1">
+=======
+<section id="outline-container-orgdbae1cc" class="outline-2">
+<h2 id="orgdbae1cc">3. Análisis de Seguridad (Safety)</h2>
+<div class="outline-text-2" id="text-orgdbae1cc">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 ¿Funciona? Lo primero es garantizar que <b><b>nunca estén juntos en el patio</b></b>. 
 </p>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org00eac10" class="outline-3">
 <h3 id="org00eac10">Teorema: Exclusión Mutua</h3>
 <div class="outline-text-3" id="text-org00eac10">
+=======
+<div id="outline-container-org9ec9a87" class="outline-3">
+<h3 id="org9ec9a87">Teorema: Exclusión Mutua</h3>
+<div class="outline-text-3" id="text-org9ec9a87">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 El algoritmo satisface la exclusión mutua. 
 </p>
@@ -181,7 +228,11 @@ El algoritmo satisface la exclusión mutua.
 </ul>
 
 
+<<<<<<< HEAD
 <figure id="orgf9a4c51">
+=======
+<figure id="org2ba05f2">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../teaching/practicas/1-intro--multihilos/img/LINExample.jpg" alt="LINExample.jpg">
 
 </figure>
@@ -189,17 +240,29 @@ El algoritmo satisface la exclusión mutua.
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org7eca14c" class="outline-2">
 <h2 id="org7eca14c">4. Análisis de Viveza (Liveness)</h2>
 <div class="outline-text-2" id="text-org7eca14c">
+=======
+<section id="outline-container-org9f52240" class="outline-2">
+<h2 id="org9f52240">4. Análisis de Viveza (Liveness)</h2>
+<div class="outline-text-2" id="text-org9f52240">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real.
 </p>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org4d1601d" class="outline-3">
 <h3 id="org4d1601d">¿Hay Deadlock? (Punto muerto)</h3>
 <div class="outline-text-3" id="text-org4d1601d">
+=======
+<div id="outline-container-org95f1b72" class="outline-3">
+<h3 id="org95f1b72">¿Hay Deadlock? (Punto muerto)</h3>
+<div class="outline-text-3" id="text-org95f1b72">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 <b>Pregunta para el lector:</b> Si ambos levantan la bandera al mismo tiempo, ¿se quedan trabados para siempre?
 </p>
@@ -209,9 +272,15 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-org943571b" class="outline-3">
 <h3 id="org943571b">¿Hay Starvation? (Inanición)</h3>
 <div class="outline-text-3" id="text-org943571b">
+=======
+<div id="outline-container-orgbc6e51b" class="outline-3">
+<h3 id="orgbc6e51b">¿Hay Starvation? (Inanición)</h3>
+<div class="outline-text-3" id="text-orgbc6e51b">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 <b>Pregunta para el lector:</b> Si Alice es muy egoísta y siempre quiere sacar al gato, ¿podría Bob quedarse esperando para siempre?
 </p>
@@ -221,9 +290,15 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-orga252d01" class="outline-3">
 <h3 id="orga252d01">El talón de Aquiles: Tolerancia a Fallos</h3>
 <div class="outline-text-3" id="text-orga252d01">
+=======
+<div id="outline-container-org8604f3b" class="outline-3">
+<h3 id="org8604f3b">El talón de Aquiles: Tolerancia a Fallos</h3>
+<div class="outline-text-3" id="text-org8604f3b">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 <b>Escenario de terror:</b> Alice levanta su bandera y, justo antes de salir al patio, ¡se queda dormida (su proceso falla/hace crash)!
 </p>
@@ -239,9 +314,15 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-orga7b51d9" class="outline-2">
 <h2 id="orga7b51d9">5. Conclusión: El Modelo SWMR</h2>
 <div class="outline-text-2" id="text-orga7b51d9">
+=======
+<section id="outline-container-orgb63dd25" class="outline-2">
+<h2 id="orgb63dd25">5. Conclusión: El Modelo SWMR</h2>
+<div class="outline-text-2" id="text-orgb63dd25">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Este pequeño ejercicio nos muestra el poder de las variables <b><b>SWMR</b></b> (Single-Writer, Multi-Reader). 
 </p>
@@ -262,14 +343,15 @@ Este es el nivel más básico de coordinación en hardware. En las siguientes no
 <ul class="org-ul">
 <li><a href="1-intro-que-porque-paraque.md">¿Qué es la computación concurrente?</a></li>
 <li><a href="2-historias-con-moraleja.md">Alice y Bob: El problema de la interferencia</a></li>
-<li><a href="3-linearizabilidad-vs-sc.md">Linearizabilidad: ¿Cómo evitar el choque de mascotas?</a></li>
+<li><a href="nocionesDcorrecion.html">Distintos sabores de corrección: ¿cómo evitar el choque de mascotas?</a></li>
 </ul>
 </div>
 </section>
 </main>
-<footer id="postamble" class="status">
+<div id="postamble" class="status">
+<p class='back-link'><a href='/teaching/teoria/'>← Volver a las notas de teoría</a></p>
 <div id='site-footer'></div>
-                              <script type='module' src='/scripts/include-teaching.js'></script>
-</footer>
+<script type='module' src='/scripts/include-teaching.js'></script>
+</div>
 </body>
 </html>

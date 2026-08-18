@@ -1,6 +1,6 @@
 #+TITLE: Construyendo un Candado Reentrante desde Cero
 #+AUTHOR: Profa. Gilde Valeria Rodríguez
-#+DATE: Cómputo Concurrente 2026-2
+#+DATE: Cómputo Concurrente 2026
 #+OPTIONS: toc:2 num:t ^:nil
 
 -----

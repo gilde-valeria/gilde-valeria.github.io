@@ -1,5 +1,5 @@
 #+TITLE: Práctica 6 — Paralelismo con OpenMP: Memoria Compartida, Corrección y Escalabilidad
-#+SUBTITLE: Cómputo Concurrente 2026-2
+#+SUBTITLE: Cómputo Concurrente 2026
 #+AUTHOR: Profa. Gilde Valeria Rodríguez
 #+DATE: 2026
 #+LANGUAGE: es
@@ -9,7 +9,6 @@
 #+LATEX_HEADER: \usepackage{listings}
 #+LATEX_HEADER: \usepackage{xcolor}
 
-Fecha de entrega: ________________ de 2026
 
 -----
 

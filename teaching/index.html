@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <title>Cómputo Concurrente</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Material de apoyo para estudiantes de Cómputo Concurrente: prácticas, ejemplos teóricos y notas en español." />
+  <meta name="description" content="Material de apoyo para estudiantes de Cómputo Concurrente: prácticas, códigos en Java, notas de teoría y bibliografía, en español." />
 
   <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="/teaching/practicas/practica.css">
 </head>
 
 <body>
@@ -19,55 +20,84 @@
   >
   <div class="title-teaching">
     <h1>Cómputo Concurrente</h1>
-  <p>Material para computólogas y computólogos</p>
+    <p>Material para computólogas y computólogos</p>
   </div>
-  
-
-  
 </header>
 
 <div id="site-navbar"></div>
 
 <main style="max-width:900px; margin:auto; padding:2rem 1rem;">
+
   <section class="card">
     <p>
-      Encontrarás mapas (roadmaps) con resúmenes, 
-      ejemplos prácticos y teóricos.
+      Aquí encontrarás todo el material del curso: los enunciados de las prácticas
+      (en HTML para leer en cualquier pantalla y en PDF para imprimir), los códigos
+      en Java listos para copiar, las notas de teoría y la bibliografía completa.
     </p>
-    <p class="muted"></p>
+    <p class="muted">Facultad de Ciencias, UNAM.</p>
   </section>
 
-  <section class="card">
-  <h2>Notas sobre Concurrente</h2>
-  <ul>
-    <li>
-      <a href="teoria/1-intro-que-porque-paraque.html">
-        1. ¿Qué es la Concurrencia?
-      </a>
-    </li>
-    <li>
-      <a href="teoria/nocionesDcorrecion.html">
-        2. Sabores de corrección 
-      </a>
-    </li>
-  </ul>
-</section>
-
-  <section class="card">
-    <h2>Índices</h2>
+  <section class="card" style="margin-top:1.25rem">
+    <h2>Empieza por aquí</h2>
     <ul>
       <li>
-        <strong><a href="/teaching/notas/">Notas sobre Concurrente</a></strong><br>
-        Conceptos, intuiciones, notas y “rutas” para estudiar.
+        <strong><a href="/teaching/practicas/">Prácticas</a></strong><br>
+        Las 8 prácticas del curso, con sus códigos, notas de apoyo y soluciones.
       </li>
       <li>
-        <strong><a href="/teaching/practicas/">Prácticas para Licenciatura</a></strong><br>
-        Enunciados, material y páginas por práctica.
+        <strong><a href="/teaching/teoria/">Notas de teoría</a></strong><br>
+        Conceptos, intuiciones y rutas para estudiar.
       </li>
       <li>
-        <strong><a href="/teaching/presentaciones/">Presentaciones para Licenciatura</a></strong><br>
-        Explicaciones, errores comunes, guías y ejemplos conceptuales.
+        <strong><a href="/teaching/practicas/referencias.html">Bibliografía del curso</a></strong><br>
+        Las obras citadas en las prácticas, con el archivo <code>.bib</code> descargable.
       </li>
+      <li>
+        <strong><a href="/teaching/practicas/guia-github.html">Cómo entregar por GitHub</a></strong><br>
+        Clonar, hacer commit y subir tus soluciones paso a paso.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card" style="margin-top:1.25rem">
+    <h2>Notas de teoría</h2>
+    <ul>
+      <li><a href="teoria/1-intro-que-porque-paraque.html">1. ¿Qué es la concurrencia?</a></li>
+      <li><a href="teoria/2-historias-con-moraleja.html">2. La fábula de las banderas: exclusión mutua</a></li>
+      <li><a href="teoria/nocionesDcorrecion.html">3. Distintos sabores de corrección</a></li>
+    </ul>
+  </section>
+
+  <section class="card" style="margin-top:1.25rem">
+    <h2>Las prácticas</h2>
+    <ol>
+      <li><a href="practicas/p1-multihilos.html">Repaso de Java e introducción a la programación multihilos</a></li>
+      <li><a href="practicas/p2-locks-pools.html">Exclusión mutua: locks y pools en Java</a></li>
+      <li><a href="practicas/p3-jmm.html">Candados clásicos y el modelo de memoria de Java</a></li>
+      <li><a href="practicas/p4-spinlocks.html">Spinlocks y algunas primitivas</a></li>
+      <li><a href="practicas/p5-snapshots.html">Snapshots y collects: backups</a></li>
+      <li><a href="practicas/p6-monitores-consenso.html">Monitores y consenso</a></li>
+      <li><a href="practicas/p7-contadores.html">Implementaciones de contadores: corrección vs. eficiencia</a></li>
+      <li><a href="practicas/p8-lenguajes.html">De Java a Rust y Clojure: paradigmas de concurrencia</a></li>
+    </ol>
+    <p style="margin-bottom:0"><a href="/teaching/practicas/">Ver el índice completo, con PDF y códigos →</a></p>
+  </section>
+
+  <section class="card" style="margin-top:1.25rem">
+    <h2>Códigos</h2>
+    <p>
+      Todos los programas en Java del curso están en
+      <a href="https://github.com/gilde-valeria/FC_CConcurrente" target="_blank" rel="noopener">este repositorio</a>,
+      y también puedes leerlos y copiarlos directamente desde aquí:
+    </p>
+    <ul>
+      <li><a href="practicas/codigos/p1.html">Práctica 1</a> ·
+          <a href="practicas/codigos/p2.html">2</a> ·
+          <a href="practicas/codigos/p3.html">3</a> ·
+          <a href="practicas/codigos/p4.html">4</a> ·
+          <a href="practicas/codigos/p5.html">5</a> ·
+          <a href="practicas/codigos/p6.html">6</a></li>
+      <li><a href="practicas/codigos/listas.html">Listas concurrentes</a></li>
     </ul>
   </section>
 

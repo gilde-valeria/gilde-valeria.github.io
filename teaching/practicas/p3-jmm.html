@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Candados clásicos y el modelo de memoria de Java · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 3" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Candados clásicos y el modelo de memoria de Java</h1>
+    <p class="practica-sub">Práctica 3</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica3.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P3" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p3.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>Para que un programador pueda diseñar y razonar de manera concurrente sobre un sistema necesita conocer el <em>modelo de memoria</em>. Existen modelos de memoria a nivel de hardware (por ejemplo, el TSO de la máquina SPARC) y también a nivel de software (por ejemplo, el de Java, el de C++).</p>
+    <p>Informalmente, un modelo de memoria especifica como las acciones en memoria (por ejemplo, las lecturas y escrituras) en un programa parecen ejecutarse desde el punto de vista del programador, por ejemplo, el valor que debe regresar la lectura de una determinada ubicación en memoria.</p>
+    <p>En un programa de un solo hilo, el modelo de memoria es trivial, ya que se debe leer lo último escrito. Sin embargo, en un programa multihilo el modelo de memoria es más complejo, ya que una lectura de un hilo puede ver o no escrituras de otros <span class="citation" data-cites="scottSharedMemory">(<a href="#ref-scottSharedMemory" role="doc-biblioref">Michael L. Scott 30 January 2024</a>)</span>.</p>
+    <p>Para un lenguaje de programación de alto nivel como Java, el modelo de memoria determina las transformaciones que el compilador puede aplicar a un programa al producir el bytecode (por ejemplo: <a href="https://gee.cs.oswego.edu/dl/jmm/cookbook.html" class="uri">https://gee.cs.oswego.edu/dl/jmm/cookbook.html</a>), las transformaciones que la máquina virtual puede aplicar al producir el código nativo, y finalmente, las optimizaciones que el hardware puede realizar en el código nativo <span class="citation" data-cites="MPA05">(<a href="#ref-MPA05" role="doc-biblioref">Manson, Pugh, y Adve 2005</a>)</span>.</p>
+    <p>Es por esto que como programadores necesitamos conocer el modelo de memoria, ya que las transformaciones que se realizan en el código, pueden impactar el resultado de nuestros programas. Sin un modelo de memoria bien especificado o si no lo conocemos, es imposible conocer los resultados de un programa.<br />
+    El modelo de memoria de Java se ha estudiado ampliamente desde los 90’s <span class="citation" data-cites="MPA05">(<a href="#ref-MPA05" role="doc-biblioref">Manson, Pugh, y Adve 2005</a>)</span>, de forma breve podemos resaltar dos puntos importantes sobre el modelo que nos afectan como programadores de Java: el Reordenamiento y la Visibilidad.</p>
+    <p><strong>Reordenamiento.</strong> El compilador, con el objetivo de optimizar, puede intercambiar el orden de dos líneas de código de un programa concurrente, por ejemplo, en el candado Peterson nos representa un problema si el compilador considera cambiar el orden de <span class="math inline">\(flag[i] = true;\)</span> y <span class="math inline">\(victim = i;\)</span>.</p>
+    <p><strong>Visibilidad.</strong> Como cada hilo tiene copias de los objetos compartidos en la Heap, puede ser que la escritura del objeto no se refleje de forma enseguida en la lectura de ese mismo objeto por otro hilo.</p>
+    <p>Para mitigar este par de problemas se utilizan los campos <em>volatile</em> y <em>final</em>, e incluso los objetos <em>atómicos</em>.
+    Los campos <em>volatile</em> y <em>final</em> garantizan que la actualización de una variable se refleje enseguida en todas sus copias, y que se respete el orden de las instrucciones en los programas.</p>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P3" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P3</a></p>
+    <ul>
+    <li><p>Programa 1 (VolatileExample1): Programa que ejemplifica el problema de Visibilidad en el JMM.</p></li>
+    <li><p>Programa 2 (VolatileExample2): Programa que ejemplifica el problema de Reordenamiento en el JMM.</p></li>
+    <li><p>Programa 3 (LockPeterson): Programa que ejecuta la clase Peterson, todas las variables utilizan volatile</p></li>
+    <li><p>Programa 4 (ExecuteBakery): Programa que ejecuta la clase Bakery, implementa Bakery de forma no acotada (sin overflow). Utiliza objetos atómicos.</p></li>
+    </ul>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <ul>
+    <li><p>Entrega en un pdf las respuestas de los ejercicios que no requieran implementarse y añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Los programas deben ir un zip. Debes realizar un programa en cada ejercicio que indique “Implementar”.</p></li>
+    <li><p>Recuerda que debes utilizar Java 21 LTS.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 2hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    <strong>Importante:</strong> No utilicen en su contador la paquetería Atomic, en general no la utilicen. Cuando utilizan <em>compareAndSet()</em>, <em>get()</em>, <em>getAndIncrement()</em>, etc, están haciendo que todo lo que está adentro de estos métodos se haga de forma atómica. Por ejemplo, si utilizan <em>getAndIncrement()</em> en su contador, este se vuelve linealizable, es decir, con consistencia, siempre contará bien, entonces no tendría caso utilizar candados y ese es el objetivo de esta práctica.</p>
+    <p>También tengan cuidado con otros objetos de la biblioteca Concurrent de java, muchas de estas implementaciones ya son linealizables, y en esta práctica no las necesitamos.</p>
+    <p>Solo ocupan <strong>volatile</strong>.</p>
+    <ol>
+    <li><p>El algoritmo de candado Peterson solo funciona para 2 hilos, utiliza el algoritmo de candado Peterson para implementar un algoritmo de candado que funcione para 4 hilos. <em>Hint: Apóyate del programa Peterson</em></p>
+    <ol>
+    <li><p>Para probar que tu candado funciona, crea una implementación en donde utilices un <em>ExecutorService</em> para ejecutar 400 tareas, cada tarea debe aumentar en uno un objeto Contador. Utiliza tu candado para 4 hilos para tener consistencia en tu Contador.</p></li>
+    <li><p>De alguna forma obtén el número de veces que los hilos aumentan el contador. ¿Cada uno realiza exactamente 100 tareas o hay algunos que realizan más?</p></li>
+    <li><p>¿Consideras que la implementación cumple con Justicia? Justifica tu respuesta.</p></li>
+    </ol>
+    <p><strong>Adventencia:</strong> Puedes considerar el pseudocódigo de la Tarea 3 (<span class="math inline">\(DoublePeterson\)</span>). Solo ten cuidado con los <strong>id’s</strong>, ya que si utilizas modulo 2 para <em>Peterson</em> y modulo 4 para <em>DoublePeterson</em>, puede pasar que dos hilos ejecuten un candado Peterson con el mismo id.
+    Si dos hilos en Peterson tienen el mismo id entonces no se cumple exclusión mutua, y el candado DoublePeterson no cumplirá su función, no contará las 400 tareas.</p></li>
+    <li><p>En base a la implementación de Bakery vista en la clase teoría, implementa Bakery para 4 hilos. <em>Hint: Crea los arreglos <span class="math inline">\(flag\)</span> y <span class="math inline">\(label\)</span> de tamaño 4, si consideras necesario utiliza campos volatile</em></p>
+    <ol>
+    <li><p>Con ayuda de un <em>ExecutorService</em> ejecuta 400 tareas, cada tarea debe aumentar en uno un objeto Contador. Utiliza tu candado para 4 hilos para tener consistencia en tu Contador.</p></li>
+    <li><p>De alguna forma obtén el número de veces que los hilos aumentan el contador. ¿Cada uno realiza exactamente 100 tareas o hay algunos que realizan más?</p></li>
+    <li><p>¿Consideras que la implementación cumple con Justicia? Justifica tu respuesta.</p></li>
+    </ol></li>
+    <li><p>Revisa el programa de Bakery que se les compartió como ejemplo, ejecútalo varias veces, revisa el código y contesta:</p>
+    <ol>
+    <li><p>Revisa para que sirve el campo <em>AtomicReference</em>, y qué hacen los métodos <em>compareAndSet()</em> y <em>get()</em>.</p></li>
+    <li><p>Describe como funciona en a lo más 6 líneas de computadora.</p></li>
+    <li><p>¿Si <em>next</em> no es un <em>AtomicReference</em> sigue funcionando? <em>Hint: Recuerda la Cola concurrente sin candados que implementaste en la Práctica 2</em></p></li>
+    <li><p>¿Consideras que mantiene la lógica de la implementación vista en clase/tu implementación del ejercicio anterior? Justifica porqué.</p></li>
+    </ol></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-MPA05" class="csl-entry" role="listitem">
+    Manson, Jeremy, William Pugh, y Sarita V. Adve. 2005. <span>«The Java memory model»</span>. En <em>Proceedings of the 32nd ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages</em>, 378-91. POPL ’05. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/1040305.1040336">https://doi.org/10.1145/1040305.1040336</a>.
+    </div>
+    <div id="ref-scottSharedMemory" class="csl-entry" role="listitem">
+    Michael L. Scott, Trevor Brown. 30 January 2024. <em>Shared-Memory Synchronization</em>. Springer Cham.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

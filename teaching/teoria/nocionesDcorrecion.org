@@ -1,6 +1,6 @@
 #+title: Distintos sabores de corrección
 #+date: 2026-03-10
-#+author: Valeria
+#+author: Profa. Gilde Valeria Rodríguez
 #+filetags: :teoria:nociones:correccion:linealizabilidad:consistencia:secuencial:
 
 * 1. Análisis de algoritmos

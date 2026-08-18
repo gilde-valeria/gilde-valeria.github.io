@@ -1,69 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
+<<<<<<< HEAD
 <!-- 2026-05-11 Mon 19:07 -->
+=======
+<!-- 2026-08-18 Tue 03:55 -->
+>>>>>>> d0a067f (formato de practicas)
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Distintos sabores de corrección</title>
-<meta name="author" content="Valeria" />
 <meta name="generator" content="Org Mode" />
-<link rel='stylesheet' href='../../styles.css'>
-                         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css'>
-                         <style>
-                           body { font-family: 'General Sans', sans-serif; background-color: #fcfcfc; }
-                           #content { max-width: 900px; margin: auto; padding: 2rem; background: white; border-radius: 12px; }
-                           
-                           /* IMÁGENES RESPONSIVAS */
-                           img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; }
-
-                           /* TABLAS ESTILO ACADÉMICO */
-                           table {
-                             width: 100%;
-                             border-collapse: collapse;
-                             margin: 2rem 0;
-                             font-size: 0.95rem;
-                             border-radius: 8px;
-                             overflow: hidden;
-                             box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-                           }
-                           th { background-color: var(--miPink, #ff4b82); color: white; text-align: left; padding: 12px 15px; }
-                           td { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; }
-                           tr:nth-of-type(even) { background-color: #f9f9f9; }
-                           tr:last-of-type { border-bottom: 2px solid var(--miPink, #ff4b82); }
-
-                           /* MODO CELULAR: Las tablas se vuelven verticales */
-                           @media screen and (max-width: 600px) {
-                             table, thead, tbody, th, td, tr { display: block; }
-                             thead tr { position: absolute; top: -9999px; left: -9999px; }
-                             tr { border: 1px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
-                             td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 50%; text-align: right; }
-                             td:before { 
-                               position: absolute; top: 12px; left: 15px; width: 45%; 
-                               padding-right: 10px; white-space: nowrap; font-weight: bold;
-                               content: attr(data-th); /* Requiere un pequeño hack en el exportador */
-                               text-align: left;
-                             }
-                           }
-
-                           pre.src { background-color: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow: auto; }
-                           .title { color: var(--miPink); font-size: 2.5rem; margin-bottom: 1rem; }
-                         </style>
+<link href='https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='/styles.css'>
+<link rel='stylesheet' href='/teaching/practicas/practica.css'>
+<link rel='stylesheet' href='/teaching/teoria/notas.css'>
 </head>
 <body>
-<div id="org-div-home-and-up">
- <a accesskey="h" href="../"> UP </a>
- |
- <a accesskey="H" href="/"> HOME </a>
-</div><header id="top" class="status">
+<div id="top" class="status">
 <div id='site-navbar'></div>
+<header class='practica-hero'>
+  <div class='practica-hero-inner'>
+    <p class='eyebrow'>Cómputo Concurrente 2026 · Notas de teoría</p>
+    <h1>Distintos sabores de corrección</h1>
+    <div class='practica-actions'>
+      <a class='btn btn-primary' href='/teaching/teoria/'>Todas las notas</a>
+      <a class='btn' href='/teaching/practicas/'>Prácticas</a>
+      <a class='btn btn-ghost' href='/teaching/'>Volver a Teaching</a>
+    </div>
+  </div>
 </header>
+</div>
 <main id="content" class="content">
 <header>
 <h1 class="title">Distintos sabores de corrección</h1>
 </header><nav id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
+<h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
+<<<<<<< HEAD
 <li><a href="#orgd75b097">1. Análisis de algoritmos</a></li>
 <li><a href="#org21e5544">2. Liveness and Safety (Viveza y Seguridad)</a></li>
 <li><a href="#org4054739">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
@@ -75,13 +49,32 @@
 </ul>
 </li>
 <li><a href="#org02c5007">5. Conclusiones</a></li>
+=======
+<li><a href="#org58a1f8a">1. Análisis de algoritmos</a></li>
+<li><a href="#org4e71aec">2. Liveness and Safety (Viveza y Seguridad)</a></li>
+<li><a href="#orgf8ec0df">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
+<li><a href="#org2fa73df">4. Distintos Sabores de Contadores</a>
+<ul>
+<li><a href="#org0826180">A. Contador Linealizable</a></li>
+<li><a href="#orgf595123">B. Sloppy Counter (Consistencia Eventual)</a></li>
+<li><a href="#orga04a62b">C. Árbol de Difracción (Consistencia Quiescente)</a></li>
+</ul>
+</li>
+<li><a href="#org2cdef33">5. Conclusiones</a></li>
+>>>>>>> d0a067f (formato de practicas)
 </ul>
 </div>
 </nav>
 
+<<<<<<< HEAD
 <section id="outline-container-orgd75b097" class="outline-2">
 <h2 id="orgd75b097">1. Análisis de algoritmos</h2>
 <div class="outline-text-2" id="text-orgd75b097">
+=======
+<section id="outline-container-org58a1f8a" class="outline-2">
+<h2 id="org58a1f8a">1. Análisis de algoritmos</h2>
+<div class="outline-text-2" id="text-org58a1f8a">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Cuando aprendemos a programar, suele ser en el mundo secuencial. 
 Analizamos el número de pasos de cómputo, ciclos y condicionales. Si profundizamos, 
@@ -103,9 +96,15 @@ Un algoritmo es una receta; una serie de instrucciones que solucionan un problem
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org21e5544" class="outline-2">
 <h2 id="org21e5544">2. Liveness and Safety (Viveza y Seguridad)</h2>
 <div class="outline-text-2" id="text-org21e5544">
+=======
+<section id="outline-container-org4e71aec" class="outline-2">
+<h2 id="org4e71aec">2. Liveness and Safety (Viveza y Seguridad)</h2>
+<div class="outline-text-2" id="text-org4e71aec">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 En 1977, Leslie Lamport definió que las propiedades de los sistemas se dividen en dos:
 </p>
@@ -120,7 +119,11 @@ unión de estas dos. En el mundo paralelo, la incertidumbre sobre "cuándo" suce
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org05f729b">
+=======
+<figure id="org0f0d39d">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/alien_thinking.png" alt="alien_thinking.png">
 
 </figure>
@@ -128,9 +131,15 @@ unión de estas dos. En el mundo paralelo, la incertidumbre sobre "cuándo" suce
 </section>
 
 
+<<<<<<< HEAD
 <section id="outline-container-org4054739" class="outline-2">
 <h2 id="org4054739">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
 <div class="outline-text-2" id="text-org4054739">
+=======
+<section id="outline-container-orgf8ec0df" class="outline-2">
+<h2 id="orgf8ec0df">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
+<div class="outline-text-2" id="text-orgf8ec0df">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Razonar sobre la corrección de un algoritmo concurrente es un desafío. 
 Dado que es indistinguible saber en qué microsegundo exacto se ejecutó una línea de código, 
@@ -154,13 +163,21 @@ operaciones que son concurrentes entre sí.
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org266e0b0">
+=======
+<figure id="orgc29080f">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/LINSiSCSi.jpg" alt="LINSiSCSi.jpg">
 
 </figure>
 
 
+<<<<<<< HEAD
 <figure id="orgde9a116">
+=======
+<figure id="org8bb51ac">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/porqueesLIN.jpg" alt="porqueesLIN.jpg">
 
 </figure>
@@ -175,7 +192,11 @@ pero respeta el <i>orden de programa</i> de cada hilo.
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org14801d0">
+=======
+<figure id="org0344d2b">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/linNOsiSC.jpg" alt="linNOsiSC.jpg">
 
 </figure>
@@ -189,7 +210,11 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </p>
 
 
+<<<<<<< HEAD
 <figure id="org155be5a">
+=======
+<figure id="orgc7ab903">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/QCvsSC.jpg" alt="QCvsSC.jpg">
 
 </figure>
@@ -200,7 +225,11 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </ul>
 
 
+<<<<<<< HEAD
 <figure id="orgd87c019">
+=======
+<figure id="org496ab22">
+>>>>>>> d0a067f (formato de practicas)
 <img src="../../images/QCvsEC.jpg" alt="QCvsEC.jpg">
 
 </figure>
@@ -208,17 +237,29 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </section>
 
 
+<<<<<<< HEAD
 <section id="outline-container-org6ee9538" class="outline-2">
 <h2 id="org6ee9538">4. Distintos Sabores de Contadores</h2>
 <div class="outline-text-2" id="text-org6ee9538">
+=======
+<section id="outline-container-org2fa73df" class="outline-2">
+<h2 id="org2fa73df">4. Distintos Sabores de Contadores</h2>
+<div class="outline-text-2" id="text-org2fa73df">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 A continuación, analizamos tres implementaciones de contadores, desde la más estricta hasta la más relajada.
 </p>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-orgd3efcc4" class="outline-3">
 <h3 id="orgd3efcc4">A. Contador Linealizable</h3>
 <div class="outline-text-3" id="text-orgd3efcc4">
+=======
+<div id="outline-container-org0826180" class="outline-3">
+<h3 id="org0826180">A. Contador Linealizable</h3>
+<div class="outline-text-3" id="text-org0826180">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 El enfoque clásico que utiliza el hardware subyacente.
 </p>
@@ -247,9 +288,15 @@ Si el Hilo A y B llaman al mismo tiempo, el hardware los ordena en tiempo real. 
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-orgda8b04b" class="outline-3">
 <h3 id="orgda8b04b">B. Sloppy Counter (Consistencia Eventual)</h3>
 <div class="outline-text-3" id="text-orgda8b04b">
+=======
+<div id="outline-container-orgf595123" class="outline-3">
+<h3 id="orgf595123">B. Sloppy Counter (Consistencia Eventual)</h3>
+<div class="outline-text-3" id="text-orgf595123">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Asigna memoria privada a cada hilo y solo sincroniza cuando supera un umbral.
 </p>
@@ -283,9 +330,15 @@ Asigna memoria privada a cada hilo y solo sincroniza cuando supera un umbral.
 </div>
 </div>
 
+<<<<<<< HEAD
 <div id="outline-container-orgd55bd2c" class="outline-3">
 <h3 id="orgd55bd2c">C. Árbol de Difracción (Consistencia Quiescente)</h3>
 <div class="outline-text-3" id="text-orgd55bd2c">
+=======
+<div id="outline-container-orga04a62b" class="outline-3">
+<h3 id="orga04a62b">C. Árbol de Difracción (Consistencia Quiescente)</h3>
+<div class="outline-text-3" id="text-orga04a62b">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 Inspirado en Shavit, divide el tráfico mediante balanceadores.
 </p>
@@ -338,9 +391,15 @@ Inspirado en Shavit, divide el tráfico mediante balanceadores.
 </div>
 </section>
 
+<<<<<<< HEAD
 <section id="outline-container-org02c5007" class="outline-2">
 <h2 id="org02c5007">5. Conclusiones</h2>
 <div class="outline-text-2" id="text-org02c5007">
+=======
+<section id="outline-container-org2cdef33" class="outline-2">
+<h2 id="org2cdef33">5. Conclusiones</h2>
+<div class="outline-text-2" id="text-org2cdef33">
+>>>>>>> d0a067f (formato de practicas)
 <p>
 La corrección no es binaria, sino un espectro. 
 En sistemas distribuidos masivos, la consistencia fuerte es matemáticamente 
@@ -356,9 +415,10 @@ exigencias de corrección es la clave para alcanzar el máximo rendimiento y esc
 </div>
 </section>
 </main>
-<footer id="postamble" class="status">
+<div id="postamble" class="status">
+<p class='back-link'><a href='/teaching/teoria/'>← Volver a las notas de teoría</a></p>
 <div id='site-footer'></div>
-                              <script type='module' src='/scripts/include-teaching.js'></script>
-</footer>
+<script type='module' src='/scripts/include-teaching.js'></script>
+</div>
 </body>
 </html>

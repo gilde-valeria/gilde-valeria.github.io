@@ -1,6 +1,6 @@
 #+TITLE: Guía de Concurrencia: Java → Rust
 #+AUTHOR: Profa. Gilde Valeria Rodríguez
-#+DATE: Cómputo Concurrente 2026-2
+#+DATE: Cómputo Concurrente 2026
 #+OPTIONS: toc:2 num:t ^:nil
 #+LATEX_HEADER: \usepackage[margin=2.5cm]{geometry}
 

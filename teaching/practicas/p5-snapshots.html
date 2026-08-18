@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Snapshots y collects: backups · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 5" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Snapshots y collects: backups</h1>
+    <p class="practica-sub">Práctica 5</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica5.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P5" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p5.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>Los snapshots atómicos son objetos concurrentes comunes, consisten de un arreglo de <span class="math inline">\(n-\)</span>registros <em>MRSW</em>, los hilos pueden actualizar su propio registro (<em>update()</em>) o leer todos de forma atómica o instantánea (<em>scan()</em>).</p>
+    <p>Se han utilizado para simplificar el diseño y la verificación de algoritmos concurrentes de memoria compartida <span class="citation" data-cites="AHR95">(<a href="#ref-AHR95" role="doc-biblioref">Attiya, Herlihy, y Rachman 1995</a>)</span>; por ejemplo, en el problema de
+    <em>bounded timestampping</em> <span class="citation" data-cites="GRLS92">(<a href="#ref-GRLS92" role="doc-biblioref">Gawlick, Lynch, y Shavit 1992</a>)</span>, en general para construir objetos <em>wait-free</em> <span class="citation" data-cites="ALS94">(<a href="#ref-ALS94" role="doc-biblioref">Attiya, Lynch, y Shavit 1994</a>)</span> y para verificar algoritmos en tiempo de ejecución <span class="citation" data-cites="BFRRT22 CR23">(<a href="#ref-BFRRT22" role="doc-biblioref">Bonakdarpour et al. 2022</a>; <a href="#ref-CR23" role="doc-biblioref">Castañeda y Rodrı́guez 2023</a>)</span>.</p>
+    <p>Los algoritmos concurrentes son difíciles de construir y verificar, existen diferentes técnicas para verificarlos. Una técnica muy famosa es la Verificación formal, por ejemplo, se puede especificar un algoritmo concurrente utilizando lenguajes especializados como <em>TLA+</em> y <em>Coq</em>, de esta forma se comprueban todos los posibles estados del algoritmo <span class="citation" data-cites="M15">(<a href="#ref-M15" role="doc-biblioref">McCaffrey 2015</a>)</span>. También existen técnicas más ligeras (utilizan menos cómputo y son más fáciles de aplicar) como la Verificación en tiempo de ejecución, consiste en obtener la ejecución actual (<em>interfaz de comunicación</em>) para decidir si la ejecución es correcta o no hasta el momento (<em>interfaz de verificación</em>).<br />
+    En esta práctica utilizaremos objetos snapshots atómicos y collects para construir una <em>interfaz de comunicación</em> para verificar cualquier algoritmo concurrente en tiempo de ejecución.
+    El modelo para obtener la ejecución de cualquier algoritmo es el siguiente:</p>
+    <figure id="modelo">
+
+    <figcaption>Modelo para verificar cualquier objeto <span class="math inline">\(obj\)</span> de forma asíncrona</figcaption>
+    </figure>
+    <p>Por ejemplo, en el código (<a href="#p2" data-reference-type="ref" data-reference="p2">[p2]</a>) verificamos un algoritmo concurrente de una cola no bloqueante no acotada (). Se ejecutó el programa para 10 operaciones aleatorias de la cola, en la Figura a continuación se observa lo que se obtiene, por cada hilo (de 0 a 3) se devuelven un conjunto de vistas, en cada vista se muestran las operaciones concurrentes o precedentes a la última operación del hilo. El hilo 0 primero hizo un <span class="math inline">\(deq()\)</span>, devolvió <span class="math inline">\(null\)</span>, y solo hay una operación precedente o concurrente a su operación: <span class="math inline">\(deq()\)</span> del hilo 1.
+    Sabemos que las operaciones son concurrentes (<span class="math inline">\(deq()\)</span> del hilo 0 y del hilo 1) porque el <span class="math inline">\(deq()\)</span> del hilo 0 también está en la primer vista correspondiente su <span class="math inline">\(deq()\)</span>.</p>
+    <figure id="img: ejemploA">
+    <img src="img/descripcionLin.jpg" style="width:73.0%" />
+    <figcaption> </figcaption>
+    </figure>
+    <p>De hecho, podemos obtener la historia de la ejecución, si seguimos las siguientes reglas (Figura <a href="#img: exec" data-reference-type="ref" data-reference="img: exec">3</a>):</p>
+    <ol>
+    <li><p>En cada vista existe una operación asociada <span class="math inline">\(op_a\)</span> (subrayada en rojo), decimos que es <em>la vista de <span class="math inline">\(op_a\)</span></em>.</p></li>
+    <li><p>Una operación <span class="math inline">\(op_x\)</span> en la vista de la operación <span class="math inline">\(op_a\)</span> es <strong>precedente</strong> si <span class="math inline">\(op_a\)</span> no está en la vista de <span class="math inline">\(op_x\)</span>.</p></li>
+    <li><p>Una operación <span class="math inline">\(op_x\)</span> en la vista de la operación <span class="math inline">\(op_a\)</span> es <strong>concurrente</strong> si <span class="math inline">\(op_a\)</span> está en la vista de <span class="math inline">\(op_x\)</span>.</p></li>
+    </ol>
+    <figure id="img: exec">
+    <img src="img/ejecucion.jpg" style="width:73.0%" />
+    <figcaption> </figcaption>
+    </figure>
+    <p>Finalmente, podemos verificar si esta historia es linealizable, existen algoritmos para verificar la linealizabilidad de un algoritmo concurrente, sin embargo, no ahondaremos en ellos. La idea es que cualquier hilo puede obtener la historia de la ejecución y verificarla de forma local.</p>
+    <figure id="img: execLin">
+    <img src="img/LINExample.jpg" style="width:73.0%" />
+    <figcaption> </figcaption>
+    </figure>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5</a></p>
+    <ol>
+    <li><p><span id="p1" label="p1"></span> Programa 1 (ExecuteSnapshot): Programa que ejecuta el <em>WFSnapshot</em>, imprime el contenido de los snaps actualizados por update()
+    Utiliza la clase <em>WFSnapshot<span class="math inline">\(&lt;T&gt;\)</span></em>, la cual utiliza las clases <em>StampedSnap</em> y <em>StampedValue</em>.</p></li>
+    <li><p><span id="p2" label="p2"></span> Programa 2 (ExecuteSnapshotQ): Programa que ejecuta el <em>WFSnapshotH</em>, imprime el contenido de value del snapshot ssR.
+    En el ssR se guardan las respuestas y las vistas, las vistas son un scan() del ssI de invocaciones. Utiliza la clase <em>WFSnapshotH<span class="math inline">\(&lt;T&gt;\)</span></em>, la cual utiliza <em>StampedSnapH</em> y <em>StampedValue</em>. El <em>WFSnapshotH</em> es diferente al <em>WFSnapshot</em> porque permite guardar todas las operaciones hechas en values y todos los snaps hechos en snap. Para ello se modifica <em>StampedSnapH</em> (a diferencia de StampedSnap<em></em>) y se le agregaron listas para values y snap.</p>
+    <p>Además utiliza la clase <span class="math inline">\(RunnableQ&lt;T&gt;\)</span> para generar las operaciones aleatorias y realizar el modelo <a href="#modelo" data-reference-type="ref" data-reference="modelo">1</a>.</p></li>
+    <li><p><span id="p3" label="p3"></span> Programa 3 (SimpleSnapshot): Programa del snapshot obstruction-free</p></li>
+    </ol>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <ul>
+    <li><p>Entrega en un pdf las respuestas de los ejercicios que no requieran implementarse y añade una breve descripción de los programas que entregas (sus nombres y qué hacen). <strong>El pdf como el directorio deben ir con el nombre y apellido paterno de la persona que entrega en Classroom (por ejemplo NombreApellido.pdf)</strong></p></li>
+    <li><p>Los programas deben ir un zip. Debes realizar un programa en cada ejercicio que indique “Implementar”.</p></li>
+    <li><p>Recuerda que debes utilizar Java 21 LTS.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 2hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    </p>
+    <ol>
+    <li><p>Implementa el mismo modelo que en el programa (<a href="#p2" data-reference-type="ref" data-reference="p2">[p2]</a>), reemplaza el Snapshot Wait-free por un Snapshot Obstruction-free (código en <a href="#p3" data-reference-type="ref" data-reference="p3">[p3]</a>).</p></li>
+    <li><p>A partir de tu implementación, dibuja o describe una ejecución de 10 operaciones (como la de la Figura <a href="#img: exec" data-reference-type="ref" data-reference="img: exec">3</a>). ¿Observas alguna diferencia al utilizar un Snapshot obstruction-free en vez de uno wait-free? Argumenta porque crees que sucede así.</p></li>
+    <li><p>Implementa el mismo modelo que en el programa (<a href="#p2" data-reference-type="ref" data-reference="p2">[p2]</a>), reemplaza el Snapshot Wait-free por un Collect, para ello modifica el <em>scan()</em> del Snapshot obstruction-free (código en <a href="#p3" data-reference-type="ref" data-reference="p3">[p3]</a>) como en la Tarea 4, en vez de hacer <span class="math inline">\(double-collects\)</span> haz solo un <span class="math inline">\(collect\)</span>.</p></li>
+    <li><p>Los collects, a diferencia de los snapshots, no son objetos atómicos, de hecho, ni siquiera tienen especificación secuencial. Sin embargo, analizando lo que se escribió en el collect, ¿crees que es posible obtener la ejecución así como con los snapshots?
+    ¿Qué diferencias observas? Justifica tu respuesta</p></li>
+    <li><p>Investiga y escribe de forma breve en qué consiste el lenguaje <em>TLA+</em>, cuándo fue inventado y enumera 3 empresas que lo utilicen.</p></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-AHR95" class="csl-entry" role="listitem">
+    Attiya, Hagit, Maurice Herlihy, y Ophir Rachman. 1995. <span>«Atomic snapshots using lattice agreement»</span>. <em>Distributed Computing</em> 13 (9). <a href="https://doi.org/10.1007/BF02242714">https://doi.org/10.1007/BF02242714</a>.
+    </div>
+    <div id="ref-ALS94" class="csl-entry" role="listitem">
+    Attiya, Hagit, Nancy Lynch, y Nir Shavit. 1994. <span>«Are wait-free algorithms fast?»</span> <em>J. ACM</em> 41 (4): 725-63. <a href="https://doi.org/10.1145/179812.179902">https://doi.org/10.1145/179812.179902</a>.
+    </div>
+    <div id="ref-BFRRT22" class="csl-entry" role="listitem">
+    Bonakdarpour, Borzoo, Pierre Fraigniaud, Sergio Rajsbaum, David Rosenblueth, y Corentin Travers. 2022. <span>«Decentralized Asynchronous Crash-resilient Runtime Verification»</span>. <em>J. ACM</em> 69 (5). <a href="https://doi.org/10.1145/3550483">https://doi.org/10.1145/3550483</a>.
+    </div>
+    <div id="ref-CR23" class="csl-entry" role="listitem">
+    Castañeda, Armando, y Gilde Valeria Rodrı́guez. 2023. <span>«Asynchronous Wait-Free Runtime Verification and Enforcement of Linearizability»</span>. En <em>Proceedings of the 2023 ACM Symposium on Principles of Distributed Computing</em>, 90-101. PODC ’23. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/3583668.3594563">https://doi.org/10.1145/3583668.3594563</a>.
+    </div>
+    <div id="ref-GRLS92" class="csl-entry" role="listitem">
+    Gawlick, Rainer, Nancy Lynch, y Nir Shavit. 1992. <span>«Concurrent timestamping made simple»</span>. En <em>Symposium Proceedings on Theory of Computing and Systems</em>, 171-83. ISTCS’92. Berlin, Heidelberg: Springer-Verlag.
+    </div>
+    <div id="ref-M15" class="csl-entry" role="listitem">
+    McCaffrey, Caitie. 2015. <span>«The Verification of a Distributed System: A practitioner’s guide to increasing confidence in system correctness»</span>. <em>Queue</em> 13 (9): 150-60. <a href="https://doi.org/10.1145/2857274.2889274">https://doi.org/10.1145/2857274.2889274</a>.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

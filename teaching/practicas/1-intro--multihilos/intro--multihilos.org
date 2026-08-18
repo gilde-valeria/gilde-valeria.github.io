@@ -1,6 +1,6 @@
 #+TITLE: Cómputo Concurrente 
 #+SUBTITLE: ¿Multihilo, Multicore, Multiprocesador? 
-#+AUTHOR: Gilde Valeria Rodríguez
+#+AUTHOR: Profa. Gilde Valeria Rodríguez
 #+LANGUAGE: es
 #+OPTIONS: toc:2 num:t
 

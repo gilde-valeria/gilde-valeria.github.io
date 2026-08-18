@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prácticas · Cómputo Concurrente</title>
+<meta name="description" content="Prácticas, códigos, notas y bibliografía del curso de Cómputo Concurrente de la Facultad de Ciencias, UNAM." />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+</head>
+<body>
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Facultad de Ciencias, UNAM</p>
+    <h1>Prácticas de Cómputo Concurrente</h1>
+    <p class="practica-sub">Enunciados en HTML y PDF, códigos en Java, notas de apoyo y bibliografía</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="referencias.html">Bibliografía del curso</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente" target="_blank" rel="noopener">Repositorio de códigos</a>
+      <a class="btn" href="guia-github.html">Cómo entregar por GitHub</a>
+      <a class="btn btn-ghost" href="/teaching/">Volver a Teaching</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout" style="grid-template-columns:1fr">
+  <article class="practica-body">
+
+    <h2 class="seccion-titulo" id="practicas">Las prácticas</h2>
+    <p class="seccion-intro">El recorrido completo del curso, de los primeros hilos hasta la comparación
+      entre lenguajes. Cada práctica trae el enunciado en HTML (con la bibliografía enlazada),
+      el PDF para imprimir y los códigos de ejemplo.</p>
+
+    <div class="practica-grid">
+
+      <div class="practica-card">
+        <p class="num">Práctica 1</p>
+        <h3>Repaso de Java e introducción a la programación multihilos</h3>
+        <p class="desc">Arquitecturas multihilo y multiprocesador, anatomía de la JVM,
+          creación de hilos con <code>Thread</code> y <code>Runnable</code>, y la Ley de Amdahl.</p>
+        <div class="links">
+          <a href="p1-multihilos.html">Enunciado</a>
+          <a href="pdf/practica1.pdf">PDF</a>
+          <a href="codigos/p1.html">Códigos</a>
+          <a href="1-intro--multihilos/intro--multihilos.html">Nota de apoyo</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 2</p>
+        <h3>Exclusión mutua: locks y pools en Java</h3>
+        <p class="desc">Condiciones de carrera y <em>data races</em>, <code>synchronized</code>,
+          la interfaz <code>Lock</code> y pools de hilos con <code>ExecutorService</code>.</p>
+        <div class="links">
+          <a href="p2-locks-pools.html">Enunciado</a>
+          <a href="pdf/practica2.pdf">PDF</a>
+          <a href="codigos/p2.html">Códigos</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 3</p>
+        <h3>Candados clásicos y el modelo de memoria de Java</h3>
+        <p class="desc">Peterson, Lamport y compañía; reordenamiento, visibilidad
+          y qué garantiza realmente el JMM.</p>
+        <div class="links">
+          <a href="p3-jmm.html">Enunciado</a>
+          <a href="pdf/practica3.pdf">PDF</a>
+          <a href="codigos/p3.html">Códigos</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 4</p>
+        <h3>Spinlocks y algunas primitivas</h3>
+        <p class="desc">TAS, TTAS, <em>backoff</em> exponencial y candados de cola.
+          Comparación empírica de desempeño.</p>
+        <div class="links">
+          <a href="p4-spinlocks.html">Enunciado</a>
+          <a href="pdf/practica4.pdf">PDF</a>
+          <a href="codigos/p4.html">Códigos</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 5</p>
+        <h3>Snapshots y collects: backups</h3>
+        <p class="desc">Linealizabilidad, collects atómicos, <em>double-collect</em>
+          y verificación en tiempo de ejecución.</p>
+        <div class="links">
+          <a href="p5-snapshots.html">Enunciado</a>
+          <a href="pdf/practica5.pdf">PDF</a>
+          <a href="codigos/p5.html">Códigos</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 6</p>
+        <h3>Monitores y consenso</h3>
+        <p class="desc">Sistemas síncronos, asíncronos y parcialmente síncronos;
+          monitores, variables de condición y el problema del consenso.</p>
+        <div class="links">
+          <a href="p6-monitores-consenso.html">Enunciado</a>
+          <a href="pdf/practica6.pdf">PDF</a>
+          <a href="codigos/p6.html">Códigos</a>
+          <a href="monitores.html">Nota de apoyo</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 7</p>
+        <h3>Implementaciones de contadores: corrección vs. eficiencia</h3>
+        <p class="desc">Contador linealizable, <em>sloppy counter</em> y árbol de difracción.
+          Linealizabilidad, consistencia secuencial, quiescente y eventual.</p>
+        <div class="links">
+          <a href="p7-contadores.html">Enunciado</a>
+          <a href="pdf/practicaContadores.pdf">PDF</a>
+          <a href="pdf/Solucion_Practica7.pdf">Solución</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 8</p>
+        <h3>De Java a Rust y Clojure: paradigmas de concurrencia</h3>
+        <p class="desc"><em>Ownership</em> y <em>fearless concurrency</em> en Rust, STM en Clojure,
+          y data races útiles. Con <em>smart contracts</em> como caso de estudio.</p>
+        <div class="links">
+          <a href="p8-lenguajes.html">Enunciado</a>
+          <a href="pdf/practica6_Lenguajes.pdf">PDF</a>
+          <a href="concurrencia-lenguajes/de-java-a-rust.html">Guía Rust</a>
+          <a href="concurrencia-lenguajes/de-java-a-clojure.html">Guía Clojure</a>
+        </div>
+      </div>
+
+    </div>
+
+    <h2 class="seccion-titulo" id="material-extra">Material extra</h2>
+    <p class="seccion-intro">Notas y guías que no forman parte de una práctica pero acompañan al curso.</p>
+
+    <div class="practica-grid">
+
+      <div class="practica-card">
+        <p class="num">Nota</p>
+        <h3>Monitores y variables de condición — ejemplos en Java</h3>
+        <p class="desc">Ejemplos autocontenidos con <code>wait</code>/<code>notify</code>
+          y las condiciones de la interfaz <code>Lock</code>.</p>
+        <div class="links"><a href="monitores.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Nota</p>
+        <h3>Construyendo un candado reentrante desde cero</h3>
+        <p class="desc">Cómo se implementa la reentrancia paso a paso, partiendo de un candado simple.</p>
+        <div class="links"><a href="reentrant.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Nota</p>
+        <h3>Paralelismo con OpenMP</h3>
+        <p class="desc">Memoria compartida fuera de la JVM: directivas, regiones paralelas,
+          reducciones y análisis de escalabilidad.</p>
+        <div class="links"><a href="hpc.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Listas concurrentes</p>
+        <h3>Implementaciones de listas para el curso</h3>
+        <p class="desc">Listas con candado grueso, fino, optimista, perezoso y sin candados.</p>
+        <div class="links"><a href="codigos/listas.html">Códigos</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Guía</p>
+        <h3>Cómo entregar tus ejercicios por GitHub</h3>
+        <p class="desc">Clonar, hacer commit, subir cambios y los errores más comunes.</p>
+        <div class="links"><a href="guia-github.html">Leer</a></div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Bibliografía</p>
+        <h3>Obras citadas en el curso</h3>
+        <p class="desc">Las 23 referencias de todas las prácticas, con enlace a dónde se citan
+          y el archivo <code>.bib</code> descargable.</p>
+        <div class="links">
+          <a href="referencias.html">Ver</a>
+          <a href="sample.bib" download>sample.bib</a>
+        </div>
+      </div>
+
+    </div>
+
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+</body>
+</html>

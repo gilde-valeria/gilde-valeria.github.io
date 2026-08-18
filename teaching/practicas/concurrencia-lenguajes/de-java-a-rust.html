@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guía de concurrencia: Java → Rust · Cómputo Concurrente</title>
+<meta name="description" content="Guía de apoyo · Práctica 8" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style></head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Guía de concurrencia: Java → Rust</h1>
+    <p class="practica-sub">Guía de apoyo · Práctica 8</p>
+    <div class="practica-actions">
+      
+      
+      
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#por-qué-rust" id="toc-por-qué-rust">1. ¿Por qué Rust?</a></li>
+    <li><a href="#instalación" id="toc-instalación">2. Instalación</a></li>
+    <li><a href="#ownership-la-regla-que-elimina-las-data-races" id="toc-ownership-la-regla-que-elimina-las-data-races">3. Ownership: la regla que elimina las data races</a></li>
+    <li><a href="#crear-y-esperar-hilos" id="toc-crear-y-esperar-hilos">4. Crear y esperar hilos</a></li>
+    <li><a href="#candados-mutext-y-arct" id="toc-candados-mutext-y-arct">5. Candados: <code>Mutex&lt;T&gt;</code> y <code>Arc&lt;T&gt;</code></a></li>
+    <li><a href="#tipos-atómicos-y-ordenamiento-de-memoria" id="toc-tipos-atómicos-y-ordenamiento-de-memoria">6. Tipos atómicos y ordenamiento de memoria</a></li>
+    <li><a href="#resumen-qué-garantiza-el-compilador-y-qué-no" id="toc-resumen-qué-garantiza-el-compilador-y-qué-no">7. Resumen: ¿qué garantiza el compilador y qué no?</a></li>
+    <li><a href="#para-compilar-y-probar-los-ejemplos" id="toc-para-compilar-y-probar-los-ejemplos">8. Para compilar y probar los ejemplos</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <hr />
+    <h2 id="por-qué-rust">1. ¿Por qué Rust?</h2>
+    <p>En el curso hemos razonado sobre corrección de programas concurrentes en Java:
+    race conditions, modelos de consistencia, candados y estructuras lock-free.
+    Java nos permite cometer errores de concurrencia —un contador sin <code>synchronized</code>
+    compila y corre, solo que produce resultados incorrectos.</p>
+    <p>Rust resuelve este problema desde otro ángulo: <strong>el compilador rechaza en tiempo
+    de compilación cualquier programa que tenga una data race</strong>. No en tiempo de
+    ejecución, no con un test, sino antes de que el programa exista.</p>
+    <p>Esta guía te muestra cómo los conceptos que ya conoces de Java se expresan en
+    Rust, para que la práctica sea una traducción de ideas familiares a una sintaxis
+    nueva.</p>
+    <h3 id="correspondencia-rápida-java-rust">Correspondencia rápida Java → Rust</h3>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Java</strong></th>
+    <th><strong>Rust</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td><code>new Thread(r).start()</code></td>
+    <td><code>thread::spawn(move \|\| { ... })~|
+    | ~thread.join()</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>synchronized</code> / <code>ReentrantLock~| ~Mutex&lt;T&gt;</code></td>
+    <td></td>
+    </tr>
+    <tr class="odd">
+    <td><code>AtomicLong</code>, <code>AtomicInteger</code></td>
+    <td><code>AtomicUsize</code>, <code>AtomicI64</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>volatile</code></td>
+    <td><code>Ordering::SeqCst</code> (ver §5)</td>
+    </tr>
+    <tr class="odd">
+    <td><code>AtomicReference</code> compartida</td>
+    <td><code>Arc&lt;T&gt;</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>lock.unlock()</code> en <code>finally</code></td>
+    <td>automático al salir del scope</td>
+    </tr>
+    </tbody>
+    </table>
+    <hr />
+    <h2 id="instalación">2. Instalación</h2>
+    <h3 id="linux-y-macos">Linux y macOS</h3>
+    <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="language-bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">--proto</span> <span class="st">&#39;=https&#39;</span> <span class="at">--tlsv1.2</span> <span class="at">-sSf</span> https://sh.rustup.rs <span class="kw">|</span> <span class="fu">sh</span></span></code></pre></div>
+    <p>El instalador descarga <code>rustup</code>, el gestor de versiones de Rust (análogo a
+    <code>sdkman</code> en Java). Acepta la instalación por defecto. Al terminar, recarga
+    la terminal o ejecuta:</p>
+    <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="language-bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> <span class="va">$HOME</span>/.cargo/env</span></code></pre></div>
+    <h3 id="windows">Windows</h3>
+    <p>Descarga y ejecuta <code>rustup-init.exe</code> desde <a href="https://rustup.rs/">https://rustup.rs/</a>.
+    Asegúrate de tener las herramientas de compilación de C++ de Visual Studio.</p>
+    <h3 id="verificación">Verificación</h3>
+    <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="language-bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rustc</span> <span class="at">--version</span>    <span class="co"># compilador</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> <span class="at">--version</span>    <span class="co"># gestor de proyectos (equivalente a Maven/Gradle)</span></span></code></pre></div>
+    <h3 id="crear-y-ejecutar-un-proyecto">Crear y ejecutar un proyecto</h3>
+    <div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="language-bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> new concurrencia_rust   <span class="co"># crea la estructura del proyecto</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> concurrencia_rust</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> run                     <span class="co"># compila y ejecuta src/main.rs</span></span></code></pre></div>
+    <p>Todos los ejemplos de esta guía van en <code>src/main.rs</code>.</p>
+    <hr />
+    <h2 id="ownership-la-regla-que-elimina-las-data-races">3. Ownership: la regla que elimina las data races</h2>
+    <p>Antes de ver hilos, hay que entender la regla fundamental de Rust que hace
+    posible la concurrencia segura:</p>
+    <blockquote>
+    <p>En cualquier punto del programa, o existe <strong>una</strong> referencia mutable (<code>&amp;mut T</code>),
+    o existen <strong>múltiples</strong> referencias inmutables (<code>&amp;T</code>) — pero nunca ambas al mismo
+    tiempo.</p>
+    </blockquote>
+    <p>Esta regla, verificada por el compilador, es exactamente la condición que hace
+    imposible una data race: una data race requiere al menos un acceso de escritura
+    concurrente con otro acceso. Si el compilador garantiza que nunca hay dos
+    referencias mutables simultáneas, las data races son imposibles por construcción.</p>
+    <p>Cuando intentas hacer el equivalente del contador sin <code>synchronized</code> de la
+    Práctica 1, el compilador te lo impide:</p>
+    <div class="sourceCode" id="cb5"><pre class="sourceCode rust"><code class="language-rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> contador<span class="op">:</span> <span class="dt">i64</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">4</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(<span class="pp">thread::</span>spawn(<span class="op">||</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            contador <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// ERROR: no puedes mover una referencia mutable</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>))<span class="op">;</span>              <span class="co">//        a múltiples hilos simultáneamente</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> handles <span class="op">{</span> h<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <p>El error del compilador dice exactamente qué regla se viola. En el Ejercicio 2
+    de la práctica leerás ese error y lo traducirás al vocabulario del curso.</p>
+    <hr />
+    <h2 id="crear-y-esperar-hilos">4. Crear y esperar hilos</h2>
+    <div class="sourceCode" id="cb6"><pre class="sourceCode rust"><code class="language-rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::time::</span>Duration<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">5</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// &#39;move&#39; transfiere la propiedad de las variables capturadas al hilo.</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Sin &#39;move&#39;, el compilador rechaza el código porque el closure</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// podría sobrevivir a la variable &#39;i&#39; del stack del main.</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> handle <span class="op">=</span> <span class="pp">thread::</span>spawn(<span class="kw">move</span> <span class="op">||</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="pp">println!</span>(<span class="st">&quot;Hola desde el hilo {}&quot;</span><span class="op">,</span> i)<span class="op">;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="pp">thread::</span>sleep(<span class="pp">Duration::</span>from_millis(<span class="dv">10</span>))<span class="op">;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(handle)<span class="op">;</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// join() espera que el hilo termine — análogo a Thread.join() en Java.</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// unwrap() propaga cualquier panic del hilo hijo.</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> handle <span class="kw">in</span> handles <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        handle<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Todos los hilos han terminado.&quot;</span>)<span class="op">;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <hr />
+    <h2 id="candados-mutext-y-arct">5. Candados: <code>Mutex&lt;T&gt;</code> y <code>Arc&lt;T&gt;</code></h2>
+    <p>En Java, <code>synchronized</code> protege una sección de código; el dato y el candado
+    son independientes. En Rust, <strong>el dato vive dentro del <code>Mutex</code></strong>. No es posible
+    acceder al dato sin haber adquirido el candado — es una garantía del sistema de
+    tipos, no una convención del programador.</p>
+    <p>Para compartir un <code>Mutex</code> entre varios hilos necesitamos <code>Arc</code> (Atomic Reference
+    Counter), que es el equivalente a <code>AtomicReference</code> en Java: permite que múltiples
+    dueños mantengan una referencia al mismo objeto con un contador de referencias
+    atómico.</p>
+    <div class="sourceCode" id="cb7"><pre class="sourceCode rust"><code class="language-rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::sync::</span><span class="op">{</span>Arc<span class="op">,</span> Mutex<span class="op">};</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// El dato (0) vive dentro del Mutex, que vive dentro del Arc.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> contador <span class="op">=</span> <span class="pp">Arc::</span>new(<span class="pp">Mutex::</span>new(<span class="dv">0_i64</span>))<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">10</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Arc::clone incrementa el contador de referencias — no clona el dato.</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Equivalente a pasar la misma referencia a otro hilo en Java.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> c <span class="op">=</span> <span class="pp">Arc::</span>clone(<span class="op">&amp;</span>contador)<span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(<span class="pp">thread::</span>spawn(<span class="kw">move</span> <span class="op">||</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="co">// lock() adquiere el Mutex y retorna un MutexGuard.</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Si otro hilo lo tiene, este hilo espera aquí — igual que en Java.</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> c<span class="op">.</span>lock()<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>num <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span>  <span class="co">// modificamos el dato a través del guard</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">// El candado se libera automáticamente cuando `num` sale del scope.</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Equivale al bloque finally { lock.unlock(); } de Java,</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>            <span class="co">// pero el compilador garantiza que nunca se olvida.</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>))<span class="op">;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> handles <span class="op">{</span> h<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Resultado: {}&quot;</span><span class="op">,</span> <span class="op">*</span>contador<span class="op">.</span>lock()<span class="op">.</span>unwrap())<span class="op">;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Resultado esperado: 10 (siempre correcto, sin race condition)</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <h3 id="punto-de-linearización">Punto de linearización</h3>
+    <p>El punto de linearización del incremento es el momento en que <code>lock()</code> retorna
+    y el hilo adquiere acceso exclusivo al dato. En términos del curso: la operación
+    "toma efecto" en ese instante, que está dentro del intervalo <code>[invocación, respuesta]</code>.</p>
+    <hr />
+    <h2 id="tipos-atómicos-y-ordenamiento-de-memoria">6. Tipos atómicos y ordenamiento de memoria</h2>
+    <p>Rust no tiene la palabra clave <code>volatile</code> para concurrencia (en Rust, <code>volatile</code>
+    existe solo para I/O mapeado en memoria a nivel de hardware, que es un caso
+    completamente distinto). Para operaciones lock-free, Rust expone tipos atómicos
+    en <code>std::sync::atomic</code>.</p>
+    <p>La diferencia importante respecto a Java es que en Rust debes especificar
+    <strong>explícitamente el ordenamiento de memoria</strong> de cada operación. Esto no es un
+    detalle burocrático — es la misma teoría de modelos de memoria débil que
+    formaliza el paper <code>Herding Cats</code> [Alglave et al., 2014]:</p>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Ordering</strong></th>
+    <th><strong>Garantía</strong></th>
+    <th><strong>Equivalente Java</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td><code>SeqCst</code></td>
+    <td>Orden global total — el más fuerte</td>
+    <td><code>volatile</code> + <code>synchronized</code></td>
+    </tr>
+    <tr class="even">
+    <td><code>Acquire</code> / <code>Release~| Sincronización por pares entre hilos            | ~volatile</code> (visibilidad)</td>
+    <td></td>
+    <td></td>
+    </tr>
+    <tr class="odd">
+    <td><code>Relaxed</code></td>
+    <td>Solo atomicidad local, sin barreras de memoria</td>
+    <td>ninguno directo</td>
+    </tr>
+    </tbody>
+    </table>
+    <div class="sourceCode" id="cb8"><pre class="sourceCode rust"><code class="language-rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::sync::atomic::</span><span class="op">{</span>AtomicI64<span class="op">,</span> Ordering<span class="op">};</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::sync::</span>Arc<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> atomico <span class="op">=</span> <span class="pp">Arc::</span>new(<span class="pp">AtomicI64::</span>new(<span class="dv">0</span>))<span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> handles <span class="op">=</span> <span class="pp">vec!</span>[]<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">10</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> a <span class="op">=</span> <span class="pp">Arc::</span>clone(<span class="op">&amp;</span>atomico)<span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        handles<span class="op">.</span>push(<span class="pp">thread::</span>spawn(<span class="kw">move</span> <span class="op">||</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// fetch_add retorna el valor ANTERIOR — análogo a getAndAdd() en Java.</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// SeqCst garantiza que todos los hilos ven las escrituras en el mismo orden.</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            a<span class="op">.</span>fetch_add(<span class="dv">1</span><span class="op">,</span> <span class="pp">Ordering::</span>SeqCst)<span class="op">;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>))<span class="op">;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> handles <span class="op">{</span> h<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Resultado: {}&quot;</span><span class="op">,</span> atomico<span class="op">.</span>load(<span class="pp">Ordering::</span>SeqCst))<span class="op">;</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Resultado esperado: 10</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+    <h3 id="cuándo-usar-relaxed">¿Cuándo usar <code>Relaxed</code>?</h3>
+    <p><code>Ordering::Relaxed</code> es correcto cuando la atomicidad de la operación individual
+    importa pero el orden relativo entre operaciones de distintos hilos no importa.
+    El contador quiescentemente consistente de la práctica es un ejemplo: el volcado
+    al global usa <code>SeqCst</code>, pero el contador local del ThreadLocal no necesita
+    sincronización de ningún tipo porque es privado al hilo.</p>
+    <hr />
+    <h2 id="resumen-qué-garantiza-el-compilador-y-qué-no">7. Resumen: ¿qué garantiza el compilador y qué no?</h2>
+    <table>
+    <thead>
+    <tr class="header">
+    <th><strong>Propiedad</strong></th>
+    <th><strong>Java</strong></th>
+    <th><strong>Rust</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="odd">
+    <td>Data races imposibles</td>
+    <td>No (runtime)</td>
+    <td>Sí (compilación)</td>
+    </tr>
+    <tr class="even">
+    <td>Deadlocks imposibles</td>
+    <td>No</td>
+    <td>No (solo Clojure STM)</td>
+    </tr>
+    <tr class="odd">
+    <td>Liberación automática del candado</td>
+    <td>No (requiere finally)</td>
+    <td>Sí (Drop al salir de scope)</td>
+    </tr>
+    <tr class="even">
+    <td>Operaciones atómicas sin GC</td>
+    <td>No (GC presente)</td>
+    <td>Sí</td>
+    </tr>
+    <tr class="odd">
+    <td>Control explícito de ordenamiento memoria</td>
+    <td>No (JMM implícito)</td>
+    <td>Sí (<code>Ordering</code>)</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Rust elimina las data races pero no los deadlocks. Si adquieres dos <code>Mutex</code> en
+    orden inverso desde dos hilos distintos, el deadlock es posible exactamente
+    igual que en Java.</p>
+    <hr />
+    <h2 id="para-compilar-y-probar-los-ejemplos">8. Para compilar y probar los ejemplos</h2>
+    <div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="language-bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Copiar cualquier ejemplo en src/main.rs y ejecutar:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> run</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Para ver errores del compilador con contexto completo:</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> build <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+    <p>Los mensajes de error de Rust son notablemente descriptivos — incluyen el nombre
+    de la regla violada, el número de línea, y frecuentemente una sugerencia de
+    cómo corregirlo. Leer el error completo es parte del ejercicio.</p>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Códigos · Práctica 5 — Snapshots y collects</title>
+<meta name="description" content="Código fuente en Java de la Práctica 5 — Snapshots y collects del curso de Cómputo Concurrente." />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    background-color: #232629;
+    color: #7a7c7d;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+div.sourceCode
+  { color: #cfcfc2; background-color: #232629; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #cfcfc2; } /* Normal */
+code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+code span.an { color: #3f8058; } /* Annotation */
+code span.at { color: #2980b9; } /* Attribute */
+code span.bn { color: #f67400; } /* BaseN */
+code span.bu { color: #7f8c8d; } /* BuiltIn */
+code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #3daee9; } /* Char */
+code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+code span.co { color: #7a7c7d; } /* Comment */
+code span.cv { color: #7f8c8d; } /* CommentVar */
+code span.do { color: #a43340; } /* Documentation */
+code span.dt { color: #2980b9; } /* DataType */
+code span.dv { color: #f67400; } /* DecVal */
+code span.er { color: #da4453; text-decoration: underline; } /* Error */
+code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+code span.fl { color: #f67400; } /* Float */
+code span.fu { color: #8e44ad; } /* Function */
+code span.im { color: #27ae60; } /* Import */
+code span.in { color: #c45b00; } /* Information */
+code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+code span.op { color: #cfcfc2; } /* Operator */
+code span.ot { color: #27ae60; } /* Other */
+code span.pp { color: #27ae60; } /* Preprocessor */
+code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #da4453; } /* SpecialString */
+code span.st { color: #f44f4f; } /* String */
+code span.va { color: #27aeae; } /* Variable */
+code span.vs { color: #da4453; } /* VerbatimString */
+code span.wa { color: #da4453; } /* Warning */
+</style>
+</head>
+<body>
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Códigos del curso</p>
+    <h1>Práctica 5 — Snapshots y collects</h1>
+    <p class="practica-sub">12 archivos Java · haz clic en cada uno para desplegarlo</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P5" target="_blank" rel="noopener">Ver en GitHub</a>
+      <a class="btn" href="/teaching/practicas/p5-snapshots.html">Ver el enunciado</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout" style="grid-template-columns:1fr">
+  <article class="practica-body">
+    <p class="muted" style="margin-top:0">
+      Estos son los mismos archivos que están en el repositorio
+      <a href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P5" target="_blank" rel="noopener">FC_CConcurrente</a>.
+      Puedes copiarlos desde aquí o clonar el repo completo:
+    </p>
+    <div class="code-wrap"><pre><code>git clone https://github.com/gilde-valeria/FC_CConcurrente.git</code></pre></div>
+    <div class="codigos-head"><h2 style="margin:0;border:none">Archivos</h2><button id="expand-all" class="btn" type="button">Expandir todo</button></div>
+    <details class="code-file">
+      <summary><span class="fname">module-info.java</span><span class="fmeta">8 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/module-info.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/module-info.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>module unam<span class="op">.</span><span class="fu">fc</span><span class="op">.</span><span class="fu">concurrent</span><span class="op">.</span><span class="fu">practica5</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExecuteSnapshot.java</span><span class="fmeta">37 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ExecuteSnapshot.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ExecuteSnapshot.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Programa 1: Programa que ejecuta el WFSnapshot, imprime el contenido de los snaps actualizados por update()</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">//  Utiliza WFSnapshot&lt;T&gt;, el cual utiliza StampedSnap y StampedValue</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">ExecutorService</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Executors</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExecuteSnapshot <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> capacity <span class="op">=</span> <span class="dv">4</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> init <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        WFSnapshot<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> snapshot <span class="op">=</span> <span class="kw">new</span> WFSnapshot<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;(</span>capacity<span class="op">,</span>init<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">ExecutorService</span> executor <span class="op">=</span> <span class="bu">Executors</span><span class="op">.</span><span class="fu">newFixedThreadPool</span><span class="op">(</span><span class="dv">4</span><span class="op">);</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">20</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                <span class="dt">final</span> <span class="dt">int</span> ntask<span class="op">=</span>i<span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                executor<span class="op">.</span><span class="fu">execute</span><span class="op">(()</span> <span class="op">-&gt;</span> snapshot<span class="op">.</span><span class="fu">update</span><span class="op">(</span>ntask<span class="op">));</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            executor<span class="op">.</span><span class="fu">shutdown</span><span class="op">();</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span><span class="op">(!</span>executor<span class="op">.</span><span class="fu">isTerminated</span><span class="op">())</span> <span class="op">{};</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Snapshot Final&quot;</span><span class="op">);</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            StampedSnap<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;[]</span> copy <span class="op">=</span> <span class="op">(</span>StampedSnap<span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnap<span class="op">[</span>capacity<span class="op">];</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            copy <span class="op">=</span> snapshot<span class="op">.</span><span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> capacity<span class="op">;</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot; Value: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">value</span> <span class="op">+</span> <span class="st">&quot; Owner: &quot;</span> <span class="op">+</span> </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            copy<span class="op">[</span>j<span class="op">].</span><span class="fu">owner</span> <span class="op">+</span> <span class="st">&quot; Stamp: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span> <span class="op">+</span> <span class="st">&quot; Snap: &quot;</span><span class="op">);</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;</span> capacity<span class="op">;</span> k<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Thread &quot;</span> <span class="op">+</span> k <span class="op">+</span> <span class="st">&quot; has value: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">getSnap</span><span class="op">(</span>k<span class="op">));</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ExecuteSnapshotQ.java</span><span class="fmeta">64 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ExecuteSnapshotQ.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ExecuteSnapshotQ.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Programa 2: Programa que ejecuta el WFSnapshotH, imprime el contenido de value del snapshot ssR</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// En el ssR se guardan las respuestas y las vistas, las vistas son un scan() del ssI de invocaciones</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">//  Utiliza WFSnapshotH&lt;T&gt;, el cual utiliza StampedSnapH y StampedValue</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">//  El WFSnapshotH es diferente al WFSnapshot porque permite guardar todas las operaciones hechas en values y todos los snaps hechos en snap</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">//  Para ello se modifica StampedSnapH (a diferencia de StampedSnap) y se le agregaron listas para values y snap</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">Random</span><span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">ConcurrentLinkedQueue</span><span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">ExecutorService</span><span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Executors</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ExecuteSnapshotQ <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">main</span><span class="op">(</span><span class="bu">String</span><span class="op">[]</span> args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> capacity <span class="op">=</span> <span class="dv">4</span><span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> init <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">ConcurrentLinkedQueue</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> queue <span class="op">=</span> <span class="kw">new</span> <span class="bu">ConcurrentLinkedQueue</span><span class="op">&lt;&gt;();</span><span class="co">// Implementacion linealizable de una cola no acotada</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotI <span class="op">=</span> <span class="kw">new</span> WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;(</span>capacity<span class="op">,</span>init<span class="op">);</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotR <span class="op">=</span> <span class="kw">new</span> WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;(</span>capacity<span class="op">,</span>init<span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">ExecutorService</span> executor <span class="op">=</span> <span class="bu">Executors</span><span class="op">.</span><span class="fu">newFixedThreadPool</span><span class="op">(</span><span class="dv">4</span><span class="op">);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">Random</span> rand <span class="op">=</span> <span class="kw">new</span> <span class="bu">Random</span><span class="op">();</span> <span class="co">//Para crear num randoms</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                <span class="dt">int</span> numRand <span class="op">=</span> rand<span class="op">.</span><span class="fu">nextInt</span><span class="op">(</span><span class="dv">2</span><span class="op">);</span><span class="co">//Si es 0 se ejecuta un enq(), si es 1 un deq()</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                <span class="dt">final</span> <span class="dt">int</span> ntask<span class="op">=</span>i<span class="op">;</span><span class="co">//Los items integers que se agregan a la cola</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                executor<span class="op">.</span><span class="fu">execute</span><span class="op">(</span><span class="kw">new</span> <span class="fu">RunnableQ</span><span class="op">(</span>ntask<span class="op">,</span> queue<span class="op">,</span>numRand<span class="op">,</span>snapshotI<span class="op">,</span>snapshotR<span class="op">));</span> </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            executor<span class="op">.</span><span class="fu">shutdown</span><span class="op">();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span><span class="op">(!</span>executor<span class="op">.</span><span class="fu">isTerminated</span><span class="op">())</span> <span class="op">{};</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Imprimir los snaps guardados en el update()</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            <span class="co">/*System.out.println(&quot;Snapshot Final in Invs&quot;);</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co">            StampedSnapH&lt;String&gt;[] copy = (StampedSnapH&lt;String&gt;[]) new StampedSnapH[capacity];</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co">            copyI = snapshotI.collect();</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co">            for (int j = 0; j &lt; capacity; j++) {</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co">                System.out.println(&quot;\n Thread Owner: &quot; + copy[j].owner + &quot; Last Value: &quot; + copy[j].value +  </span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">                        &quot; Last Stamp: &quot; + copy[j].stamp + &quot; Number of Snaps: &quot; + copy[j].snap.size());</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="co">                </span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co">                  for (int i = 0; i &lt; copy[j].snap.size(); i++) { </span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co">                      System.out.println(&quot;The &quot; + i + &quot; snap has: &quot; ); </span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co">                      for (int k = 0; k &lt; capacity; k++) {</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co">                          System.out.println(&quot;Thread &quot; + k + &quot; has value: &quot; + copy[j].getSnap(k,i)); }</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co">                  }</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co">                 </span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="co">            }*/</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            StampedSnapH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;[]</span> copy <span class="op">=</span> <span class="op">(</span>StampedSnapH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnapH<span class="op">[</span>capacity<span class="op">];</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>            copy <span class="op">=</span> snapshotR<span class="op">.</span><span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>            <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Snapshot Final --- Values&quot;</span><span class="op">);</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> capacity<span class="op">;</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st"> Thread Owner: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">owner</span> <span class="op">+</span>  </span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot; Last Stamp: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span> <span class="op">+</span> <span class="st">&quot; Number of Snaps: &quot;</span> <span class="op">+</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">snap</span><span class="op">.</span><span class="fu">size</span><span class="op">());</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>                <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;The values are: &quot;</span><span class="op">);</span> </span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> copy<span class="op">[</span>j<span class="op">].</span><span class="fu">values</span><span class="op">.</span><span class="fu">size</span><span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span> </span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                      </span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>                      <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>copy<span class="op">[</span>j<span class="op">].</span><span class="fu">values</span><span class="op">.</span><span class="fu">get</span><span class="op">(</span>i<span class="op">));</span> <span class="op">}</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>                  </span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">RunnableQ.java</span><span class="fmeta">57 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/RunnableQ.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/RunnableQ.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">Arrays</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Callable</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">ConcurrentLinkedQueue</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">LinkedBlockingQueue</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">stream</span><span class="op">.</span><span class="im">Collectors</span><span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">stream</span><span class="op">.</span><span class="im">Stream</span><span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> RunnableQ<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">implements</span> <span class="bu">Runnable</span><span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> item<span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">ConcurrentLinkedQueue</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> queue<span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotI<span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotR<span class="op">;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> num<span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">RunnableQ</span><span class="op">(</span><span class="dt">int</span> item<span class="op">,</span> <span class="bu">ConcurrentLinkedQueue</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> queue<span class="op">,</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> num<span class="op">,</span> WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotI<span class="op">,</span> WFSnapshotH<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;</span> snapshotR<span class="op">){</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">item</span> <span class="op">=</span> item<span class="op">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">queue</span> <span class="op">=</span> queue<span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">snapshotI</span> <span class="op">=</span> snapshotI<span class="op">;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">snapshotR</span> <span class="op">=</span> snapshotR<span class="op">;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">num</span> <span class="op">=</span> num<span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Override</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">run</span><span class="op">(){</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span><span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span><span class="kw">this</span><span class="op">.</span><span class="fu">num</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span><span class="co">//Probabilidad de 50/100 de ejecutar enq</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> string <span class="op">=</span> <span class="bu">String</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span><span class="st">&quot;enq( </span><span class="sc">%s</span><span class="st"> )&quot;</span><span class="op">,</span> <span class="kw">this</span><span class="op">.</span><span class="fu">item</span><span class="op">);</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                snapshotI<span class="op">.</span><span class="fu">update</span><span class="op">(</span>string<span class="op">);</span><span class="co">//En el ssI se guardan las invocaciones </span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Boolean</span> res <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">queue</span><span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="kw">this</span><span class="op">.</span><span class="fu">item</span><span class="op">);</span> <span class="co">// Aplico la operacion de la queue</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Object</span><span class="op">[]</span> result  <span class="op">=</span> <span class="op">(</span>T<span class="op">[])</span> snapshotI<span class="op">.</span><span class="fu">scan</span><span class="op">();</span> <span class="co">// Tomo la foto de las invs escritas</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                Stream<span class="op">&lt;</span><span class="bu">Object</span><span class="op">&gt;</span> stream <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">stream</span><span class="op">(</span>result<span class="op">);</span> </span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> scan <span class="op">=</span> stream<span class="op">.</span><span class="fu">map</span><span class="op">(</span> n <span class="op">-&gt;</span> n<span class="op">.</span><span class="fu">toString</span><span class="op">()</span> <span class="op">)</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span><span class="fu">collect</span><span class="op">(</span> Collectors<span class="op">.</span><span class="fu">joining</span><span class="op">(</span> <span class="st">&quot; + &quot;</span> <span class="op">)</span> <span class="op">);</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                snapshotR<span class="op">.</span><span class="fu">update</span><span class="op">(</span>scan <span class="op">+</span> <span class="bu">String</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span><span class="st">&quot; |  </span><span class="sc">%s</span><span class="st"> || &quot;</span><span class="op">,</span> res<span class="op">));</span><span class="co">// En el ssR se guardan las respuestas</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span><span class="kw">this</span><span class="op">.</span><span class="fu">num</span> <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span><span class="co">//Probabilidad de 50/100 de ejecutar deq</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>                snapshotI<span class="op">.</span><span class="fu">update</span><span class="op">(</span><span class="st">&quot;deq()&quot;</span><span class="op">);</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>                T res <span class="op">=</span> <span class="op">(</span>T<span class="op">)</span> <span class="kw">this</span><span class="op">.</span><span class="fu">queue</span><span class="op">.</span><span class="fu">poll</span><span class="op">();</span> <span class="co">// Regresa null o el valor entero</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Object</span><span class="op">[]</span> result  <span class="op">=</span> <span class="op">(</span>T<span class="op">[])</span> snapshotI<span class="op">.</span><span class="fu">scan</span><span class="op">();</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>                Stream<span class="op">&lt;</span><span class="bu">Object</span><span class="op">&gt;</span> stream <span class="op">=</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">stream</span><span class="op">(</span>result<span class="op">);</span> </span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> scan <span class="op">=</span> stream<span class="op">.</span><span class="fu">map</span><span class="op">(</span> n <span class="op">-&gt;</span> n<span class="op">.</span><span class="fu">toString</span><span class="op">()</span> <span class="op">)</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span><span class="fu">collect</span><span class="op">(</span> Collectors<span class="op">.</span><span class="fu">joining</span><span class="op">(</span> <span class="st">&quot; + &quot;</span> <span class="op">)</span> <span class="op">);</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>                snapshotR<span class="op">.</span><span class="fu">update</span><span class="op">(</span>scan <span class="op">+</span> <span class="bu">String</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span><span class="st">&quot; |  </span><span class="sc">%s</span><span class="st"> || &quot;</span><span class="op">,</span> res<span class="op">));</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">catch</span><span class="op">(</span><span class="bu">Exception</span> e<span class="op">){</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">SimpleSnapshot.java</span><span class="fmeta">58 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/SimpleSnapshot.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/SimpleSnapshot.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * SimpleSnapshot.java</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 10:43 AM</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">Arrays</span><span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"> * @</span>author Maurice Herlihy</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> SimpleSnapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">implements</span> Snapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[]</span> a_table<span class="op">;</span>  <span class="co">// array of atomic MRSW registers</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">SimpleSnapshot</span><span class="op">(</span><span class="dt">int</span> capacity<span class="op">,</span> T init<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    a_table <span class="op">=</span> <span class="op">(</span>StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedValue<span class="op">[</span>capacity<span class="op">];</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> capacity<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      a_table<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;(</span>init<span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">void</span> <span class="fu">update</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> me <span class="op">=</span> ThreadID<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    StampedValue<span class="op">&lt;</span>T<span class="op">&gt;</span> oldValue <span class="op">=</span> a_table<span class="op">[</span>me<span class="op">];</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">//oldValue.values.add(value); // Guardar el conjunto de valores hechos</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    StampedValue<span class="op">&lt;</span>T<span class="op">&gt;</span> newValue <span class="op">=</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;((</span>oldValue<span class="op">.</span><span class="fu">stamp</span><span class="op">)+</span><span class="dv">1</span><span class="op">,</span> value<span class="op">);</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    a_table<span class="op">[</span>me<span class="op">]</span> <span class="op">=</span> newValue<span class="op">;</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[]</span> <span class="fu">collect</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[]</span> copy <span class="op">=</span> <span class="op">(</span>StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedValue<span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      copy<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> a_table<span class="op">[</span>j<span class="op">];</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> copy<span class="op">;</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T<span class="op">[]</span> <span class="fu">scan</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    StampedValue<span class="op">&lt;</span>T<span class="op">&gt;[]</span> oldCopy<span class="op">,</span> newCopy<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    oldCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    collect<span class="op">:</span> <span class="cf">while</span> <span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>      newCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(!</span> <span class="bu">Arrays</span><span class="op">.</span><span class="fu">equals</span><span class="op">(</span>oldCopy<span class="op">,</span> newCopy<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        oldCopy <span class="op">=</span> newCopy<span class="op">;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span> collect<span class="op">;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>      <span class="co">// clean collect</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>      T<span class="op">[]</span> result <span class="op">=</span> <span class="op">(</span>T<span class="op">[])</span> <span class="kw">new</span> <span class="bu">Object</span><span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        result<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> newCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">value</span><span class="op">;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">Snapshot.java</span><span class="fmeta">23 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/Snapshot.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/Snapshot.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * Snapshot.java</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 10:39 AM</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Interface for snapshot implementations</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * @</span>author Maurice Herlihy</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> Snapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">void</span> <span class="fu">update</span><span class="op">(</span>T v<span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T<span class="op">[]</span> <span class="fu">scan</span><span class="op">();</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">StampedSnap.java</span><span class="fmeta">43 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedSnap.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedSnap.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">ArrayList</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">List</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Future</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * StampedSnap.java</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 9:03 PM</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Labeled snapshot value<span class="co">.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>param T object type</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>author Maurice Herlihy</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">extends</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T<span class="op">[]</span> snap<span class="op">;</span> </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedSnap</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">super</span><span class="op">(</span>value<span class="op">);</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    snap  <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Constructor<span class="co">.</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param stamp timestamp</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param value object value</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param snap </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedSnap</span><span class="op">(</span><span class="dt">long</span> stamp<span class="op">,</span> T value<span class="op">,</span> T<span class="op">[]</span> snap<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">super</span><span class="op">(</span>stamp<span class="op">,</span> value<span class="op">);</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">snap</span> <span class="op">=</span> snap<span class="op">;</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T <span class="fu">getSnap</span><span class="op">(</span><span class="dt">int</span> i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">snap</span><span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">StampedSnapH.java</span><span class="fmeta">51 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedSnapH.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedSnapH.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">ArrayList</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">List</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">Future</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * StampedSnap.java</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 9:03 PM</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Labeled snapshot value<span class="co">.</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>param T object type</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>author Maurice Herlihy</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">extends</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">//public T[] snap; </span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>T<span class="op">[]&gt;</span> snap <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span>T<span class="op">[]&gt;();</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>T<span class="op">&gt;</span> values <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;</span>T<span class="op">&gt;();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedSnapH</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">super</span><span class="op">(</span>value<span class="op">);</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">//snap  = null;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Constructor<span class="co">.</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param stamp timestamp</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param value object value</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> <span class="co">@</span>param snap </span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedSnapH</span><span class="op">(</span><span class="dt">long</span> stamp<span class="op">,</span> T value<span class="op">,</span> <span class="bu">List</span><span class="op">&lt;</span>T<span class="op">[]&gt;</span> s<span class="op">,</span> <span class="bu">List</span><span class="op">&lt;</span>T<span class="op">&gt;</span> v<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">super</span><span class="op">(</span>stamp<span class="op">,</span> value<span class="op">);</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    snap <span class="op">=</span> s<span class="op">;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedSnapH</span><span class="op">(</span><span class="dt">long</span> stamp<span class="op">,</span> T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">super</span><span class="op">(</span>stamp<span class="op">,</span> value<span class="op">);</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T <span class="fu">getSnap</span><span class="op">(</span><span class="dt">int</span> i<span class="op">,</span> <span class="dt">int</span> j<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="kw">this</span><span class="op">.</span><span class="fu">snap</span><span class="op">.</span><span class="fu">get</span><span class="op">(</span>j<span class="op">)[</span>i<span class="op">];</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">StampedValue.java</span><span class="fmeta">59 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedValue.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/StampedValue.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * StampedValue.java</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 9:49 AM</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> stamps for atomic MRMW register</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * @</span>author Maurice Herlihy</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> StampedValue<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Counter value used for comparison<span class="co">.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">long</span> stamp<span class="op">;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Thread id of creator</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">int</span> owner<span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Register value<span class="co">.</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T   value<span class="op">;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Least value ever<span class="co">.</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> StampedValue MIN_VALUE <span class="op">=</span> <span class="kw">new</span> <span class="fu">StampedValue</span><span class="op">(</span><span class="kw">null</span><span class="op">);</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Constructor<span class="co">.</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedValue</span><span class="op">(</span><span class="dt">long</span> stamp<span class="op">,</span> T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">stamp</span> <span class="op">=</span> stamp<span class="op">;</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">owner</span> <span class="op">=</span> ThreadID<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> Constructor<span class="co">.</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>   <span class="co">*/</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">StampedValue</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">stamp</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">value</span> <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">static</span> StampedValue <span class="fu">max</span><span class="op">(</span>StampedValue x<span class="op">,</span> StampedValue y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x<span class="op">.</span><span class="fu">stamp</span> <span class="op">&gt;</span> y<span class="op">.</span><span class="fu">stamp</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> x<span class="op">;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>x<span class="op">.</span><span class="fu">owner</span> <span class="op">&gt;</span> y<span class="op">.</span><span class="fu">owner</span><span class="op">){</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> x<span class="op">;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> y<span class="op">;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">ThreadID.java</span><span class="fmeta">40 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ThreadID.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/ThreadID.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * ThreadID.java</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 11, 2006, 10:27 PM</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Assigns unique contiguous ids to threads<span class="co">.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>author Maurice Herlihyh</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> ThreadID <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> The next thread ID to be assigned</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>   <span class="co">**/</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> <span class="dt">static</span> <span class="kw">volatile</span> <span class="dt">int</span> nextID <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>   <span class="co">*</span> My thread<span class="co">-</span>local ID<span class="co">.</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>   <span class="co">**/</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> <span class="dt">static</span> ThreadLocalID threadID <span class="op">=</span> <span class="kw">new</span> <span class="fu">ThreadLocalID</span><span class="op">();</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">static</span> <span class="dt">int</span> <span class="fu">get</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> threadID<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">static</span> <span class="dt">void</span> <span class="fu">reset</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    nextID <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> <span class="dt">static</span> <span class="kw">class</span> ThreadLocalID <span class="kw">extends</span> <span class="bu">ThreadLocal</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">protected</span> <span class="kw">synchronized</span> <span class="bu">Integer</span> <span class="fu">initialValue</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> nextID<span class="op">++;</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">WFSnapshot.java</span><span class="fmeta">67 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/WFSnapshot.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/WFSnapshot.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * WFSnapshot.java</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * Created on January 19, 2006, 9:20 PM</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * From &quot;Multiprocessor Synchronization and Concurrent Data Structures&quot;,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * by Maurice Herlihy and Nir Shavit.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * Copyright 2006 Elsevier Inc. All rights reserved.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Wait<span class="co">-</span>free snapshot<span class="co">.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> <span class="co">@</span>author Maurice Herlihy</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> WFSnapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">implements</span> Snapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">private</span> StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[]</span> a_table<span class="op">;</span> <span class="co">// array of MRSW atomic registers</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="fu">WFSnapshot</span><span class="op">(</span><span class="dt">int</span> capacity<span class="op">,</span> T init<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    a_table <span class="op">=</span> <span class="op">(</span>StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnap<span class="op">[</span>capacity<span class="op">];</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      a_table<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;(</span>init<span class="op">);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> <span class="dt">void</span> <span class="fu">update</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> me <span class="op">=</span> ThreadID<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    T<span class="op">[]</span> snap <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">scan</span><span class="op">();</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;</span> oldValue <span class="op">=</span> a_table<span class="op">[</span>me<span class="op">];</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;</span> newValue <span class="op">=</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      <span class="kw">new</span> StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;(</span>oldValue<span class="op">.</span><span class="fu">stamp</span><span class="op">+</span><span class="dv">1</span><span class="op">,</span> value<span class="op">,</span> snap<span class="op">);</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    a_table<span class="op">[</span>me<span class="op">]</span> <span class="op">=</span> newValue<span class="op">;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[]</span> <span class="fu">collect</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[]</span> copy <span class="op">=</span> <span class="op">(</span>StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnap<span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      copy<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> a_table<span class="op">[</span>j<span class="op">];</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> copy<span class="op">;</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span> T<span class="op">[]</span> <span class="fu">scan</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[]</span> oldCopy<span class="op">;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    StampedSnap<span class="op">&lt;</span>T<span class="op">&gt;[]</span> newCopy<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">boolean</span><span class="op">[]</span> moved <span class="op">=</span> <span class="kw">new</span> <span class="dt">boolean</span><span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    oldCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    collect<span class="op">:</span> <span class="cf">while</span> <span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>      newCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// did any thread move?</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>oldCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span> <span class="op">!=</span> newCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> <span class="op">(</span>moved<span class="op">[</span>j<span class="op">])</span> <span class="op">{</span>       <span class="co">// second move</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> oldCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">snap</span><span class="op">;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>            moved<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>            oldCopy <span class="op">=</span> newCopy<span class="op">;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span> collect<span class="op">;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>      <span class="co">// clean collect</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>      T<span class="op">[]</span> result <span class="op">=</span> <span class="op">(</span>T<span class="op">[])</span> <span class="kw">new</span> <span class="bu">Object</span><span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        result<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> newCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">value</span><span class="op">;</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+    </details>
+    <details class="code-file">
+      <summary><span class="fname">WFSnapshotH.java</span><span class="fmeta">54 líneas</span></summary>
+      <p class="fpath"><a href="https://github.com/gilde-valeria/FC_CConcurrente/blob/main/Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/WFSnapshotH.java" target="_blank" rel="noopener">Programas_P5/unam.fc.concurrent.practica5/src/unam/fc/concurrent/practica5/WFSnapshotH.java</a></p>
+      <pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> unam</span><span class="op">.</span><span class="im">fc</span><span class="op">.</span><span class="im">concurrent</span><span class="op">.</span><span class="im">practica5</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> WFSnapshotH<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">implements</span> Snapshot<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">private</span> StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[]</span> a_table<span class="op">;</span> <span class="co">// array of MRSW atomic registers</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">public</span> <span class="fu">WFSnapshotH</span><span class="op">(</span><span class="dt">int</span> capacity<span class="op">,</span> T init<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        a_table <span class="op">=</span> <span class="op">(</span>StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnapH<span class="op">[</span>capacity<span class="op">];</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>          a_table<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;(</span>init<span class="op">);</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">public</span> <span class="dt">void</span> <span class="fu">update</span><span class="op">(</span>T value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> me <span class="op">=</span> ThreadID<span class="op">.</span><span class="fu">get</span><span class="op">();</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        T<span class="op">[]</span> snap1 <span class="op">=</span> <span class="kw">this</span><span class="op">.</span><span class="fu">scan</span><span class="op">();</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;</span> oldValue <span class="op">=</span> a_table<span class="op">[</span>me<span class="op">];</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        oldValue<span class="op">.</span><span class="fu">snap</span><span class="op">.</span><span class="fu">add</span><span class="op">(</span>snap1<span class="op">);</span> <span class="co">// Guardar el conjunto de snaps</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        oldValue<span class="op">.</span><span class="fu">values</span><span class="op">.</span><span class="fu">add</span><span class="op">(</span>value<span class="op">);</span> <span class="co">// Guardar el conjunto de valores hechos</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;</span> newValue <span class="op">=</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>          <span class="kw">new</span> StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;(</span>oldValue<span class="op">.</span><span class="fu">stamp</span><span class="op">+</span><span class="dv">1</span><span class="op">,</span> value<span class="op">,</span> oldValue<span class="op">.</span><span class="fu">snap</span><span class="op">,</span> oldValue<span class="op">.</span><span class="fu">values</span><span class="op">);</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        a_table<span class="op">[</span>me<span class="op">]</span> <span class="op">=</span> newValue<span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      <span class="kw">public</span> StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[]</span> <span class="fu">collect</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[]</span> copy <span class="op">=</span> <span class="op">(</span>StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[])</span> <span class="kw">new</span> StampedSnapH<span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>          copy<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> a_table<span class="op">[</span>j<span class="op">];</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> copy<span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>      <span class="kw">public</span> T<span class="op">[]</span> <span class="fu">scan</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[]</span> oldCopy<span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        StampedSnapH<span class="op">&lt;</span>T<span class="op">&gt;[]</span> newCopy<span class="op">;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">boolean</span><span class="op">[]</span> moved <span class="op">=</span> <span class="kw">new</span> <span class="dt">boolean</span><span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        oldCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        collect<span class="op">:</span> <span class="cf">while</span> <span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>          newCopy <span class="op">=</span> <span class="fu">collect</span><span class="op">();</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            <span class="co">// did any thread move?</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>oldCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span> <span class="op">!=</span> newCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">stamp</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> <span class="op">(</span>moved<span class="op">[</span>j<span class="op">])</span> <span class="op">{</span>       <span class="co">// second move</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> oldCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">snap</span><span class="op">.</span><span class="fu">getLast</span><span class="op">();</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>              <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>                moved<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                oldCopy <span class="op">=</span> newCopy<span class="op">;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span> collect<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>              <span class="op">}</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>          <span class="co">// clean collect</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>          T<span class="op">[]</span> result <span class="op">=</span> <span class="op">(</span>T<span class="op">[])</span> <span class="kw">new</span> <span class="bu">Object</span><span class="op">[</span>a_table<span class="op">.</span><span class="fu">length</span><span class="op">];</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> a_table<span class="op">.</span><span class="fu">length</span><span class="op">;</span> j<span class="op">++)</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            result<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> <span class="op">(</span>T<span class="op">)</span> newCopy<span class="op">[</span>j<span class="op">].</span><span class="fu">values</span><span class="op">;</span> <span class="co">// Regreso el conjunto de valores</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre>
+    </details>
+
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn'; b.type = 'button'; b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b); wrap.appendChild(pre);
+});
+document.getElementById('expand-all').addEventListener('click', function () {
+  var abrir = this.dataset.state !== 'open';
+  document.querySelectorAll('details').forEach(function (d) { d.open = abrir; });
+  this.dataset.state = abrir ? 'open' : 'closed';
+  this.textContent = abrir ? 'Contraer todo' : 'Expandir todo';
+});
+</script>
+</body>
+</html>

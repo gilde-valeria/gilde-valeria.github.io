@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Repaso de Java e introducción a la programación multihilos · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 1" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Repaso de Java e introducción a la programación multihilos</h1>
+    <p class="practica-sub">Práctica 1</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica1.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P1" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/p1.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#ejemplos" id="toc-ejemplos">Ejemplos</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>“La necesidad de sincronización surge siempre que existan operaciones que se ejecutan de forma concurrente sin importar si realmente se ejecutan en paralelo” <span class="citation" data-cites="scottSharedMemory">(<a href="#ref-scottSharedMemory" role="doc-biblioref">Michael L. Scott 30 January 2024</a>)</span>.</p>
+    <p>Esta observación data de los años 60’s por Edsger Dijkstra, a pesar de que las arquitecturas <em>multiprocesador</em> surgen a inicios de los 2000’s, las arquitecturas <em>multihilo</em> surgen antes.</p>
+    <p>En una <strong>arquitectura multihilo</strong> un solo procesador tiene la capacidad de seguir múltiples programas de ejecución distintos sin la necesidad de
+    la intervención del software, ya que esto requeriría múltiples ciclos del procesador. En cambio, permite cambiar de un programa de ejecución o hilo a otro a partir del almacenamiento de los estados de los hilos en el hardware, esto potencia el uso más eficiente de recursos del procesador, como se observa en la Figura <a href="#img: multithreads1" data-reference-type="ref" data-reference="img: multithreads1">1</a>.</p>
+    <p>Las primeras máquinas con arquitecturas de multihilos surgieron en los años 50’s, la DYSEAC y la SEAC <span class="citation" data-cites="tullsenMultithreading">(<a href="#ref-tullsenMultithreading" role="doc-biblioref">Mario Nemirovsky 17 January 2013</a>)</span>.</p>
+    <figure id="img: multithreads1">
+    <img src="img/multithreadsExample.png" style="width:73.0%" />
+    <figcaption> Imagen obtenida de <span class="citation" data-cites="tullsenMultithreading">(<a href="#ref-tullsenMultithreading" role="doc-biblioref">Mario Nemirovsky 17 January 2013</a>)</span>
+    </figcaption>
+    </figure>
+    <p>Una <strong>arquitectura multiprocesador</strong> está conformada por múltiples procesadores, permite ejecutar dos hilos o más en el mismo ciclo, es decir, de forma paralela debido a que los recursos de ejecución de cada hilo están distribuidos en los procesadores, y los procesadores a su vez tienen múltiples <em>cores</em>. En la Figura <a href="#img: multithreads2" data-reference-type="ref" data-reference="img: multithreads2">2</a> se muestra un ejemplo de una arquitectura moderna, en donde cada procesador tiene múltiples cores, los cuales comparten determinadas instancias de memoria (Caché <span class="math inline">\(L1\)</span>, <span class="math inline">\(L2\)</span>, <span class="math inline">\(L3\)</span>, etc) y se comunican por un bus de memoria unificada. En la actualidad cada <span class="math inline">\(core\)</span> tiene la capacidad de almacenar más de un hilo <span class="citation" data-cites="Hyperth">(<a href="#ref-Hyperth" role="doc-biblioref">Intel 2024</a>)</span>. Cada arquitectura es distinta dependiendo el fabricante.<br />
+    </p>
+    <figure id="img: multithreads2">
+    <img src="img/modernArquitecture.png" style="width:75.0%" />
+    <figcaption> Imagen obtenida de <span class="citation" data-cites="scottSharedMemory">(<a href="#ref-scottSharedMemory" role="doc-biblioref">Michael L. Scott 30 January 2024</a>)</span>
+    </figcaption>
+    </figure>
+    <p>Los <strong>hilos/procesos</strong> se utilizan de forma diferente según distintos autores, por ejemplo, según Linus Torvalds un hilo/proceso es simplemente un <em>contexto de ejecución</em>.
+    Sin embargo, en el curso consideraremos las definiciones a continuación:</p>
+    <p>Un <strong>proceso</strong> es un programa en ejecución.
+    Un <strong>hilo</strong> es un proceso que puede ejecutarse de forma paralela con otros hilos concurrentes y compartir recursos (por ejemplo: variables).</p>
+    <p>Un proceso también se puede considerar como un conjunto de hilos que comparten el espacio del proceso (memoria, disco, cpu, etc).</p>
+    <h3 id="multihilos-en-java">Multihilos en Java</h3>
+    <p><strong>Arquitectura de <em>JVM</em></strong>.</p>
+    <figure id="img: JVManatomy">
+    <img src="img/JVManatomy.JPG" style="width:50.0%" />
+    <figcaption> Imagen obtenida de <span class="citation" data-cites="youtubeJVMAnatomy">(<a href="#ref-youtubeJVMAnatomy" role="doc-biblioref">Lipsky 2023</a>)</span>
+    </figcaption>
+    </figure>
+    <p>En la Figura <a href="#img: JVManatomy" data-reference-type="ref" data-reference="img: JVManatomy">4</a> se muestra la anatomía de la JVM, sin embargo, en este curso nuestras áreas de interés son: <em>Thread Synchronization</em> y <em>Memory Management</em>.</p>
+    <p>Un hilo en Java se implementa por un hilo nativo del sistema operativo, cada hilo tiene una región de memoria reservada la cual se denota como la <em>stack</em> de cada hilo. Cada <em>stack</em> contiene variables locales y configuraciones de métodos que son ejecutados por el hilo (El tamaño de las stacks es una variable en la JVM).</p>
+    <p>En relación con la asignación de memoria en Java, cada objeto nuevo creado con el operador <em>new</em> reside en la memoria llamada <em>Java heap</em>, la cual está especificada por la JVM (y no por los programadores). Sin embargo, esta <em>heap</em> debe ser rápida y <em>thread-safe</em>, es por eso que cada hilo tiene su propia región en esta heap.</p>
+    <figure id="img: JVManatomy">
+    <img src="img/JavaHeap.png" style="width:35.0%" />
+    <figcaption>Representación de la Memoria en Java</figcaption>
+    </figure>
+    <p><strong>Hilos en Java.</strong><br />
+    Un hilo en Java es una instancia de la clase <em>java.lang.Thread</em> (<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html" class="uri">https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html</a>), se crean como cualquier otro objeto en Java.
+    Podemos crear un hilo de dos formas distintas:</p>
+    <ol>
+    <li><p>Extendiendo la clase <em>Thread</em> y sobrescribiendo el método <em>run()</em></p></li>
+    <li><p>Implementando la interfaz <em>Runnable</em> para pasarla como argumento de un objeto de la clase <em>Thread</em>.</p></li>
+    </ol>
+    <p>Un hilo de la clase Thread tiene los siguientes atributos:</p>
+    <p><span class="math inline">\(\diamond\)</span> ID</p>
+    <p><span class="math inline">\(\diamond\)</span> Nombre</p>
+    <p><span class="math inline">\(\diamond\)</span> Prioridad</p>
+    <p><span class="math inline">\(\diamond\)</span> Status: Consta de 5 estados.<br />
+    Los 5 estados son los siguientes:</p>
+    <ol>
+    <li><p><em>New:</em> El hilo se ha creado pero no ha empezado</p></li>
+    <li><p><em>Runnable:</em> El hilo está siendo ejecutado por la JVM</p></li>
+    <li><p><em>Blocked:</em> El hilo está bloqueado y está esperando por un monitor (<span class="math inline">\(sleep()\)</span>, <span class="math inline">\(await()\)</span>)</p></li>
+    <li><p><em>Timed<span class="math inline">\(\_\)</span>waiting:</em> Un hilo está esperando a otro por un lapso de tiempo específico</p></li>
+    <li><p><em>Terminated:</em> Un hilo ha terminado su ejecución</p></li>
+    </ol>
+    <h2 id="ejemplos">Ejemplos</h2>
+    <p>En el siguiente link: <a href="https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P1" class="uri">https://github.com/surindt/FC_CConcurrente/tree/main/Programas_P1</a></p>
+    <ul>
+    <li><p>Programa 1 (ExampleThreads): Creacion de un hilo</p></li>
+    <li><p>Programa 2 (ExampleMultipleExtends): Ejemplo de un contador extendiendo la clase Thread</p></li>
+    <li><p>Programa 3 (ExampleMultipleRunnable): Ejemplo de un contador implementando la interfaz Runnable</p></li>
+    <li><p>Programa 4 (MainThread): Ejemplo de un contador que no termina</p></li>
+    <li><p>Programa 5 (AlwaysDesignToStop): Ejemplo de un contador que termina solo si el hilo principal lo detiene</p></li>
+    <li><p>Programa 6 (UseJoin): Uso de Join()</p></li>
+    <li><p>Programa 7 (ExampleMultipleExtends2): Ejemplo de un contador extendiendo la clase Thread, compartiendo un contador</p></li>
+    <li><p>Programa 8 (ExampleMultipleRunnable2): Ejemplo de un contador implementando Runnable, compartiendo un contador</p></li>
+    <li><p>Programa 9 (FibonacciThreads): Programa no muy paralelizable</p></li>
+    <li><p>Programa 10 (DeterminanteConcurrente): Programa para obtener el determinante de una matriz de 3x3</p></li>
+    </ul>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <p><strong>Instrucciones:</strong></p>
+    <ul>
+    <li><p>Entrega en un <strong>PDF</strong> las respuestas de los ejercicios que no requieran implementarse, en los ejercicios que requieran implementación añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Solo un integrante del equipo debe subir la práctica. Los demás integrantes deben marcar la tarea como entregada y escribir, en un comentario privado dentro de la práctica, el nombre completo de la persona que realizó la entrega. Todos los programas y el PDF deben ir dentro de un <strong>archivo ZIP</strong>. El archivo ZIP debe seguir el siguiente formato de nombre: <code>P#k_ApellidoPaternoNombre</code>, usando el apellido y nombre de la persona que entrega la práctica.</p></li>
+    <li><p>Cada ejercicio debe tener un programa que indique “Implementar” si aplica.</p></li>
+    <li><p>Recuerda que debes utilizar <strong>Java 21 LTS</strong>.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21 LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong><span class="math inline">\(\approx\)</span> 1.5hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    </p>
+    <ol>
+    <li><p>Lee lo siguiente <a href="https://www.evanjones.ca/software/threading-linus-msg.html" class="uri">https://www.evanjones.ca/software/threading-linus-msg.html</a> y comparte en máximo 4 líneas de computadora a que se refiere Linus Torvalds con <em>un contexto de ejecución</em> y cómo se relaciona con la definición en la sección <a href="#secc: contexto" data-reference-type="ref" data-reference="secc: contexto">1</a> de esta práctica.</p></li>
+    <li><p>¿Cuántos hilos tiene disponibles tu computadora?</p>
+    <p>Ejecuta <em>Runtime.getRuntime().availableProcessors()</em>, si son más de uno en el equipo escriban el de cada uno.</p></li>
+    <li><p>Revisa el programa <em>Determinante concurrente</em> y responde ¿Cuánto tiempo tarda en ejecutarse?</p></li>
+    <li><p>El programa <em>Determinante concurrente</em> está implementado extendiendo la clase <em>Thread</em>. Implementa el programa utilizando la interfaz <em>Runnable</em>.</p></li>
+    <li><p>Implementa el programa <em>Determinante concurrente</em> de forma secuencial.</p></li>
+    <li><p>Implementa del programa <em>Determinante concurrente</em> para dos hilos (en vez de seis).</p></li>
+    <li><p>Compara las 3 implementaciones: el programa <em>Determinante concurrente</em> para dos hilos, para seis hilos y el programa secuencial. Responde:
+    ¿A qué se debe el orden en el que se ordenan los tiempos de ejecución de cada programa?</p></li>
+    <li><p>Si utilizas la Ley de Amdahl entre el programa <em>Determinante concurrente</em> para dos hilos y el programa secuencial. ¿El resultado es mayor o menor a 1? ¿Por qué?</p></li>
+    <li><p>Describe con tus propias palabras en máximo dos líneas para qué sirve el método join(). Si no utilizas el método join() en <em>Determinante Concurrente</em>, ¿sigue funcionando?</p></li>
+    </ol>
+    <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+    <div id="ref-Hyperth" class="csl-entry" role="listitem">
+    Intel. 2024. <span>«What Is Hyper-Threading?»</span> <a href="https://www.intel.com/content/www/us/en/gaming/resources/hyper-threading.html#:~:text=Intel®%20Hyper%2DThreading%20Technology%20is%20a%20hardware%20innovation%20that,can%20be%20done%20in%20parallel.]" class="uri">https://www.intel.com/content/www/us/en/gaming/resources/hyper-threading.html#:~:text=Intel®%20Hyper%2DThreading%20Technology%20is%20a%20hardware%20innovation%20that,can%20be%20done%20in%20parallel.]</a>.
+    </div>
+    <div id="ref-youtubeJVMAnatomy" class="csl-entry" role="listitem">
+    Lipsky, Nikita. 2023. <span>«JVM Anatomy 101»</span>. Youtube; <a href="https://youtu.be/BeMi8K0AFAc?si=X56D_vzpp-u7iNH9" class="uri">https://youtu.be/BeMi8K0AFAc?si=X56D_vzpp-u7iNH9</a>.
+    </div>
+    <div id="ref-tullsenMultithreading" class="csl-entry" role="listitem">
+    Mario Nemirovsky, Dean M. Tullsen. 17 January 2013. <em>Multithreading Architecture</em>. Springer Cham.
+    </div>
+    <div id="ref-scottSharedMemory" class="csl-entry" role="listitem">
+    Michael L. Scott, Trevor Brown. 30 January 2024. <em>Shared-Memory Synchronization</em>. Springer Cham.
+    </div>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>
