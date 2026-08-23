@@ -227,7 +227,7 @@ nuevo en el programador, ahora con operaciones atómicas CXL en lugar de mensaje
   añade una breve descripción del programa entregado.
 - Solo un integrante del equipo debe subir la práctica. Los demás deben marcar la tarea como
   entregada y escribir un comentario privado con el nombre de quien entregó.
-- Todos los programas y el PDF deben ir en un archivo ZIP nombrado: =P6_ApellidoPaternoNombre=.
+- El formato y el medio de entrega los indicará tu ayudante de laboratorio.
 - Utilizar *gcc con soporte OpenMP*. Se penalizará si no compila.
 - Tiempo estimado: ≈ 1.5 hr  —  Puntaje total: *100*
 

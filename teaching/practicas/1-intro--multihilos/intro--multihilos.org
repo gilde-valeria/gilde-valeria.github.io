@@ -105,8 +105,7 @@ Repositorio con ejemplos:
 - Entrega en un *PDF* las respuestas de los ejercicios que no requieran implementarse.
   En los ejercicios que requieran implementación añade una breve descripción de los programas que entregas (sus nombres y qué hacen).
 - Solo un integrante del equipo debe subir la práctica. Los demás integrantes deben marcar la tarea como entregada y escribir, en un comentario privado dentro de la práctica, el nombre completo de la persona que realizó la entrega.
-- Todos los programas y el PDF deben ir dentro de un *archivo ZIP*.
-  El archivo ZIP debe seguir el formato: =P#k_ApellidoPaternoNombre=, usando el apellido y nombre de la persona que entrega la práctica.
+- El formato y el medio de entrega los indicará tu ayudante de laboratorio.
 - Cada ejercicio debe tener un programa que indique “Implementar” si aplica.
 - Recuerda que debes utilizar *Java 21 LTS*.
 - *Si no compila utilizando Java 21 LTS o si no se entrega la breve descripción de los programas se penalizará.*

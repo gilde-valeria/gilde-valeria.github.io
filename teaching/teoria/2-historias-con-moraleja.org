@@ -39,7 +39,7 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 El algoritmo satisface la exclusión mutua. 
 - *Prueba por contradicción:* Si ambos estuvieran dentro, Alice debió ver la bandera de Bob abajo, y Bob debió ver la de Alice abajo. Pero para que Alice entre, su bandera ya debe estar arriba. Bob, al verla arriba, por protocolo **está obligado a bajar la suya y esperar**. Es imposible que ambos vean la bandera del otro abajo simultáneamente después de haber levantado la propia.
 
-[[file:../../teaching/practicas/1-intro--multihilos/img/LINExample.jpg]]
+[[file:../../images/cat_dog_safety.jpg]]
 
 * 4. Análisis de Viveza (Liveness)
 Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real.
@@ -67,8 +67,24 @@ Este pequeño ejercicio nos muestra el poder de las variables **SWMR** (Single-W
 
 Este es el nivel más básico de coordinación en hardware. En las siguientes notas, veremos cómo mejorar esto para que sea **Wait-free** (que nadie tenga que esperar, incluso si otros fallan).
 
----
-# Notas Relacionadas:
-- [[file:1-intro-que-porque-paraque.md][¿Qué es la computación concurrente?]]
-- [[file:2-historias-con-moraleja.md][Alice y Bob: El problema de la interferencia]]
+* Fuente
+
+Esta nota sigue de cerca el Capítulo 1 de:
+
+#+begin_quote
+Maurice Herlihy y Nir Shavit. /The Art of Multiprocessor Programming/.
+Morgan Kaufmann Publishers, San Francisco, 2008. ISBN 0-12-370591-6.
+Capítulo 1, /Introduction/ (§1.1, /Shared Objects and Synchronization/).
+#+end_quote
+
+La historia de Alice, Bob y sus mascotas, el protocolo de banderas y el análisis
+de exclusión mutua, deadlock, inanición y tolerancia a fallos provienen de ahí;
+aquí se cuentan en español y con algunos comentarios añadidos para el curso.
+
+El libro aparece también en la [[file:../practicas/referencias.html][bibliografía del curso]], donde puedes descargar
+la entrada en formato BibTeX.
+
+* Notas relacionadas
+
+- [[file:1-intro-que-porque-paraque.org][¿Qué es la concurrencia? Origen, propósito y definición]]
 - [[file:nocionesDcorrecion.org][Distintos sabores de corrección: ¿cómo evitar el choque de mascotas?]]

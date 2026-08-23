@@ -109,9 +109,9 @@ Sin embargo, **Sergio Rajsbaum y Michel Raynal** argumentan que el término de c
 - **Cómputo Distribuido:** Busca **Coordinación**. Es un entorno "hostil" donde hay que sobrevivir a fallos, asincronía y falta de un reloj global.
 
 
-[[file:../../images/procesador_atomic.png]]
+[[file:../../images/procesador_atomic.jpg]]
 
----
-# Notas Relacionadas:
-- [[file:2-historias-con-moraleja.org][Historias y el modelo de interleaving de Raynal]]
+* Notas relacionadas
+
+- [[file:2-historias-con-moraleja.org][La fábula de las banderas: el ABC de la exclusión mutua]]
 - [[file:nocionesDcorrecion.org][Distintos sabores de corrección: ¿cómo probar que un algoritmo es correcto?]]
