@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<<<<<<< HEAD
-<!-- 2026-08-18 Tue 19:52 -->
-=======
-<!-- 2026-08-23 Sun 22:39 -->
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<!-- 2026-08-23 Sun 22:51 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Distintos sabores de corrección</title>
@@ -37,44 +33,24 @@
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<<<<<<< HEAD
-<li><a href="#org578836e">1. Análisis de algoritmos</a></li>
-<li><a href="#org424707f">2. Liveness and Safety (Viveza y Seguridad)</a></li>
-<li><a href="#org698d49a">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
-<li><a href="#orgc30f42d">4. Distintos Sabores de Contadores</a>
+<li><a href="#org3923d33">1. Análisis de algoritmos</a></li>
+<li><a href="#orge3759f2">2. Liveness and Safety (Viveza y Seguridad)</a></li>
+<li><a href="#orgad71b19">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
+<li><a href="#org29845e2">4. Distintos Sabores de Contadores</a>
 <ul>
-<li><a href="#orgc13da57">A. Contador Linealizable</a></li>
-<li><a href="#orgde7db55">B. Sloppy Counter (Consistencia Eventual)</a></li>
-<li><a href="#orgcdbb554">C. Árbol de Difracción (Consistencia Quiescente)</a></li>
+<li><a href="#orgc4fa683">A. Contador Linealizable</a></li>
+<li><a href="#orgc1c320c">B. Sloppy Counter (Consistencia Eventual)</a></li>
+<li><a href="#orgc711b41">C. Árbol de Difracción (Consistencia Quiescente)</a></li>
 </ul>
 </li>
-<li><a href="#org69c65ba">5. Conclusiones</a></li>
-=======
-<li><a href="#orga83d89e">1. Análisis de algoritmos</a></li>
-<li><a href="#orge8d99d3">2. Liveness and Safety (Viveza y Seguridad)</a></li>
-<li><a href="#orgf5e4a66">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</a></li>
-<li><a href="#org047eede">4. Distintos Sabores de Contadores</a>
-<ul>
-<li><a href="#org14e708e">A. Contador Linealizable</a></li>
-<li><a href="#orgbc5decc">B. Sloppy Counter (Consistencia Eventual)</a></li>
-<li><a href="#orgc2082ab">C. Árbol de Difracción (Consistencia Quiescente)</a></li>
-</ul>
-</li>
-<li><a href="#orgf30427e">5. Conclusiones</a></li>
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<li><a href="#org2890987">5. Conclusiones</a></li>
 </ul>
 </div>
 </nav>
 
-<<<<<<< HEAD
-<section id="outline-container-org578836e" class="outline-2">
-<h2 id="org578836e">1. Análisis de algoritmos</h2>
-<div class="outline-text-2" id="text-org578836e">
-=======
-<section id="outline-container-orga83d89e" class="outline-2">
-<h2 id="orga83d89e">1. Análisis de algoritmos</h2>
-<div class="outline-text-2" id="text-orga83d89e">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<section id="outline-container-org3923d33" class="outline-2">
+<h2 id="org3923d33">1. Análisis de algoritmos</h2>
+<div class="outline-text-2" id="text-org3923d33">
 <p>
 Cuando aprendemos a programar, suele ser en el mundo secuencial. 
 Analizamos el número de pasos de cómputo, ciclos y condicionales. Si profundizamos, 
@@ -96,15 +72,9 @@ Un algoritmo es una receta; una serie de instrucciones que solucionan un problem
 </div>
 </section>
 
-<<<<<<< HEAD
-<section id="outline-container-org424707f" class="outline-2">
-<h2 id="org424707f">2. Liveness and Safety (Viveza y Seguridad)</h2>
-<div class="outline-text-2" id="text-org424707f">
-=======
-<section id="outline-container-orge8d99d3" class="outline-2">
-<h2 id="orge8d99d3">2. Liveness and Safety (Viveza y Seguridad)</h2>
-<div class="outline-text-2" id="text-orge8d99d3">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<section id="outline-container-orge3759f2" class="outline-2">
+<h2 id="orge3759f2">2. Liveness and Safety (Viveza y Seguridad)</h2>
+<div class="outline-text-2" id="text-orge3759f2">
 <p>
 En 1977, Leslie Lamport definió que las propiedades de los sistemas se dividen en dos:
 </p>
@@ -119,28 +89,17 @@ unión de estas dos. En el mundo paralelo, la incertidumbre sobre "cuándo" suce
 </p>
 
 
-<<<<<<< HEAD
-<figure id="orgf7463ff">
-<img src="../../images/alien_thinking.png" alt="alien_thinking.png">
-=======
-<figure id="org405367d">
+<figure id="org5137f4b">
 <img src="../../images/alien_thinking.jpg" alt="alien_thinking.jpg">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
 
 </figure>
 </div>
 </section>
 
 
-<<<<<<< HEAD
-<section id="outline-container-org698d49a" class="outline-2">
-<h2 id="org698d49a">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
-<div class="outline-text-2" id="text-org698d49a">
-=======
-<section id="outline-container-orgf5e4a66" class="outline-2">
-<h2 id="orgf5e4a66">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
-<div class="outline-text-2" id="text-orgf5e4a66">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<section id="outline-container-orgad71b19" class="outline-2">
+<h2 id="orgad71b19">3. Objetos y Algoritmos Concurrentes: El Optimismo Analítico</h2>
+<div class="outline-text-2" id="text-orgad71b19">
 <p>
 Razonar sobre la corrección de un algoritmo concurrente es un desafío. 
 Dado que es indistinguible saber en qué microsegundo exacto se ejecutó una línea de código, 
@@ -164,21 +123,13 @@ operaciones que son concurrentes entre sí.
 </p>
 
 
-<<<<<<< HEAD
-<figure id="org46c6697">
-=======
-<figure id="orgbef62c4">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<figure id="org466dc01">
 <img src="../../images/LINSiSCSi.jpg" alt="LINSiSCSi.jpg">
 
 </figure>
 
 
-<<<<<<< HEAD
-<figure id="orgb81a42d">
-=======
-<figure id="org4696bd9">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<figure id="orgfe8fac7">
 <img src="../../images/porqueesLIN.jpg" alt="porqueesLIN.jpg">
 
 </figure>
@@ -193,11 +144,7 @@ pero respeta el <i>orden de programa</i> de cada hilo.
 </p>
 
 
-<<<<<<< HEAD
-<figure id="org4f43b5e">
-=======
-<figure id="org21dc67f">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<figure id="orgf28fc67">
 <img src="../../images/linNOsiSC.jpg" alt="linNOsiSC.jpg">
 
 </figure>
@@ -211,11 +158,7 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </p>
 
 
-<<<<<<< HEAD
-<figure id="org7d7b984">
-=======
-<figure id="orgb8b0839">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<figure id="orgf619430">
 <img src="../../images/QCvsSC.jpg" alt="QCvsSC.jpg">
 
 </figure>
@@ -226,11 +169,7 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </ul>
 
 
-<<<<<<< HEAD
-<figure id="orga2b6c66">
-=======
-<figure id="org02ff40d">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<figure id="org0228632">
 <img src="../../images/QCvsEC.jpg" alt="QCvsEC.jpg">
 
 </figure>
@@ -238,29 +177,17 @@ Solo garantiza el orden a través de periodos donde nadie hace nada (quietud).
 </section>
 
 
-<<<<<<< HEAD
-<section id="outline-container-orgc30f42d" class="outline-2">
-<h2 id="orgc30f42d">4. Distintos Sabores de Contadores</h2>
-<div class="outline-text-2" id="text-orgc30f42d">
-=======
-<section id="outline-container-org047eede" class="outline-2">
-<h2 id="org047eede">4. Distintos Sabores de Contadores</h2>
-<div class="outline-text-2" id="text-org047eede">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<section id="outline-container-org29845e2" class="outline-2">
+<h2 id="org29845e2">4. Distintos Sabores de Contadores</h2>
+<div class="outline-text-2" id="text-org29845e2">
 <p>
 A continuación, analizamos tres implementaciones de contadores, desde la más estricta hasta la más relajada.
 </p>
 </div>
 
-<<<<<<< HEAD
-<div id="outline-container-orgc13da57" class="outline-3">
-<h3 id="orgc13da57">A. Contador Linealizable</h3>
-<div class="outline-text-3" id="text-orgc13da57">
-=======
-<div id="outline-container-org14e708e" class="outline-3">
-<h3 id="org14e708e">A. Contador Linealizable</h3>
-<div class="outline-text-3" id="text-org14e708e">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<div id="outline-container-orgc4fa683" class="outline-3">
+<h3 id="orgc4fa683">A. Contador Linealizable</h3>
+<div class="outline-text-3" id="text-orgc4fa683">
 <p>
 El enfoque clásico que utiliza el hardware subyacente.
 </p>
@@ -289,15 +216,9 @@ Si el Hilo A y B llaman al mismo tiempo, el hardware los ordena en tiempo real. 
 </div>
 </div>
 
-<<<<<<< HEAD
-<div id="outline-container-orgde7db55" class="outline-3">
-<h3 id="orgde7db55">B. Sloppy Counter (Consistencia Eventual)</h3>
-<div class="outline-text-3" id="text-orgde7db55">
-=======
-<div id="outline-container-orgbc5decc" class="outline-3">
-<h3 id="orgbc5decc">B. Sloppy Counter (Consistencia Eventual)</h3>
-<div class="outline-text-3" id="text-orgbc5decc">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<div id="outline-container-orgc1c320c" class="outline-3">
+<h3 id="orgc1c320c">B. Sloppy Counter (Consistencia Eventual)</h3>
+<div class="outline-text-3" id="text-orgc1c320c">
 <p>
 Asigna memoria privada a cada hilo y solo sincroniza cuando supera un umbral.
 </p>
@@ -331,15 +252,9 @@ Asigna memoria privada a cada hilo y solo sincroniza cuando supera un umbral.
 </div>
 </div>
 
-<<<<<<< HEAD
-<div id="outline-container-orgcdbb554" class="outline-3">
-<h3 id="orgcdbb554">C. Árbol de Difracción (Consistencia Quiescente)</h3>
-<div class="outline-text-3" id="text-orgcdbb554">
-=======
-<div id="outline-container-orgc2082ab" class="outline-3">
-<h3 id="orgc2082ab">C. Árbol de Difracción (Consistencia Quiescente)</h3>
-<div class="outline-text-3" id="text-orgc2082ab">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<div id="outline-container-orgc711b41" class="outline-3">
+<h3 id="orgc711b41">C. Árbol de Difracción (Consistencia Quiescente)</h3>
+<div class="outline-text-3" id="text-orgc711b41">
 <p>
 Inspirado en Shavit, divide el tráfico mediante balanceadores.
 </p>
@@ -392,15 +307,9 @@ Inspirado en Shavit, divide el tráfico mediante balanceadores.
 </div>
 </section>
 
-<<<<<<< HEAD
-<section id="outline-container-org69c65ba" class="outline-2">
-<h2 id="org69c65ba">5. Conclusiones</h2>
-<div class="outline-text-2" id="text-org69c65ba">
-=======
-<section id="outline-container-orgf30427e" class="outline-2">
-<h2 id="orgf30427e">5. Conclusiones</h2>
-<div class="outline-text-2" id="text-orgf30427e">
->>>>>>> c0a4ba9 (bib, images and intructions about zip)
+<section id="outline-container-org2890987" class="outline-2">
+<h2 id="org2890987">5. Conclusiones</h2>
+<div class="outline-text-2" id="text-org2890987">
 <p>
 La corrección no es binaria, sino un espectro. 
 En sistemas distribuidos masivos, la consistencia fuerte es matemáticamente 
