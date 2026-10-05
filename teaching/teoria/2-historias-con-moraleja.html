@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<!-- 2026-10-05 Mon 04:50 -->
+<!-- 2026-10-05 Mon 05:59 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>La Fábula de las Banderas: El ABC de la Exclusión Mutua</title>
@@ -33,39 +33,39 @@
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orga75194c">1. El Problema: El Patio, el Gato y el Perro</a>
+<li><a href="#org6b05065">1. El Problema: El Patio, el Gato y el Perro</a>
 <ul>
-<li><a href="#org39fa6ac">Las Reglas del Juego (Restricciones de Comunicación)</a></li>
+<li><a href="#org3820b02">Las Reglas del Juego (Restricciones de Comunicación)</a></li>
 </ul>
 </li>
-<li><a href="#org64e11e8">2. El Protocolo de Banderas</a>
+<li><a href="#orgab5fc78">2. El Protocolo de Banderas</a>
 <ul>
-<li><a href="#org8fb7aae">El Protocolo de Alice (El Gato)</a></li>
-<li><a href="#org02621f9">El Protocolo de Bob (El Perro)</a></li>
+<li><a href="#orge4b2162">El Protocolo de Alice (El Gato)</a></li>
+<li><a href="#org7fe11ef">El Protocolo de Bob (El Perro)</a></li>
 </ul>
 </li>
-<li><a href="#orgb198e4a">3. Análisis de Seguridad (Safety)</a>
+<li><a href="#org4895dfd">3. Análisis de Seguridad (Safety)</a>
 <ul>
-<li><a href="#orged1ce58">Teorema: Exclusión Mutua</a></li>
+<li><a href="#org40312bb">Teorema: Exclusión Mutua</a></li>
 </ul>
 </li>
-<li><a href="#orgacd7b39">4. Análisis de Viveza (Liveness)</a>
+<li><a href="#org17f1e17">4. Análisis de Viveza (Liveness)</a>
 <ul>
-<li><a href="#org5c5fa1d">¿Hay Deadlock? (Punto muerto)</a></li>
-<li><a href="#orgd8c9753">¿Hay Starvation? (Inanición)</a></li>
-<li><a href="#org5326b3c">El talón de Aquiles: Tolerancia a Fallos</a></li>
+<li><a href="#org40a6240">¿Hay Deadlock? (Punto muerto)</a></li>
+<li><a href="#orge8afc12">¿Hay Starvation? (Inanición)</a></li>
+<li><a href="#orge1fbb84">El talón de Aquiles: Tolerancia a Fallos</a></li>
 </ul>
 </li>
-<li><a href="#org05062c1">5. Conclusión: El Modelo SWMR</a></li>
-<li><a href="#org1c19fea">Fuente</a></li>
-<li><a href="#orgddaebad">Notas relacionadas</a></li>
+<li><a href="#orgdb2e6fc">5. Conclusión: El Modelo SWMR</a></li>
+<li><a href="#orge482a30">Fuente</a></li>
+<li><a href="#org6d33239">Notas relacionadas</a></li>
 </ul>
 </div>
 </nav>
 
-<section id="outline-container-orga75194c" class="outline-2">
-<h2 id="orga75194c">1. El Problema: El Patio, el Gato y el Perro</h2>
-<div class="outline-text-2" id="text-orga75194c">
+<section id="outline-container-org6b05065" class="outline-2">
+<h2 id="org6b05065">1. El Problema: El Patio, el Gato y el Perro</h2>
+<div class="outline-text-2" id="text-org6b05065">
 <p>
 Para entender cómo se coordinan dos procesos, imaginemos a dos vecinos, <b>Alice</b> y <b>Bob</b>, que comparten un patio. El problema es sencillo pero crítico:
 </p>
@@ -76,9 +76,9 @@ Para entender cómo se coordinan dos procesos, imaginemos a dos vecinos, <b>Alic
 </ul>
 </div>
 
-<div id="outline-container-org39fa6ac" class="outline-3">
-<h3 id="org39fa6ac">Las Reglas del Juego (Restricciones de Comunicación)</h3>
-<div class="outline-text-3" id="text-org39fa6ac">
+<div id="outline-container-org3820b02" class="outline-3">
+<h3 id="org3820b02">Las Reglas del Juego (Restricciones de Comunicación)</h3>
+<div class="outline-text-3" id="text-org3820b02">
 <p>
 Para que esto sea un problema de computación real, añadimos restricciones:
 </p>
@@ -92,17 +92,17 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 </section>
 
 
-<section id="outline-container-org64e11e8" class="outline-2">
-<h2 id="org64e11e8">2. El Protocolo de Banderas</h2>
-<div class="outline-text-2" id="text-org64e11e8">
+<section id="outline-container-orgab5fc78" class="outline-2">
+<h2 id="orgab5fc78">2. El Protocolo de Banderas</h2>
+<div class="outline-text-2" id="text-orgab5fc78">
 <p>
 ¿Cómo evitar que choquen usando solo banderas? Aquí está el primer intento de algoritmo:
 </p>
 </div>
 
-<div id="outline-container-org8fb7aae" class="outline-3">
-<h3 id="org8fb7aae">El Protocolo de Alice (El Gato)</h3>
-<div class="outline-text-3" id="text-org8fb7aae">
+<div id="outline-container-orge4b2162" class="outline-3">
+<h3 id="orge4b2162">El Protocolo de Alice (El Gato)</h3>
+<div class="outline-text-3" id="text-orge4b2162">
 <ol class="org-ol">
 <li>Levanto mi bandera.</li>
 <li>Miro la ventana de Bob. Si su bandera está <b><b>abajo</b></b>, dejo salir al gato.</li>
@@ -111,9 +111,9 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 </div>
 </div>
 
-<div id="outline-container-org02621f9" class="outline-3">
-<h3 id="org02621f9">El Protocolo de Bob (El Perro)</h3>
-<div class="outline-text-3" id="text-org02621f9">
+<div id="outline-container-org7fe11ef" class="outline-3">
+<h3 id="org7fe11ef">El Protocolo de Bob (El Perro)</h3>
+<div class="outline-text-3" id="text-org7fe11ef">
 <ol class="org-ol">
 <li>Levanto mi bandera.</li>
 <li>Miro la ventana de Alice. Si su bandera está <b><b>arriba</b></b>:
@@ -129,17 +129,17 @@ Para que esto sea un problema de computación real, añadimos restricciones:
 </div>
 </section>
 
-<section id="outline-container-orgb198e4a" class="outline-2">
-<h2 id="orgb198e4a">3. Análisis de Seguridad (Safety)</h2>
-<div class="outline-text-2" id="text-orgb198e4a">
+<section id="outline-container-org4895dfd" class="outline-2">
+<h2 id="org4895dfd">3. Análisis de Seguridad (Safety)</h2>
+<div class="outline-text-2" id="text-org4895dfd">
 <p>
 ¿Funciona? Lo primero es garantizar que <b><b>nunca estén juntos en el patio</b></b>. 
 </p>
 </div>
 
-<div id="outline-container-orged1ce58" class="outline-3">
-<h3 id="orged1ce58">Teorema: Exclusión Mutua</h3>
-<div class="outline-text-3" id="text-orged1ce58">
+<div id="outline-container-org40312bb" class="outline-3">
+<h3 id="org40312bb">Teorema: Exclusión Mutua</h3>
+<div class="outline-text-3" id="text-org40312bb">
 <p>
 El algoritmo satisface la exclusión mutua. 
 </p>
@@ -148,7 +148,7 @@ El algoritmo satisface la exclusión mutua.
 </ul>
 
 
-<figure id="org49cb1fb">
+<figure id="orge32ac88">
 <img src="../../images/cat_dog_safety.jpg" alt="cat_dog_safety.jpg">
 
 </figure>
@@ -156,17 +156,17 @@ El algoritmo satisface la exclusión mutua.
 </div>
 </section>
 
-<section id="outline-container-orgacd7b39" class="outline-2">
-<h2 id="orgacd7b39">4. Análisis de Viveza (Liveness)</h2>
-<div class="outline-text-2" id="text-orgacd7b39">
+<section id="outline-container-org17f1e17" class="outline-2">
+<h2 id="org17f1e17">4. Análisis de Viveza (Liveness)</h2>
+<div class="outline-text-2" id="text-org17f1e17">
 <p>
 Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real.
 </p>
 </div>
 
-<div id="outline-container-org5c5fa1d" class="outline-3">
-<h3 id="org5c5fa1d">¿Hay Deadlock? (Punto muerto)</h3>
-<div class="outline-text-3" id="text-org5c5fa1d">
+<div id="outline-container-org40a6240" class="outline-3">
+<h3 id="org40a6240">¿Hay Deadlock? (Punto muerto)</h3>
+<div class="outline-text-3" id="text-org40a6240">
 <p>
 <b>Pregunta para el lector:</b> Si ambos levantan la bandera al mismo tiempo, ¿se quedan trabados para siempre?
 </p>
@@ -176,9 +176,9 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </div>
 
-<div id="outline-container-orgd8c9753" class="outline-3">
-<h3 id="orgd8c9753">¿Hay Starvation? (Inanición)</h3>
-<div class="outline-text-3" id="text-orgd8c9753">
+<div id="outline-container-orge8afc12" class="outline-3">
+<h3 id="orge8afc12">¿Hay Starvation? (Inanición)</h3>
+<div class="outline-text-3" id="text-orge8afc12">
 <p>
 <b>Pregunta para el lector:</b> Si Alice es muy egoísta y siempre quiere sacar al gato, ¿podría Bob quedarse esperando para siempre?
 </p>
@@ -188,9 +188,9 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </div>
 
-<div id="outline-container-org5326b3c" class="outline-3">
-<h3 id="org5326b3c">El talón de Aquiles: Tolerancia a Fallos</h3>
-<div class="outline-text-3" id="text-org5326b3c">
+<div id="outline-container-orge1fbb84" class="outline-3">
+<h3 id="orge1fbb84">El talón de Aquiles: Tolerancia a Fallos</h3>
+<div class="outline-text-3" id="text-orge1fbb84">
 <p>
 <b>Escenario de terror:</b> Alice levanta su bandera y, justo antes de salir al patio, ¡se queda dormida (su proceso falla/hace crash)!
 </p>
@@ -206,9 +206,9 @@ Aquí es donde el algoritmo se pone a prueba frente a situaciones del mundo real
 </div>
 </section>
 
-<section id="outline-container-org05062c1" class="outline-2">
-<h2 id="org05062c1">5. Conclusión: El Modelo SWMR</h2>
-<div class="outline-text-2" id="text-org05062c1">
+<section id="outline-container-orgdb2e6fc" class="outline-2">
+<h2 id="orgdb2e6fc">5. Conclusión: El Modelo SWMR</h2>
+<div class="outline-text-2" id="text-orgdb2e6fc">
 <p>
 Este pequeño ejercicio nos muestra el poder de las variables <b><b>SWMR</b></b> (Single-Writer, Multi-Reader). 
 </p>
@@ -224,9 +224,9 @@ Este es el nivel más básico de coordinación en hardware. En las siguientes no
 </div>
 </section>
 
-<section id="outline-container-org1c19fea" class="outline-2">
-<h2 id="org1c19fea">Fuente</h2>
-<div class="outline-text-2" id="text-org1c19fea">
+<section id="outline-container-orge482a30" class="outline-2">
+<h2 id="orge482a30">Fuente</h2>
+<div class="outline-text-2" id="text-orge482a30">
 <p>
 Esta nota sigue de cerca el Capítulo 1 de:
 </p>
@@ -252,9 +252,9 @@ la entrada en formato BibTeX.
 </div>
 </section>
 
-<section id="outline-container-orgddaebad" class="outline-2">
-<h2 id="orgddaebad">Notas relacionadas</h2>
-<div class="outline-text-2" id="text-orgddaebad">
+<section id="outline-container-org6d33239" class="outline-2">
+<h2 id="org6d33239">Notas relacionadas</h2>
+<div class="outline-text-2" id="text-org6d33239">
 <ul class="org-ul">
 <li><a href="1-intro-que-porque-paraque.html">¿Qué es la concurrencia? Origen, propósito y definición</a></li>
 <li><a href="nocionesDcorrecion.html">Distintos sabores de corrección: ¿cómo evitar el choque de mascotas?</a></li>
