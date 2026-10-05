@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Monitores: candados y condiciones · Cómputo Concurrente</title>
+<meta name="description" content="Práctica 5" />
+<link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/teaching/practicas/practica.css">
+<style>
+
+</style><script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']]}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div id="site-navbar"></div>
+
+<header class="practica-hero">
+  <div class="practica-hero-inner">
+    <p class="eyebrow">Cómputo Concurrente 2026</p>
+    <h1>Monitores: candados y condiciones</h1>
+    <p class="practica-sub">Práctica 5</p>
+    <div class="practica-actions">
+      <a class="btn btn-primary" href="pdf/practica5__Monitores.pdf">Descargar PDF</a>
+      <a class="btn" href="https://github.com/gilde-valeria/FC_CConcurrente/tree/main/Programas_P6" target="_blank" rel="noopener">Códigos en GitHub</a>
+      <a class="btn" href="codigos/monitores-condiciones.html">Ver códigos aquí</a>
+      <a class="btn btn-ghost" href="/teaching/practicas/">Todas las prácticas</a>
+    </div>
+  </div>
+</header>
+
+<main class="practica-layout">
+    <aside class="practica-toc">
+    <p class="toc-title">Contenido</p>
+    <ul>
+    <li><a href="#secc: contexto" id="toc-secc: contexto">Contexto</a></li>
+    <li><a href="#código-base" id="toc-código-base">Código base</a></li>
+    <li><a href="#ejercicios" id="toc-ejercicios">Ejercicios</a></li>
+    </ul>
+  </aside>
+    <article class="practica-body">
+    <h2 id="secc: contexto">Contexto</h2>
+    <p>En las prácticas anteriores trabajamos con candados que, al no obtener el acceso, esperan en un ciclo
+    <code>while</code> (<em>busy-waiting</em>) y consumen CPU. En el mundo real, los sistemas operativos y
+    los lenguajes proveen objetos más sofisticados:</p>
+    <ul>
+    <li><p><strong>Spinlocks:</strong> si no obtengo el candado, <em>quemo CPU</em> dando vueltas en un ciclo.</p></li>
+    <li><p><strong>Monitores:</strong> si no obtengo el candado, <em>me voy a dormir</em> y el sistema operativo
+    me despierta cuando sea mi turno.</p></li>
+    </ul>
+    <h3 id="monitores-y-variables-de-condición">Monitores y variables de condición</h3>
+    <p>Un <strong>monitor</strong> es una clase que encapsula sus variables, asegura exclusión mutua en sus métodos
+    y permite a los hilos suspenderse esperando una condición. En Java se construye combinando un
+    <code>Lock</code> con una o varias <code>Condition</code>.</p>
+    <p><strong>Motivación.</strong> En el problema de productores/consumidores, un consumidor que encuentra la cola vacía
+    no puede retener el candado, porque el productor no podría encolar (<em>deadlock</em> lógico), y tampoco
+    puede revisar la cola sin candado sin romper la exclusión mutua. La solución es que el hilo
+    <em>suelte temporalmente</em> el candado y se suspenda hasta que la condición se cumpla.</p>
+    <p>Una <strong>variable de condición</strong> es un objeto asociado a un candado que provee una <em>cola de espera</em>.
+    Sus métodos principales son:</p>
+    <ul>
+    <li><p><code>await()</code>: libera el candado de forma atómica y duerme al hilo. Al despertar debe
+    re-adquirir el candado antes de continuar.</p></li>
+    <li><p><code>signal()</code>: despierta a <em>un</em> hilo dormido en esa condición.</p></li>
+    <li><p><code>signalAll()</code>: despierta a <em>todos</em> los hilos dormidos en esa condición.</p></li>
+    </ul>
+    <p><strong>Patrón obligatorio.</strong> Siempre usar <code>await()</code> dentro de un ciclo <code>while</code>, nunca con
+    <code>if</code>:</p>
+    <pre><code>lock.lock();
+try {
+    while (!property) {        // WHILE, nunca if
+        cond.await();
+    }
+    // la propiedad esta garantizada aqui
+    ...
+    cond.signal();             // avisa a alguien mas
+} finally {
+    lock.unlock();
+}</code></pre>
+    <h3 id="secc: despertar">¿Cómo despierta un hilo dormido?</h3>
+    <p>Un hilo que despierta continúa <em>exactamente en la instrucción que sigue a</em> <code>await()</code>. La razón es que
+    <code>await()</code> es una llamada a método más: mientras el hilo duerme, su <em>pila</em> (variables locales y dirección
+    de retorno) y su contador de programa quedan guardados, como en cualquier cambio de contexto, y al despertar
+    <code>await()</code> simplemente <em>retorna</em>.</p>
+    <pre><code>while (count == 0)
+    notEmpty.await();   // aqui duerme
+x = items[head];        // aqui continua (tras re-evaluar el while)</code></pre>
+    <p>Los pasos son:</p>
+    <ol>
+    <li><p><strong>Dormir.</strong> <code>await()</code> guarda cuántas veces el hilo tenía el candado (<code>holdCount</code>),
+    lo libera por completo, coloca al hilo en la cola de espera de la condición y le pide al sistema
+    operativo que lo suspenda. No consume CPU.</p></li>
+    <li><p><strong><code>signal()</code>.</strong> Quien señala (con el candado) saca al hilo de la cola de la condición y lo pasa
+    a la cola del candado. Todavía no se ejecuta.</p></li>
+    <li><p><strong>El señalizador libera el candado</strong> en su <code>unlock()</code>.</p></li>
+    <li><p><strong>Competencia.</strong> El hilo despertado pasa a la cola de listos y debe competir por el candado; otro
+    hilo puede ganarle.</p></li>
+    <li><p><strong>Re-adquisición.</strong> Al obtener el candado se le restaura el <code>holdCount</code> que tenía antes de dormir.</p></li>
+    <li><p><strong>Retorno.</strong> <code>await()</code> termina y la ejecución sigue en la instrucción posterior.</p></li>
+    </ol>
+    <p><strong>Importante:</strong> el hilo retoma su ejecución, pero <em>no sabe</em> que la condición es verdadera. Entre el paso 2 y el
+    paso 5 otros hilos pudieron cambiar el estado compartido, y las variables locales leídas antes del <code>await()</code>
+    pueden estar obsoletas. Por eso <code>await()</code> va dentro de un <code>while</code>: al retornar, el programa vuelve a
+    evaluar la condición.</p>
+    <h3 id="peligros">Peligros</h3>
+    <p><strong><em>Spurious wakeups</em>.</strong> Un hilo regresa de <code>await()</code> pero la condición ya no es válida.
+    Ocurre, por ejemplo, cuando A está dormido, B hace <code>signal()</code> y A pasa a la cola de listos, pero antes de que A
+    re-adquiera el candado, un hilo C entra, toma el candado y arruina la condición. El <code>while</code> permite a A volver a dormir.</p>
+    <p><strong><em>Lost wakeups</em>.</strong> Las condiciones <em>no tienen memoria</em>: si un hilo hace <code>signal()</code> y nadie
+    está en la cola de espera, la señal desaparece para siempre. Una forma de evitarlo es usar <code>signalAll()</code>,
+    a costa de la <em>thundering herd</em>: muchos hilos despiertan, compiten por el candado y casi todos
+    vuelven a dormir. Otra es usar un <em>timeout</em> con <code>awaitNanos()</code>.</p>
+    <h3 id="candados-de-lectoresescritores">Candados de Lectores/Escritores</h3>
+    <p>Los lectores no modifican el objeto, así que pueden estar varios a la vez. Los escritores requieren acceso
+    exclusivo. Las reglas de seguridad son:</p>
+    <ol>
+    <li><p>Ningún escritor entra si hay algún otro escritor o lector dentro.</p></li>
+    <li><p>Ningún lector entra si hay un escritor dentro.</p></li>
+    </ol>
+    <pre><code>public interface ReadWriteLock {
+    Lock readLock();
+    Lock writeLock();
+}</code></pre>
+    <p><strong>Inanición.</strong> En <code>SimpleReadWriteLock</code>, si llegan lectores sin parar, el contador
+    <code>readers</code> nunca llega a 0 y un escritor puede quedar bloqueado para siempre. La solución justa,
+    <code>FifoReadWriteLock</code>, usa dos contadores monótonos (<code>readAcquires</code> y <code>readReleases</code>) y hace que el escritor
+    “levante la mano” (<code>writer = true</code>) <em>antes</em> de esperar a que los lectores actuales se vayan,
+    de modo que ningún lector nuevo pueda entrar.</p>
+    <h3 id="candados-reentrantes-y-semáforos">Candados reentrantes y semáforos</h3>
+    <p>Un candado <strong>reentrante</strong> sabe quién es su dueño. Si el mismo dueño lo adquiere otra vez, solo incrementa
+    un contador (<code>holdCount</code>) en lugar de bloquearse a sí mismo; el candado base se libera hasta que
+    <code>holdCount</code> vuelve a 0. Un <strong>semáforo</strong> (Dijkstra) generaliza el mutex: permite hasta <span class="math inline">\(C\)</span> hilos
+    en la sección simultáneamente. A diferencia de <code>signal()</code>, el semáforo <em>sí</em> tiene memoria: un
+    <code>release()</code> aumenta la capacidad disponible aunque nadie esté esperando.</p>
+    <h2 id="código-base">Código base</h2>
+    <h3 id="lockedqueue-monitor-con-dos-condiciones">LockedQueue (monitor con dos condiciones)</h3>
+    <pre><code>class LockedQueue&lt;T&gt; {
+    final Lock lock = new ReentrantLock();
+    final Condition notFull  = lock.newCondition();
+    final Condition notEmpty = lock.newCondition();
+    final T[] items;
+    int tail, head, count;
+
+    public void enq(T x) throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == items.length)
+                notFull.await();               // duerme productor
+            items[tail] = x;
+            if (++tail == items.length) tail = 0;
+            ++count;
+            notEmpty.signal();                 // avisa consumidor
+        } finally { lock.unlock(); }
+    }
+
+    public T deq() throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == 0)
+                notEmpty.await();              // duerme consumidor
+            T x = items[head];
+            if (++head == items.length) head = 0;
+            --count;
+            notFull.signal();                  // avisa productor
+            return x;
+        } finally { lock.unlock(); }
+    }
+}</code></pre>
+    <h4 class="unnumbered" id="cómo-funciona-lockedqueue">Cómo funciona LockedQueue</h4>
+    <ul>
+    <li><p><strong><code>Lock lock = new ReentrantLock()</code></strong> es un candado. <code>lock.lock()</code> bloquea al hilo hasta
+    que sea el único dentro; <code>lock.unlock()</code> lo libera para que entre otro. Solo un hilo a la vez ejecuta
+    el código que está entre ambas llamadas.</p></li>
+    <li><p><strong><code>try { ... } finally { lock.unlock(); }</code></strong> garantiza que el candado se libere aunque ocurra una excepción.
+    Sin el <code>finally</code>, un error dejaría el candado tomado para siempre y todos los demás hilos quedarían bloqueados.</p></li>
+    <li><p><strong><code>Condition</code></strong> es una “sala de espera” asociada al candado. <code>await()</code> suelta el candado y
+    duerme al hilo en esa sala; <code>signal()</code> despierta a uno de los que están dormidos en ella.</p></li>
+    <li><p><strong>Dos condiciones.</strong> <code>notFull</code> es la sala de los productores (esperan a que haya espacio) y
+    <code>notEmpty</code> es la sala de los consumidores (esperan a que haya elementos). Así cada tipo de hilo
+    espera solo lo que le interesa.</p></li>
+    <li><p><strong>Cola circular.</strong> <code>items</code> es un arreglo de tamaño fijo. <code>head</code> es la posición del siguiente
+    elemento a sacar, <code>tail</code> la posición donde se pondrá el siguiente elemento y <code>count</code> cuántos
+    elementos hay. Cuando un índice llega al final del arreglo, regresa a 0:
+    <code>if (++tail == items.length) tail = 0;</code> incrementa <code>tail</code> y, si se salió del arreglo, lo reinicia.</p></li>
+    </ul>
+    <p><strong><code>enq(x)</code>, paso a paso (productor).</strong></p>
+    <ol>
+    <li><p><code>lock.lock()</code>: entra en exclusión mutua; nadie más ejecuta <code>enq</code> o <code>deq</code> en este instante.</p></li>
+    <li><p><code>while (count == items.length) notFull.await();</code>: si la cola está llena, el productor suelta el candado
+    y se duerme en <code>notFull</code>. Cuando lo despiertan vuelve a revisar la condición (por eso es <code>while</code>).</p></li>
+    <li><p><code>items[tail] = x;</code>: guarda el elemento.</p></li>
+    <li><p><code>if (++tail == items.length) tail = 0;</code>: avanza <code>tail</code> de forma circular.</p></li>
+    <li><p><code>++count;</code>: ahora hay un elemento más.</p></li>
+    <li><p><code>notEmpty.signal();</code>: avisa a un consumidor, que pudo quedarse dormido porque la cola estaba vacía.</p></li>
+    <li><p><code>finally</code>: libera el candado.</p></li>
+    </ol>
+    <p><strong><code>deq()</code>, paso a paso (consumidor).</strong> Es simétrico: espera mientras <code>count == 0</code> en <code>notEmpty</code>;
+    lee <code>items[head]</code>, avanza <code>head</code> de forma circular, hace <code>–count</code>, avisa con <code>notFull.signal()</code>
+    (ahora hay un lugar libre para un productor) y devuelve el elemento.</p>
+    <p><strong>Ejemplo de ejecución</strong> (capacidad 2, cola vacía: <code>head = 0, tail = 0, count = 0</code>).</p>
+    <ol>
+    <li><p>El consumidor <span class="math inline">\(C\)</span> llama a <code>deq()</code>: entra, ve <code>count == 0</code>, hace <code>await()</code> y duerme en
+    <code>notEmpty</code>. El candado queda libre.</p></li>
+    <li><p>El productor <span class="math inline">\(P\)</span> llama a <code>enq(a)</code>: entra, guarda <code>items[0] = a</code>, <code>tail = 1</code>,
+    <code>count = 1</code> y hace <code>notEmpty.signal()</code>: <span class="math inline">\(C\)</span> sale de la sala de espera, pero aún no se ejecuta
+    porque <span class="math inline">\(P\)</span> tiene el candado.</p></li>
+    <li><p><span class="math inline">\(P\)</span> sale del <code>finally</code> y libera el candado. <span class="math inline">\(C\)</span> lo re-adquiere, regresa de <code>await()</code> y
+    <strong>vuelve a evaluar</strong> el <code>while</code>: <code>count = 1</code>, así que sale del ciclo.</p></li>
+    <li><p><span class="math inline">\(C\)</span> lee <code>a</code> de <code>items[0]</code>, avanza <code>head = 1</code>, <code>count = 0</code>, ejecuta
+    <code>notFull.signal()</code> (no hay productores dormidos, la señal no tiene efecto) y devuelve <code>a</code>.</p></li>
+    </ol>
+    <h3 id="simplereadwritelock">SimpleReadWriteLock</h3>
+    <pre><code>public class SimpleReadWriteLock implements ReadWriteLock {
+    int readers;          // lectores activos
+    boolean writer;       // escritor activo
+    Lock lock;
+    Condition condition;  // monitor global
+    Lock readLock, writeLock;
+
+    public SimpleReadWriteLock() {
+        writer = false;
+        readers = 0;
+        lock = new ReentrantLock();
+        readLock = new ReadLock();
+        writeLock = new WriteLock();
+        condition = lock.newCondition();
+    }
+    public Lock readLock()  { return readLock; }
+    public Lock writeLock() { return writeLock; }
+
+    class ReadLock implements Lock {
+        public void lock() {
+            SimpleReadWriteLock.this.lock.lock();
+            try {
+                while (writer) condition.await();
+                readers++;
+            } finally { SimpleReadWriteLock.this.lock.unlock(); }
+        }
+        public void unlock() {
+            SimpleReadWriteLock.this.lock.lock();
+            try {
+                readers--;
+                if (readers == 0) condition.signalAll();
+            } finally { SimpleReadWriteLock.this.lock.unlock(); }
+        }
+        // demas metodos de Lock omitidos
+    }
+
+    class WriteLock implements Lock {
+        public void lock() {
+            SimpleReadWriteLock.this.lock.lock();
+            try {
+                while (readers &gt; 0 || writer) condition.await();
+                writer = true;
+            } finally { SimpleReadWriteLock.this.lock.unlock(); }
+        }
+        public void unlock() {
+            SimpleReadWriteLock.this.lock.lock();
+            try {
+                writer = false;
+                condition.signalAll();
+            } finally { SimpleReadWriteLock.this.lock.unlock(); }
+        }
+        // demas metodos de Lock omitidos
+    }
+}</code></pre>
+    <p>Nota: las clases internas <code>ReadLock</code> y <code>WriteLock</code> usan el candado y la condición del monitor global
+    para modificar <code>readers</code> y <code>writer</code>. Por simplicidad se omite el manejo de
+    <code>InterruptedException</code>; en su implementación deben manejarlo.</p>
+    <h4 class="unnumbered" id="cómo-funciona-simplereadwritelock">Cómo funciona SimpleReadWriteLock</h4>
+    <p><strong>La idea.</strong> Muchos lectores pueden leer a la vez, pero un escritor necesita estar solo. Para saber quién está adentro
+    el monitor lleva dos datos: <code>readers</code> (cuántos lectores hay dentro) y <code>writer</code> (si hay un escritor dentro).
+    Todos los hilos que deben esperar se duermen en una sola sala de espera, <code>condition</code>.</p>
+    <p><strong>Dos candados distintos.</strong> Es el punto que más confunde:</p>
+    <ul>
+    <li><p>El <strong>candado interno</strong> (<code>lock</code>, un <code>ReentrantLock</code>) solo protege a <code>readers</code> y
+    <code>writer</code> durante unos instantes. Se toma y se suelta dentro de cada método.</p></li>
+    <li><p>El <strong>candado de lectura/escritura</strong> (<code>readLock()</code> y <code>writeLock()</code>) es el que el usuario
+    mantiene “tomado” mientras lee o escribe. Cuando <code>rw.readLock().lock()</code> regresa, el candado interno
+    ya fue liberado; lo que queda es una anotación en <code>readers</code> o <code>writer</code> que indica quién está dentro.</p></li>
+    </ul>
+    <pre><code>ReadWriteLock rw = new SimpleReadWriteLock();
+rw.readLock().lock();
+try { /* leer el recurso compartido */ }
+finally { rw.readLock().unlock(); }</code></pre>
+    <p><strong>Clases internas.</strong> <code>ReadLock</code> y <code>WriteLock</code> están declaradas dentro de <code>SimpleReadWriteLock</code>
+    para poder modificar <code>readers</code> y <code>writer</code>. Como ambas tienen un método llamado <code>lock()</code>, se escribe
+    <code>SimpleReadWriteLock.this.lock</code> para dejar claro que nos referimos al candado interno del monitor externo.</p>
+    <p><strong><code>ReadLock.lock()</code>.</strong> Toma el candado interno y espera con <code>while (writer) condition.await();</code>
+    mientras haya un escritor dentro. Cuando no lo hay, hace <code>readers++</code> (“hay un lector más”) y suelta el candado interno.</p>
+    <p><strong><code>ReadLock.unlock()</code>.</strong> Hace <code>readers–</code>. Si era el último lector (<code>readers == 0</code>), llama a
+    <code>signalAll()</code>, porque los únicos que pueden estar esperando eso son los escritores.</p>
+    <p><strong><code>WriteLock.lock()</code>.</strong> Espera con <code>while (readers &gt; 0 || writer)</code>: no entra si hay lectores
+    <em>ni</em> si hay otro escritor. La segunda parte es necesaria: dos escritores podrían ver <code>readers == 0</code> al mismo
+    tiempo y entrar juntos si no se revisara <code>writer</code>. Al entrar hace <code>writer = true</code>.</p>
+    <p><strong><code>WriteLock.unlock()</code>.</strong> Hace <code>writer = false</code> y <code>signalAll()</code>. Se despierta a todos porque en
+    la misma sala duermen lectores y escritores y no se sabe cuál puede avanzar; cada uno re-evalúa su propio <code>while</code>
+    y el que no puede vuelve a dormir.</p>
+    <p><strong>Ejemplo de ejecución.</strong></p>
+    <ol>
+    <li><p>Los lectores <span class="math inline">\(L_1\)</span> y <span class="math inline">\(L_2\)</span> llaman a <code>readLock().lock()</code>: ambos ven <code>writer == false</code> y entran
+    (<code>readers = 2</code>).</p></li>
+    <li><p>El escritor <span class="math inline">\(W\)</span> llama a <code>writeLock().lock()</code>: ve <code>readers &gt; 0</code> y se duerme en <code>condition</code>.</p></li>
+    <li><p><span class="math inline">\(L_1\)</span> sale (<code>readers = 1</code>, no hay señal). <span class="math inline">\(L_2\)</span> sale (<code>readers = 0</code>) y hace <code>signalAll()</code>.</p></li>
+    <li><p><span class="math inline">\(W\)</span> despierta, re-evalúa su <code>while</code> (<code>readers == 0</code> y <code>writer == false</code>), entra y
+    pone <code>writer = true</code>.</p></li>
+    <li><p>Un lector <span class="math inline">\(L_3\)</span> que llega ahora ve <code>writer == true</code> y duerme. Cuando <span class="math inline">\(W\)</span> sale, <code>writer = false</code>
+    y <code>signalAll()</code> lo despierta.</p></li>
+    </ol>
+    <p><strong>El problema.</strong> Si llegan lectores sin parar, <code>readers</code> nunca baja a 0 y <span class="math inline">\(W\)</span> duerme indefinidamente
+    (inanición). Esto lo corrige <code>FifoReadWriteLock</code>.</p>
+    <h4 class="unnumbered" id="cómo-funciona-fiforeadwritelock">Cómo funciona FifoReadWriteLock</h4>
+    <p>El código completo aparece en el Ejercicio 2; aquí se explica su lógica.</p>
+    <p><strong>Dos contadores que solo suben.</strong> En lugar de <code>readers</code> se usan <code>readAcquires</code> (cuántos lectores han
+    entrado en total) y <code>readReleases</code> (cuántos han salido en total). Los lectores que hay dentro son la diferencia entre
+    ambos, así que <code>readAcquires == readReleases</code> significa “no hay lectores”.</p>
+    <p><strong>La bandera <code>writer</code></strong> significa “hay un escritor dentro <em>o</em> un escritor que ya levantó la mano y espera
+    a que salgan los lectores actuales”.</p>
+    <p><strong><code>ReadLock.lock()</code>.</strong></p>
+    <pre><code>while (writer) condition.await();   // si un escritor levanto la mano, espero
+readAcquires++;</code></pre>
+    <p><strong><code>WriteLock.lock()</code></strong> tiene tres pasos:</p>
+    <pre><code>while (writer) condition.await();                // 1. otros escritores
+writer = true;                                   // 2. levanto la mano
+while (readAcquires != readReleases)             // 3. espero a los lectores actuales
+    condition.await();</code></pre>
+    <p>El paso 2 es la diferencia clave: <code>writer = true</code> se pone <em>antes</em> de esperar a los lectores. Desde ese momento,
+    cualquier lector nuevo ve <code>writer == true</code> y espera, así que solo quedan los lectores que ya estaban adentro, y al salir
+    llevan <code>readReleases</code> a igualarse con <code>readAcquires</code>.</p>
+    <p><strong><code>ReadLock.unlock()</code>.</strong> Hace <code>readReleases++</code> y, si ya no quedan lectores
+    (<code>readAcquires == readReleases</code>), hace <code>signalAll()</code> para despertar al escritor que espera.</p>
+    <p><strong><code>WriteLock.unlock()</code>.</strong> Hace <code>writer = false</code> y <code>signalAll()</code>, para que entren los lectores
+    y escritores que esperaban.</p>
+    <p><strong>Ejemplo de ejecución</strong> (compara con el de <code>SimpleReadWriteLock</code>).</p>
+    <ol>
+    <li><p>El lector <span class="math inline">\(L_1\)</span> entra: <code>readAcquires = 1</code>, <code>readReleases = 0</code>.</p></li>
+    <li><p>El escritor <span class="math inline">\(W\)</span> llega: <code>writer == false</code>, así que pone <code>writer = true</code>. Como
+    <code>readAcquires != readReleases</code>, hace <code>await()</code>.</p></li>
+    <li><p>El lector <span class="math inline">\(L_2\)</span> llega después: ve <code>writer == true</code> y se duerme. (En <code>SimpleReadWriteLock</code> habría
+    entrado y <span class="math inline">\(W\)</span> seguiría esperando.)</p></li>
+    <li><p><span class="math inline">\(L_1\)</span> sale: <code>readReleases = 1</code>, ahora son iguales, y hace <code>signalAll()</code>. Despiertan <span class="math inline">\(W\)</span> y <span class="math inline">\(L_2\)</span>.</p></li>
+    <li><p>Si <span class="math inline">\(L_2\)</span> obtiene primero el candado interno, ve <code>writer == true</code> y vuelve a dormir. <span class="math inline">\(W\)</span> re-evalúa su
+    segundo <code>while</code>, los contadores son iguales, y entra a escribir.</p></li>
+    <li><p>Cuando <span class="math inline">\(W\)</span> sale, <code>writer = false</code> y <code>signalAll()</code> despierta a <span class="math inline">\(L_2\)</span>, que ahora sí puede entrar.</p></li>
+    </ol>
+    <p>Con esto ningún escritor sufre inanición: los lectores que llegan después de que él levanta la mano esperan su turno.</p>
+    <h2 id="ejercicios">Ejercicios</h2>
+    <p><strong>Instrucciones:</strong></p>
+    <ul>
+    <li><p>Entrega en un <strong>PDF</strong> las respuestas de los ejercicios teóricos. En los ejercicios que requieran
+    implementación, añade una breve descripción de los programas que entregas (sus nombres y qué hacen).</p></li>
+    <li><p>Solo un integrante del equipo debe subir la práctica. Los demás integrantes deben marcar la tarea como
+    entregada y escribir, en un comentario privado dentro de la práctica, el nombre completo de la persona
+    que realizó la entrega.</p></li>
+    <li><p>El formato y el medio de entrega los indicará tu ayudante de laboratorio.</p></li>
+    <li><p>Recuerda que debes utilizar <strong>Java 21 LTS</strong>.</p></li>
+    <li><p><strong>Si no compila utilizando Java 21 LTS o si no se entrega la breve descripción de los programas se penalizará.</strong></p></li>
+    </ul>
+    <p><strong>Tiempo de elaboración:</strong> <span class="math inline">\(\approx\)</span> 2 hr</p>
+    <p><strong>Total de puntos:</strong> 100<br />
+    </p>
+    <ol>
+    <li><p><strong>[15 min / 20 puntos]</strong> <strong><em>Spurious wakeups</em>.</strong>
+    Un compañero reescribe el método <code>deq()</code> de <code>LockedQueue</code> cambiando el <code>while</code>
+    por un <code>if</code>:</p>
+    <pre><code>if (count == 0) notEmpty.await();</code></pre>
+    <ol>
+    <li><p>(6 pts) Describe, paso a paso, una ejecución con un productor <span class="math inline">\(P\)</span> y dos consumidores <span class="math inline">\(C_1\)</span> y <span class="math inline">\(C_2\)</span> en la que
+    <span class="math inline">\(C_1\)</span> termina ejecutando el resto de <code>deq()</code> con <code>count == 0</code>. Indica en cada paso quién tiene el candado
+    y el valor de <code>count</code>.</p></li>
+    <li><p>(4 pts) ¿Qué valor termina teniendo <code>count</code> y qué le pasa a la cola? Explica cómo el <code>while</code>
+    evita el problema.</p></li>
+    </ol></li>
+    <li><p><strong>[30 min / 40 puntos]</strong> Considera el monitor <em>FifoReadWriteLock</em>, actualmente cumple con:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica.</p></li>
+    <li><p>Si un escritor está en su sección crítica, <strong>ningún escritor o lector</strong> puede entrar a su propia sección crítica.</p></li>
+    </ol>
+    <pre><code>public class FifoReadWriteLock implements ReadWriteLock {
+    int readAcquires;     // entradas
+    int readReleases;     // salidas
+    boolean writer;
+    Lock lock;
+    Condition condition;
+    Lock readLock, writeLock;
+
+    public FifoReadWriteLock() {
+        readAcquires = 0; readReleases = 0;
+        writer = false;
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
+        readLock = new ReadLock();
+        writeLock = new WriteLock();
+    }
+    public Lock readLock()  { return readLock; }
+    public Lock writeLock() { return writeLock; }
+
+    class ReadLock implements Lock {
+        public void lock() {
+            FifoReadWriteLock.this.lock.lock();
+            try {
+                while (writer) condition.await();
+                readAcquires++;
+            } finally { FifoReadWriteLock.this.lock.unlock(); }
+        }
+        public void unlock() {
+            FifoReadWriteLock.this.lock.lock();
+            try {
+                readReleases++;
+                if (readAcquires == readReleases) condition.signalAll();
+            } finally { FifoReadWriteLock.this.lock.unlock(); }
+        }
+    }
+
+    class WriteLock implements Lock {
+        public void lock() {
+            FifoReadWriteLock.this.lock.lock();
+            try {
+                while (writer) condition.await();      // 1. otros escritores
+                writer = true;                         // 2. levanto la mano
+                while (readAcquires != readReleases)   // 3. lectores actuales
+                    condition.await();
+            } finally { FifoReadWriteLock.this.lock.unlock(); }
+        }
+        public void unlock() {
+            FifoReadWriteLock.this.lock.lock();
+            try {
+                writer = false;
+                condition.signalAll();
+            } finally { FifoReadWriteLock.this.lock.unlock(); }
+        }
+    }
+}</code></pre>
+    <p>Implementa el monitor modificando la propiedad (b) de forma que ahora se cumpla:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica.</p></li>
+    <li><p>Si un escritor está en su sección crítica, <strong>ningún lector</strong> puede entrar a su propia sección crítica.</p></li>
+    </ol>
+    <p>Entrega la clase y un programa de prueba, y explica brevemente
+    por qué tu implementación cumple (a) y (b) y por qué ahora pueden coexistir varios escritores.</p></li>
+    <li><p><strong>[30 min / 40 puntos]</strong> Considera el monitor <em>SimpleReadWriteLock</em> de la sección de código base,
+    actualmente cumple con:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica.</p></li>
+    <li><p>Si un escritor está en su sección crítica, ningún escritor o lector puede entrar a su propia sección crítica.</p></li>
+    <li><p>Cualquier cantidad de lectores puede estar simultáneamente en su sección crítica.</p></li>
+    </ol>
+    <p>Implementa el monitor modificando la propiedad (c) de forma que ahora se cumpla:</p>
+    <ol>
+    <li><p>Si un lector está en su sección crítica, ningún escritor puede entrar a su propia sección crítica.</p></li>
+    <li><p>Si un escritor está en su sección crítica, ningún escritor o lector puede entrar a su propia sección crítica.</p></li>
+    <li><p><strong>A lo más <span class="math inline">\(K\)</span> lectores</strong> pueden estar simultáneamente en su sección crítica, donde <span class="math inline">\(K\)</span> es un parámetro
+    del constructor.</p></li>
+    </ol>
+    <p>No es necesario que el protocolo sea justo. Responde además: ¿es suficiente que <code>ReadLock.unlock()</code> llame a
+    <code>signalAll()</code> solo cuando <code>readers == 0</code>? Justifica con una ejecución.</p></li>
+    </ol>
+    <div class="thebibliography">
+    <p><span>99</span></p>
+    <p>Maurice Herlihy and Nir Shavit. <em>The Art of Multiprocessor Programming</em>.
+    Morgan Kaufmann Publishers Inc., 2008. Cap. 8: Monitors and Blocking Synchronization.</p>
+    <p>Oracle. <em>Java SE Documentation — Interface Condition</em>.
+    <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/Condition.html" class="uri">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/Condition.html</a></p>
+    <p>JSR-166: Concurrency Utilities. <code>ReentrantReadWriteLock</code>.</p>
+    </div>
+    <p class="back-link"><a href="/teaching/practicas/">← Volver al índice de prácticas</a></p>
+  </article>
+</main>
+
+<div id="site-footer"></div>
+<script type="module" src="/scripts/include-teaching.js"></script>
+<script>
+document.querySelectorAll('pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn';
+  b.type = 'button';
+  b.textContent = 'Copiar';
+  b.addEventListener('click', function () {
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      b.textContent = '¡Copiado!';
+      setTimeout(function () { b.textContent = 'Copiar'; }, 1600);
+    });
+  });
+  var wrap = document.createElement('div');
+  wrap.className = 'code-wrap';
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(b);
+  wrap.appendChild(pre);
+});
+</script>
+</body>
+</html>

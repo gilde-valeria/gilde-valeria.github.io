@@ -42,9 +42,9 @@
         <p class="desc">Arquitecturas multihilo y multiprocesador, anatomía de la JVM,
           creación de hilos con <code>Thread</code> y <code>Runnable</code>, y la Ley de Amdahl.</p>
         <div class="links">
-          <a href="p1-multihilos.html">Enunciado</a>
+          <a href="multihilos.html">Enunciado</a>
           <a href="pdf/practica1.pdf">PDF</a>
-          <a href="codigos/p1.html">Códigos</a>
+          <a href="codigos/multihilos.html">Códigos</a>
           <a href="1-intro--multihilos/intro--multihilos.html">Nota de apoyo</a>
         </div>
       </div>
@@ -55,9 +55,9 @@
         <p class="desc">Condiciones de carrera y <em>data races</em>, <code>synchronized</code>,
           la interfaz <code>Lock</code> y pools de hilos con <code>ExecutorService</code>.</p>
         <div class="links">
-          <a href="p2-locks-pools.html">Enunciado</a>
+          <a href="locks-pools.html">Enunciado</a>
           <a href="pdf/practica2.pdf">PDF</a>
-          <a href="codigos/p2.html">Códigos</a>
+          <a href="codigos/locks-pools.html">Códigos</a>
         </div>
       </div>
 
@@ -67,9 +67,9 @@
         <p class="desc">Peterson, Lamport y compañía; reordenamiento, visibilidad
           y qué garantiza realmente el JMM.</p>
         <div class="links">
-          <a href="p3-jmm.html">Enunciado</a>
+          <a href="jmm.html">Enunciado</a>
           <a href="pdf/practica3.pdf">PDF</a>
-          <a href="codigos/p3.html">Códigos</a>
+          <a href="codigos/jmm.html">Códigos</a>
         </div>
       </div>
 
@@ -79,55 +79,68 @@
         <p class="desc">TAS, TTAS, <em>backoff</em> exponencial y candados de cola.
           Comparación empírica de desempeño.</p>
         <div class="links">
-          <a href="p4-spinlocks.html">Enunciado</a>
+          <a href="spinlocks.html">Enunciado</a>
           <a href="pdf/practica4.pdf">PDF</a>
-          <a href="codigos/p4.html">Códigos</a>
+          <a href="codigos/spinlocks.html">Códigos</a>
         </div>
       </div>
 
       <div class="practica-card">
         <p class="num">Práctica 5</p>
-        <h3>Snapshots y collects: backups</h3>
-        <p class="desc">Linealizabilidad, collects atómicos, <em>double-collect</em>
-          y verificación en tiempo de ejecución.</p>
+        <h3>Monitores: candados y condiciones</h3>
+        <p class="desc">Variables de condición, <code>await</code>/<code>signal</code>,
+          <em>spurious</em> y <em>lost wakeups</em>, candados de lectores/escritores e inanición.</p>
         <div class="links">
-          <a href="p5-snapshots.html">Enunciado</a>
-          <a href="pdf/practica5.pdf">PDF</a>
-          <a href="codigos/p5.html">Códigos</a>
+          <a href="monitores-condiciones.html">Enunciado</a>
+          <a href="pdf/practica5__Monitores.pdf">PDF</a>
+          <a href="codigos/monitores-condiciones.html">Códigos</a>
+          <a href="monitores.html">Nota de apoyo</a>
+          <a href="reentrant.html">Candado reentrante</a>
         </div>
       </div>
 
       <div class="practica-card">
         <p class="num">Práctica 6</p>
-        <h3>Monitores y consenso</h3>
-        <p class="desc">Sistemas síncronos, asíncronos y parcialmente síncronos;
-          monitores, variables de condición y el problema del consenso.</p>
+        <h3>Snapshots y collects: backups</h3>
+        <p class="desc">Linealizabilidad, collects atómicos, <em>double-collect</em>
+          y verificación en tiempo de ejecución.</p>
         <div class="links">
-          <a href="p6-monitores-consenso.html">Enunciado</a>
-          <a href="pdf/practica6.pdf">PDF</a>
-          <a href="codigos/p6.html">Códigos</a>
-          <a href="monitores.html">Nota de apoyo</a>
+          <a href="snapshots.html">Enunciado</a>
+          <a href="pdf/practica5.pdf">PDF</a>
+          <a href="codigos/snapshots.html">Códigos</a>
         </div>
       </div>
 
       <div class="practica-card">
         <p class="num">Práctica 7</p>
-        <h3>Implementaciones de contadores: corrección vs. eficiencia</h3>
-        <p class="desc">Contador linealizable, <em>sloppy counter</em> y árbol de difracción.
-          Linealizabilidad, consistencia secuencial, quiescente y eventual.</p>
+        <h3>Monitores y consenso</h3>
+        <p class="desc">Sistemas síncronos, asíncronos y parcialmente síncronos;
+          monitores, variables de condición y el problema del consenso.</p>
         <div class="links">
-          <a href="p7-contadores.html">Enunciado</a>
-          <a href="pdf/practicaContadores.pdf">PDF</a>
+          <a href="monitores-consenso.html">Enunciado</a>
+          <a href="pdf/practica6.pdf">PDF</a>
+          <a href="codigos/monitores-consenso.html">Códigos</a>
         </div>
       </div>
 
       <div class="practica-card">
         <p class="num">Práctica 8</p>
+        <h3>Implementaciones de contadores: corrección vs. eficiencia</h3>
+        <p class="desc">Contador linealizable, <em>sloppy counter</em> y contador con balanceador.
+          Linealizabilidad, consistencia secuencial, quiescente y eventual.</p>
+        <div class="links">
+          <a href="contadores.html">Enunciado</a>
+          <a href="pdf/practicaContadores.pdf">PDF</a>
+        </div>
+      </div>
+
+      <div class="practica-card">
+        <p class="num">Práctica 9</p>
         <h3>De Java a Rust y Clojure: paradigmas de concurrencia</h3>
         <p class="desc"><em>Ownership</em> y <em>fearless concurrency</em> en Rust, STM en Clojure,
           y data races útiles. Con <em>smart contracts</em> como caso de estudio.</p>
         <div class="links">
-          <a href="p8-lenguajes.html">Enunciado</a>
+          <a href="lenguajes.html">Enunciado</a>
           <a href="pdf/practica6_Lenguajes.pdf">PDF</a>
           <a href="concurrencia-lenguajes/de-java-a-rust.html">Guía Rust</a>
           <a href="concurrencia-lenguajes/de-java-a-clojure.html">Guía Clojure</a>

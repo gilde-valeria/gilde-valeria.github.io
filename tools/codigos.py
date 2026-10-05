@@ -6,16 +6,36 @@ REPO = "https://github.com/gilde-valeria/FC_CConcurrente"
 AQUI = pathlib.Path(__file__).resolve().parent
 BUILD = pathlib.Path(__file__).resolve().parent
 SRC = pathlib.Path(os.environ.get("REPO_CODIGOS", "/tmp/repo"))  # clon de FC_CConcurrente
+LOCALES = pathlib.Path(os.environ.get("CODIGOS_LOCALES", ""))    # códigos que solo viven en un enunciado
 OUT = pathlib.Path(os.environ.get("SITIO", pathlib.Path(__file__).resolve().parent.parent)) / "teaching/practicas/codigos"
 
+# Cada grupo es una página. "carpeta" es la del repo; "solo" y "excluir" permiten
+# repartir una carpeta entre dos prácticas (Programas_P6 trae monitores y consenso
+# mezclados). "locales" añade archivos que no están en el repo, tomados del enunciado.
 GRUPOS = [
-    ("p1", "Programas_P1", "Práctica 1 — Repaso de Java y multihilos", "p1-multihilos"),
-    ("p2", "Programas_P2", "Práctica 2 — Locks y pools", "p2-locks-pools"),
-    ("p3", "Programas_P3", "Práctica 3 — Candados clásicos y JMM", "p3-jmm"),
-    ("p4", "Programas_P4", "Práctica 4 — Spinlocks y primitivas", "p4-spinlocks"),
-    ("p5", "Programas_P5", "Práctica 5 — Snapshots y collects", "p5-snapshots"),
-    ("p6", "Programas_P6", "Práctica 6 — Monitores y consenso", "p6-monitores-consenso"),
-    ("listas", "Listas", "Listas concurrentes — material extra", None),
+    dict(slug="multihilos", carpeta="Programas_P1",
+         titulo="Práctica 1 — Repaso de Java y multihilos", practica="multihilos"),
+    dict(slug="locks-pools", carpeta="Programas_P2",
+         titulo="Práctica 2 — Locks y pools", practica="locks-pools"),
+    dict(slug="jmm", carpeta="Programas_P3",
+         titulo="Práctica 3 — Candados clásicos y JMM", practica="jmm"),
+    dict(slug="spinlocks", carpeta="Programas_P4",
+         titulo="Práctica 4 — Spinlocks y primitivas", practica="spinlocks"),
+    dict(slug="monitores-condiciones", carpeta="Programas_P6",
+         titulo="Práctica 5 — Monitores: candados y condiciones",
+         practica="monitores-condiciones",
+         solo=["FifoReadWriteLock.java", "ExecReadersWriters.java", "CountDownLatch.java"],
+         locales="codigos-p5",
+         nota_locales="Estos tres salen del propio enunciado. Se les añadieron los "
+                      "<em>imports</em>, un constructor para <code>LockedQueue</code> y los métodos "
+                      "de <code>Lock</code> que el PDF omite, para que compilen tal cual."),
+    dict(slug="snapshots", carpeta="Programas_P5",
+         titulo="Práctica 6 — Snapshots y collects", practica="snapshots"),
+    dict(slug="monitores-consenso", carpeta="Programas_P6",
+         titulo="Práctica 7 — Monitores y consenso", practica="monitores-consenso",
+         excluir=["FifoReadWriteLock.java", "ExecReadersWriters.java", "CountDownLatch.java"]),
+    dict(slug="listas", carpeta="Listas",
+         titulo="Listas concurrentes — material extra", practica=None),
 ]
 
 HLCSS = (AQUI / "hl.css").read_text(encoding="utf-8")
@@ -68,9 +88,8 @@ PAGE = """<!DOCTYPE html>
 <main class="practica-layout" style="grid-template-columns:1fr">
   <article class="practica-body">
     <p class="muted" style="margin-top:0">
-      Estos son los mismos archivos que están en el repositorio
-      <a href="{repo}" target="_blank" rel="noopener">FC_CConcurrente</a>.
-      Puedes copiarlos desde aquí o clonar el repo completo:
+      Puedes copiar cada archivo desde aquí, o clonar el repositorio
+      <a href="{repo}" target="_blank" rel="noopener">FC_CConcurrente</a> completo:
     </p>
     <div class="code-wrap"><pre><code>git clone {repoclone}.git</code></pre></div>
 {cuerpo}
@@ -107,46 +126,72 @@ document.getElementById('expand-all').addEventListener('click', function () {{
 """
 
 
+def bloque_archivo(f, enlace=None):
+    """Un <details> con el archivo resaltado; enlace es su URL en GitHub, si la tiene."""
+    fuente = f.read_text(encoding="utf-8", errors="replace")
+    lineas = fuente.count("\n") + 1
+    ruta = (f'      <p class="fpath"><a href="{enlace}" target="_blank" rel="noopener">'
+            f'{html.escape(enlace.split("/blob/main/")[-1])}</a></p>\n') if enlace else ""
+    return (f'    <details class="code-file">\n'
+            f'      <summary><span class="fname">{html.escape(f.name)}</span>'
+            f'<span class="fmeta">{lineas} líneas</span></summary>\n'
+            f'{ruta}'
+            f'      {resaltar(fuente)}\n'
+            f'    </details>\n')
+
+
 def build():
     OUT.mkdir(parents=True, exist_ok=True)
     generadas = []
-    for slug, carpeta, titulo, practica in GRUPOS:
-        base = SRC / carpeta
-        if not base.exists():
-            print(f"  [skip] {carpeta} no existe")
+    for g in GRUPOS:
+        base = SRC / g["carpeta"]
+        archivos = []
+        if base.exists():
+            archivos = sorted(base.rglob("*.java"), key=lambda p: (str(p.parent), p.name))
+            if g.get("solo"):
+                archivos = [f for f in archivos if f.name in g["solo"]]
+            if g.get("excluir"):
+                archivos = [f for f in archivos if f.name not in g["excluir"]]
+        else:
+            print(f"  [skip] {g['carpeta']} no existe")
+
+        locales = []
+        if g.get("locales"):
+            d = (LOCALES / g["locales"]) if str(LOCALES) else pathlib.Path(g["locales"])
+            if d.is_dir():
+                locales = sorted(d.glob("*.java"))
+            else:
+                print(f"  [aviso] no encuentro los códigos locales en {d}")
+
+        if not archivos and not locales:
             continue
-        archivos = sorted(base.rglob("*.java"), key=lambda p: (str(p.parent), p.name))
-        if not archivos:
-            continue
-        partes = []
-        for f in archivos:
-            rel = f.relative_to(SRC)
-            fuente = f.read_text(encoding="utf-8", errors="replace")
-            lineas = fuente.count("\n") + 1
-            bloque = resaltar(fuente)
-            partes.append(
-                f'    <details class="code-file">\n'
-                f'      <summary><span class="fname">{html.escape(f.name)}</span>'
-                f'<span class="fmeta">{lineas} líneas</span></summary>\n'
-                f'      <p class="fpath"><a href="{REPO}/blob/main/{rel}" target="_blank" '
-                f'rel="noopener">{html.escape(str(rel))}</a></p>\n'
-                f'      {bloque}\n'
-                f'    </details>\n'
-            )
-        cuerpo = (
-            '    <div class="codigos-head"><h2 style="margin:0;border:none">Archivos</h2>'
-            '<button id="expand-all" class="btn" type="button">Expandir todo</button></div>\n'
-            + "".join(partes)
-        )
-        enun = (f'<a class="btn" href="/teaching/practicas/{practica}.html">Ver el enunciado</a>'
-                if practica else "")
-        (OUT / f"{slug}.html").write_text(
-            PAGE.format(titulo=html.escape(titulo), n=len(archivos), hlcss=HLCSS,
-                        repo=f"{REPO}/tree/main/{carpeta}", repoclone=REPO,
+
+        secciones = []
+        if locales:
+            secciones.append(
+                '    <h2 class="seccion-titulo">Del enunciado</h2>\n'
+                f'    <p class="seccion-intro">{g.get("nota_locales", "")}</p>\n'
+                + "".join(bloque_archivo(f) for f in locales))
+        if archivos:
+            titulo_repo = "En el repositorio" if locales else "Archivos"
+            secciones.append(
+                f'    <h2 class="seccion-titulo">{titulo_repo}</h2>\n'
+                + "".join(bloque_archivo(f, f"{REPO}/blob/main/{f.relative_to(SRC)}")
+                          for f in archivos))
+
+        cuerpo = ('    <div class="codigos-head"><h2 style="margin:0;border:none">Archivos</h2>'
+                  '<button id="expand-all" class="btn" type="button">Expandir todo</button></div>\n'
+                  + "".join(secciones))
+        enun = (f'<a class="btn" href="/teaching/practicas/{g["practica"]}.html">Ver el enunciado</a>'
+                if g.get("practica") else "")
+        (OUT / f'{g["slug"]}.html').write_text(
+            PAGE.format(titulo=html.escape(g["titulo"]), n=len(archivos) + len(locales), hlcss=HLCSS,
+                        repo=f'{REPO}/tree/main/{g["carpeta"]}', repoclone=REPO,
                         enunciado=enun, cuerpo=cuerpo),
             encoding="utf-8")
-        print(f"  [ok] codigos/{slug}.html — {len(archivos)} archivos")
-        generadas.append(slug)
+        print(f'  [ok] codigos/{g["slug"]}.html — {len(archivos) + len(locales)} archivos'
+              + (f' ({len(locales)} del enunciado)' if locales else ''))
+        generadas.append(g["slug"])
     return generadas
 
 

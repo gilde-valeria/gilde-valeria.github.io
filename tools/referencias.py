@@ -7,14 +7,15 @@ OUT = pathlib.Path(os.environ.get("SITIO", pathlib.Path(__file__).resolve().pare
 
 # slug -> (etiqueta, archivo html)
 TEX2PRACTICA = {
-    "practica1.tex": ("Práctica 1", "p1-multihilos.html"),
-    "practica2.tex": ("Práctica 2", "p2-locks-pools.html"),
-    "practica3.tex": ("Práctica 3", "p3-jmm.html"),
-    "practica4.tex": ("Práctica 4", "p4-spinlocks.html"),
-    "practica5.tex": ("Práctica 5", "p5-snapshots.html"),
-    "practica6.tex": ("Práctica 6", "p6-monitores-consenso.html"),
-    "practicaContadores.tex": ("Práctica 7", "p7-contadores.html"),
-    "practica6_Lenguajes.tex": ("Práctica 8", "p8-lenguajes.html"),
+    "practica1.tex": ("Práctica 1", "multihilos.html"),
+    "practica2.tex": ("Práctica 2", "locks-pools.html"),
+    "practica3.tex": ("Práctica 3", "jmm.html"),
+    "practica4.tex": ("Práctica 4", "spinlocks.html"),
+    "practica5__Monitores.tex": ("Práctica 5", "monitores-condiciones.html"),
+    "practica5.tex": ("Práctica 6", "snapshots.html"),
+    "practica6.tex": ("Práctica 7", "monitores-consenso.html"),
+    "practicaContadores.tex": ("Práctica 8", "contadores.html"),
+    "practica6_Lenguajes.tex": ("Práctica 9", "lenguajes.html"),
 }
 
 
