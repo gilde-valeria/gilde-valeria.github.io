@@ -30,9 +30,9 @@ GRUPOS = [
                       "<em>imports</em>, un constructor para <code>LockedQueue</code> y los métodos "
                       "de <code>Lock</code> que el PDF omite, para que compilen tal cual."),
     dict(slug="snapshots", carpeta="Programas_P5",
-         titulo="Práctica 6 — Snapshots y collects", practica="snapshots"),
+         titulo="Snapshots y collects — material extra", practica="snapshots"),
     dict(slug="monitores-consenso", carpeta="Programas_P6",
-         titulo="Práctica 7 — Monitores y consenso", practica="monitores-consenso",
+         titulo="Práctica 6 — Monitores y consenso", practica="monitores-consenso",
          excluir=["FifoReadWriteLock.java", "ExecReadersWriters.java", "CountDownLatch.java"]),
     dict(slug="listas", carpeta="Listas",
          titulo="Listas concurrentes — material extra", practica=None),

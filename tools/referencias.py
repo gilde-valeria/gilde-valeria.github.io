@@ -12,10 +12,10 @@ TEX2PRACTICA = {
     "practica3.tex": ("Práctica 3", "jmm.html"),
     "practica4.tex": ("Práctica 4", "spinlocks.html"),
     "practica5__Monitores.tex": ("Práctica 5", "monitores-condiciones.html"),
-    "practica5.tex": ("Práctica 6", "snapshots.html"),
-    "practica6.tex": ("Práctica 7", "monitores-consenso.html"),
-    "practicaContadores.tex": ("Práctica 8", "contadores.html"),
-    "practica6_Lenguajes.tex": ("Práctica 9", "lenguajes.html"),
+    "practica5.tex": ("Snapshots (material extra)", "snapshots.html"),
+    "practica6.tex": ("Práctica 6", "monitores-consenso.html"),
+    "practicaContadores.tex": ("Práctica 7", "contadores.html"),
+    "practica6_Lenguajes.tex": ("Práctica 8", "lenguajes.html"),
 }
 
 
